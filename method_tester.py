@@ -16,12 +16,22 @@ from sklearn.base import clone
 from sklearn.compose import TransformedTargetRegressor
 from sklearn.cross_decomposition import PLSRegression as PLS
 from sklearn.decomposition import PCA
+from sklearn.ensemble import AdaBoostRegressor, BaggingRegressor, GradientBoostingRegressor
+from sklearn.ensemble import RandomForestRegressor, StackingRegressor, ExtraTreesRegressor
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.kernel_ridge import KernelRidge
 from sklearn.linear_model import Lasso, Ridge, Lars, LassoLars
+from sklearn.linear_model import LogisticRegression, LinearRegression, SGDRegressor
+from sklearn.linear_model import ElasticNet, ARDRegression, BayesianRidge
+from sklearn.linear_model import HuberRegressor, RANSACRegressor, TheilSenRegressor
+from sklearn.linear_model import PassiveAggressiveRegressor, ridge_regression
 from sklearn.metrics import make_scorer
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.model_selection import learning_curve, ShuffleSplit, KFold
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import QuantileTransformer, PowerTransformer
+from sklearn.preprocessing import StandardScaler, RobustScaler
+from sklearn.svm import LinearSVR, NuSVR, SVR
 
 # local files
 import data_getter
@@ -46,19 +56,6 @@ y_columns = ['Total Chlorophyll (ug/ml)',
              'Chlorophyll a (ug/ml)',
              'Chlorophyll b (ug/ml)']
 
-
-
-invert_y = False
-# x_data = np.log(x_data)
-conditions = "Partial Least Squared"
-if invert_y:
-    conditions += "\nInverted Y"
-    modeler = TransformedTargetRegressor(regressor=PLS(n_components=3),
-                                         func=inverse,
-                                         inverse_func=inverse)
-else:
-    modeler = PLS(n_components=1)
-    modeler_name = "Partial Least Squared"
 
 modeler = TransformedTargetRegressor(regressor=PLS(n_components=3),
                                      func=np.reciprocal,
@@ -189,7 +186,7 @@ def method_tester(x_data, y_names, modeler, test_size=0.25):
         y_test_predict = modeler.predict(x_test)
         r2_test = r2_score(y_test, y_test_predict)
         mae_test = mean_absolute_error(y_test, y_test_predict)
-        print(r2_train, mae_train, r2_test, mae_test)
+        return r2_train, mae_train, r2_test, mae_test
 
 
 
@@ -236,11 +233,21 @@ models_to_test = [PLS(n_components=1), PLS(n_components=2),
                   Lasso(alpha=1), Lasso(alpha=0.1),
                   Lasso(alpha=0.01), Lasso(alpha=0.001),
                   LassoLars(alpha=1), LassoLars(alpha=0.1),
-                  LassoLars(alpha=0.01), Lasso(alpha=0.001),
+                  LassoLars(alpha=0.01), LassoLars(alpha=0.001),
                   Ridge(alpha=0.01, max_iter=5000),
                   Ridge(alpha=0.001, max_iter=5000),
                   Ridge(alpha=0.0001, max_iter=5000),
-                  Lars()]
+                  Ridge(alpha=0.00001, max_iter=5000),
+                  Lars(), GaussianProcessRegressor(),
+                  GradientBoostingRegressor(), SVR(), LinearSVR(), NuSVR(),
+                  LogisticRegression(), LinearRegression(), SGDRegressor(),
+                  ElasticNet(), ARDRegression(), BayesianRidge(),
+                  HuberRegressor(), RANSACRegressor(), TheilSenRegressor(),
+                  PassiveAggressiveRegressor(),
+                  AdaBoostRegressor(), BaggingRegressor(), GradientBoostingRegressor(),
+                  RandomForestRegressor(n_estimators=10, max_depth=2),
+                  ExtraTreesRegressor(n_estimators=10, max_depth=2),
+                  KernelRidge()]
 
 model_names = ["PLS 1-component", "PLS 2-component",
                "PLS 3-component", "PLS 4-component",
@@ -249,23 +256,44 @@ model_names = ["PLS 1-component", "PLS 2-component",
                "LassoLars alpha 1", "LassoLars alpha 0.1",
                "LassoLars alpha 0.01", "LassoLars alpha 0.001",
                "Ridge alpha 0.01", "Ridge alpha 0.001",
-               "Ridge alpha 0.0001", "Lars"
+               "Ridge alpha 0.0001", "Ridge alpha 0.00001",
+               "Lars", "Guassian Regression",
+               "Gradient Boosting",
+               "SVR", "LinearSVR", "NuSVR",
+               "LogisticRegression", "LinearRegression", "SGDRegressor",
+               "ElasticNet", "ARDRegression", "BayesianRidge",
+               "HuberRegressor", "RANSACRegressor", "TheilSenRegressor",
+               "PassiveAggressiveRegressor",
+               "AdaBoostRegressor", "BaggingRegressor", "GradientBoostingRegressor",
+               "RandomForestRegressor", "ExtraTreesRegressor",
+               "Kernel Ridge"
                ]
+# print(len(model_names), len(models_to_test))
+# for i, model_name in enumerate(model_names):
+#     print(models_to_test[i], model_names[i])
+
 # model_names = ["Ridge"]
 
-y_transformations = [None, (np.exp, np.log), (np.log, np.exp),
+y_transformations = [None, (np.exp, np.log), (np.log, np.exp), (np.log1p, np.expm1),
                      (np.reciprocal, np.reciprocal),
                      QuantileTransformer(n_quantiles=10),
+                     QuantileTransformer(n_quantiles=10, output_distribution='normal'),
                      PowerTransformer()]
 
 # y_transformations = [None, (np.reciprocal, np.reciprocal)]
-x_transformations = [None, np.exp, np.log, np.reciprocal]
+x_transformations = [None, np.exp, np.log, np.reciprocal, np.log1p, np.expm1]
 # x_transformations = [None, np.exp]
 # x_transformations = [np.log, np.reciprocal]
 
-transormation_names = ["None", "Exponential", "Logarithm",
-                       "Reciprocol", "Quantile Transform",
+transormation_names = ["None", "Exponential", "Logarithm"
+                       "Reciprocol",  "Logarithm plus 1", "Exponential minus one",
+                       "Quantile Transform", "Normal Quantile Transform",
                        "Power Transform"]
+
+# results = pd.DataFrame(columns=["Model", "y transform", "x transform", "r2 train", "mae train", "r2 test", "mae test"])
+results = []
+
+x_data = StandardScaler().fit_transform(x_data)
 
 for i, test_model in enumerate(models_to_test):
     for j, y_transformation in enumerate(y_transformations):
@@ -296,10 +324,18 @@ for i, test_model in enumerate(models_to_test):
             try:
                 # fit_n_plot_estimator(x_data_new, y_columns,
                 #                      _model, title)
-                method_tester(x_data_new, y_columns, _model)
+                r2_train, mae_train, r2_test, mae_test = method_tester(x_data_new, y_columns, _model)
+                results.append([model_names[i], transormation_names[j],
+                                transormation_names[k], r2_train,
+                                mae_train, r2_test, mae_test])
             except Exception as e:
                 print("FAIL===============>>>>>>>>>")
                 print(e)
 
+print(results)
+results_pd = pd.DataFrame(results, columns=["Model", "y transform", "x transform", "r2 train", "mae train", "r2 test", "mae test"])
+print(results_pd)
+
+results_pd.to_csv("results_Scalar_processing.csv")
 
 plt.show()
