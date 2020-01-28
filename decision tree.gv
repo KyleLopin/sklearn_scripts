@@ -1,0 +1,22 @@
+digraph "decision tree" {
+	node [shape=rectangle style=rounded]
+	size="6,6"
+	"Add fertilizer
+Low plant nitrogen" [fillcolor=coral1 style=filled]
+	"Leaf Nitrogen <= 1 g m⁻²" -> "Add fertilizer
+Low plant nitrogen" [label=True]
+	"Leaf Nitrogen <= 1 g m⁻²" -> "Leaf Nitrogen >= 1.5 g m⁻²" [label=False]
+	"Leaf Nitrogen >= 1.5 g m⁻²" -> "Good growing conditions?" [label=False]
+	"Don't add fertilizer
+Adequate plant nitrogen" [fillcolor=lightblue style=filled]
+	"Leaf Nitrogen >= 1.5 g m⁻²" -> "Don't add fertilizer
+Adequate plant nitrogen" [label=True]
+	"Add fertilizer
+to optimize growth" [fillcolor=coral1 style=filled]
+	"Good growing conditions?" -> "Add fertilizer
+to optimize growth" [label=True]
+	"Don't add fertilizer
+Not optimal growing conditions" [fillcolor=lightblue3 style=filled]
+	"Good growing conditions?" -> "Don't add fertilizer
+Not optimal growing conditions" [label=False]
+}
