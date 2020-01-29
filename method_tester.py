@@ -17,7 +17,7 @@ from sklearn.compose import TransformedTargetRegressor
 from sklearn.cross_decomposition import PLSRegression as PLS
 from sklearn.decomposition import PCA
 from sklearn.ensemble import AdaBoostRegressor, BaggingRegressor, GradientBoostingRegressor
-from sklearn.ensemble import RandomForestRegressor, StackingRegressor, ExtraTreesRegressor
+from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.linear_model import Lasso, Ridge, Lars, LassoLars
@@ -28,7 +28,7 @@ from sklearn.linear_model import PassiveAggressiveRegressor, ridge_regression
 from sklearn.metrics import make_scorer
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.model_selection import learning_curve, ShuffleSplit, KFold
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_validate
 from sklearn.preprocessing import QuantileTransformer, PowerTransformer
 from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.svm import LinearSVR, NuSVR, SVR
@@ -42,7 +42,7 @@ plt.style.use('seaborn')
 # data = pd.read_csv('as7262_mango.csv')
 # data = data.groupby('Leaf number', as_index=True).mean()
 
-x_data, data = data_getter.get_data("mango", remove_outlier=True,
+x_data, data = data_getter.get_data("as7262 mango", remove_outlier=True,
                                     only_pos2=True)
 
 data_columns = []
@@ -56,6 +56,19 @@ y_columns = ['Total Chlorophyll (ug/ml)',
              'Chlorophyll a (ug/ml)',
              'Chlorophyll b (ug/ml)']
 
+
+
+invert_y = False
+# x_data = np.log(x_data)
+conditions = "Partial Least Squared"
+if invert_y:
+    conditions += "\nInverted Y"
+    modeler = TransformedTargetRegressor(regressor=PLS(n_components=3),
+                                         func=inverse,
+                                         inverse_func=inverse)
+else:
+    modeler = PLS(n_components=1)
+    modeler_name = "Partial Least Squared"
 
 modeler = TransformedTargetRegressor(regressor=PLS(n_components=3),
                                      func=np.reciprocal,
@@ -179,15 +192,20 @@ def method_tester(x_data, y_names, modeler, test_size=0.25):
         r2_train = r2_score(y_data, y_predict)
         mae_train = mean_absolute_error(y_data, y_predict)
 
-        # calculate a test set
-        x_train, x_test, y_train, y_test = train_test_split(x_data, y_data,
-                                                            test_size=test_size)
-        modeler.fit(x_train, y_train)
-        y_test_predict = modeler.predict(x_test)
-        r2_test = r2_score(y_test, y_test_predict)
-        mae_test = mean_absolute_error(y_test, y_test_predict)
+        # # calculate a test set
+        # x_train, x_test, y_train, y_test = train_test_split(x_data, y_data,
+        #                                                     test_size=test_size)
+        # modeler.fit(x_train, y_train)
+        # y_test_predict = modeler.predict(x_test)
+        # r2_test = r2_score(y_test, y_test_predict)
+        # mae_test = mean_absolute_error(y_test, y_test_predict)
+        # print(r2_train, mae_train, r2_test, mae_test)
+        # return r2_train, mae_train, r2_test, mae_test
+        local_scores = cross_validate(modeler, x_data, y=y_data,
+                                      cv=cv, scoring=['r2', 'neg_mean_absolute_error'])
+        r2_test = local_scores['test_r2'].mean()
+        mae_test = local_scores['test_neg_mean_absolute_error'].mean()
         return r2_train, mae_train, r2_test, mae_test
-
 
 
 def fit_n_plot_estimator(x_data, y_names, modeler, title):
@@ -268,11 +286,7 @@ model_names = ["PLS 1-component", "PLS 2-component",
                "RandomForestRegressor", "ExtraTreesRegressor",
                "Kernel Ridge"
                ]
-# print(len(model_names), len(models_to_test))
-# for i, model_name in enumerate(model_names):
-#     print(models_to_test[i], model_names[i])
 
-# model_names = ["Ridge"]
 
 y_transformations = [None, (np.exp, np.log), (np.log, np.exp), (np.log1p, np.expm1),
                      (np.reciprocal, np.reciprocal),
@@ -285,7 +299,7 @@ x_transformations = [None, np.exp, np.log, np.reciprocal, np.log1p, np.expm1]
 # x_transformations = [None, np.exp]
 # x_transformations = [np.log, np.reciprocal]
 
-transormation_names = ["None", "Exponential", "Logarithm"
+transormation_names = ["None", "Exponential", "Logarithm",
                        "Reciprocol",  "Logarithm plus 1", "Exponential minus one",
                        "Quantile Transform", "Normal Quantile Transform",
                        "Power Transform"]
@@ -293,11 +307,15 @@ transormation_names = ["None", "Exponential", "Logarithm"
 # results = pd.DataFrame(columns=["Model", "y transform", "x transform", "r2 train", "mae train", "r2 test", "mae test"])
 results = []
 
+# x_data = np.diff(x_data)
+
+# x_data = processing.snv(x_data)
 x_data = StandardScaler().fit_transform(x_data)
 
 for i, test_model in enumerate(models_to_test):
     for j, y_transformation in enumerate(y_transformations):
         for k, x_transformation in enumerate(x_transformations):
+
             title = "{0}\ny transformer: {1}" \
                     "\nx transformer: {2}".format(model_names[i],
                                                   transormation_names[j],
@@ -328,6 +346,9 @@ for i, test_model in enumerate(models_to_test):
                 results.append([model_names[i], transormation_names[j],
                                 transormation_names[k], r2_train,
                                 mae_train, r2_test, mae_test])
+                # fit_n_plot_estimator(x_data_new, y_columns,
+                #                      _model, title)
+                # method_tester(x_data_new, y_columns, _model)
             except Exception as e:
                 print("FAIL===============>>>>>>>>>")
                 print(e)

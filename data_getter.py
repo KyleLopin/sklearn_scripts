@@ -11,10 +11,13 @@ import pandas as pd
 
 
 def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
-    if leaf_type == 'mango':
+
+    if leaf_type == 'as7262 mango':
+        print('===')
         data = pd.read_csv('as7262_mango.csv')
+        print(data.columns)
         if remove_outlier:
-            print(data)
+            print(data.columns)
             # data = data.drop(["Leaf: 49"])
             # print(data[data["Leaf number"] == "Leaf: 49"])
             data = data[data["Leaf number"] != "Leaf: 54"]
@@ -25,20 +28,41 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
             # data = data[data["Leaf number"] != "Leaf: 34"]
             # data = data[data["Leaf number"] != "Leaf: 35"]
         print(data)
+        data = data.groupby('Leaf number', as_index=True).mean()
+        print(data.columns)
+    elif leaf_type == 'as7263 mango':
+        data = pd.read_csv('as7265x_mango_leaves.csv')
+        # print(data)
+        # print('=======')
+        data_columns = ["Leaf number", "integration time",
+                        "610 nm", "680 nm", "730 nm",
+                        "760 nm", "810 nm", "860 nm",
+                        "position", "LED"]
+
+        chloro_columns = []
+        for column in data.columns:
+            if 'Chlorophyll' in column:
+                chloro_columns.append(column)
+        data_columns.extend(chloro_columns)
+        data = data[data_columns]
+        # data = data.groupby(['Leaf number', 'LED']).mean()
+        print(data)
+        print('======')
 
     elif leaf_type == 'roseapple':
-        fitting_data = pd.read_csv('as7262_roseapple.csv')
+        data = pd.read_csv('as7262_roseapple.csv')
+        data = data.groupby('Leaf number', as_index=True).mean()
 
-
-
+    print(data.columns)
     if only_pos2:
         data = data.loc[(data['position'] == 'pos 2')]
-    data = data.groupby('Leaf number', as_index=True).mean()
+
 
     data_columns = []
     for column in data.columns:
         if 'nm' in column:
             data_columns.append(column)
     x_data = data[data_columns]
-
+    print(data)
+    print('++++')
     return x_data, data
