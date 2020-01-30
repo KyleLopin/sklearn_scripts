@@ -40,15 +40,19 @@ import processing
 
 plt.style.use('ggplot')
 
-x_data, data = data_getter.get_data('as7263 mango')
-chloro_data = data.groupby('Leaf number', as_index=True).mean()
-
+data, chloro_data = data_getter.get_data('as7263 roseapple')
+# chloro_data = data.groupby('Leaf number', as_index=True).mean()
+print(data)
+print(chloro_data)
 data_columns = []
+print('=====')
+print(data.columns)
 for column in data.columns:
     if 'nm' in column:
         data_columns.append(column)
 print(data_columns)
-
+x_data = data[data_columns]
+print(data.columns)
 y_columns = ['Total Chlorophyll (ug/ml)',
              'Chlorophyll a (ug/ml)',
              'Chlorophyll b (ug/ml)']
@@ -174,6 +178,7 @@ data_set_names = ["raw", "inverse", "SNV", "Invert SNV", "MSC", "inverse msc",
                   "standard scalar", "Standard Scalar SNV", "Standard Scalar MSC",
                   "Robust Scalar", "Robust Scalar SNV", "Robust Scalar MSC"]
 
+print(data.columns)
 for z, result in enumerate(results):
 
     for w, x_data_local in enumerate(data_sets):
@@ -185,7 +190,7 @@ for z, result in enumerate(results):
 
                         led_data = data[data["LED"] == led].groupby("Leaf number", as_index=True).mean()
                         x_data_local = led_data[data_columns]
-                        y_data = led_data[y_columns[z]]
+                        y_data = chloro_data[y_columns[z]]
 
                         print(y_columns[z], led)
 
@@ -237,4 +242,4 @@ for z, result in enumerate(results):
     results_pd = pd.DataFrame(result, columns=["Model", "preprocessing", "y transform", "x transform", "LED", "r2 train", "mae train", "r2 test", "mae test"])
     print(results_pd)
 
-    results_pd.to_csv(os.path.join(os.getcwd(), r"as7263_{0}_results_full.csv".format(chloro_types[z])))
+    results_pd.to_csv(os.path.join(os.getcwd(), r"as7263_roseapple_{0}_results_full.csv".format(chloro_types[z])))
