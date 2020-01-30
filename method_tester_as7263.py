@@ -6,7 +6,8 @@
 
 __author__ = "Kyle Vitatus Lopin"
 
-
+# standard libraries
+import os
 # installed libraries
 import matplotlib.pyplot as plt
 import numpy as np
@@ -52,7 +53,11 @@ y_columns = ['Total Chlorophyll (ug/ml)',
              'Chlorophyll a (ug/ml)',
              'Chlorophyll b (ug/ml)']
 
-cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
+# cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
+cv = KFold(n_splits=5)
+
+best_test = np.inf
+best_conditions = []
 
 def method_tester(x_data, y_data, modeler, test_size=0.25):
     # calculate full train set
@@ -70,54 +75,78 @@ def method_tester(x_data, y_data, modeler, test_size=0.25):
     print(r2_train, mae_train, r2_test, mae_test)
     return r2_train, mae_train, r2_test, mae_test
 
+# models_to_test = [PLS(n_components=1), PLS(n_components=2),
+#                   PLS(n_components=3), PLS(n_components=4),
+#                   Lasso(alpha=1), Lasso(alpha=0.1),
+#                   Lasso(alpha=0.01), Lasso(alpha=0.001),
+#                   LassoLars(alpha=1), LassoLars(alpha=0.1),
+#                   LassoLars(alpha=0.01), LassoLars(alpha=0.001),
+#                   Ridge(alpha=0.01, max_iter=5000),
+#                   Ridge(alpha=0.001, max_iter=5000),
+#                   Ridge(alpha=0.0001, max_iter=5000),
+#                   Ridge(alpha=0.00001, max_iter=5000),
+#                   Lars(), GaussianProcessRegressor(),
+#                   GradientBoostingRegressor(), SVR(), LinearSVR(), NuSVR(),
+#                   LogisticRegression(), LinearRegression(), SGDRegressor(),
+#                   ElasticNet(), ARDRegression(), BayesianRidge(),
+#                   HuberRegressor(), RANSACRegressor(), TheilSenRegressor(),
+#                   PassiveAggressiveRegressor(),
+#                   AdaBoostRegressor(), BaggingRegressor(), GradientBoostingRegressor(),
+#                   RandomForestRegressor(n_estimators=10, max_depth=2),
+#                   ExtraTreesRegressor(n_estimators=10, max_depth=2),
+#                   KernelRidge()]
+#
+# model_names = ["PLS 1-component", "PLS 2-component",
+#                "PLS 3-component", "PLS 4-component",
+#                "Lasso alpha 1", "Lasso alpha 0.1",
+#                "Lasso alpha 0.01", "Lasso alpha 0.001",
+#                "LassoLars alpha 1", "LassoLars alpha 0.1",
+#                "LassoLars alpha 0.01", "LassoLars alpha 0.001",
+#                "Ridge alpha 0.01", "Ridge alpha 0.001",
+#                "Ridge alpha 0.0001", "Ridge alpha 0.00001",
+#                "Lars", "Guassian Regression",
+#                "Gradient Boosting",
+#                "SVR", "LinearSVR", "NuSVR",
+#                "LogisticRegression", "LinearRegression", "SGDRegressor",
+#                "ElasticNet", "ARDRegression", "BayesianRidge",
+#                "HuberRegressor", "RANSACRegressor", "TheilSenRegressor",
+#                "PassiveAggressiveRegressor",
+#                "AdaBoostRegressor", "BaggingRegressor", "GradientBoostingRegressor",
+#                "RandomForestRegressor", "ExtraTreesRegressor",
+#                "Kernel Ridge"
+#                ]
+
 models_to_test = [PLS(n_components=1), PLS(n_components=2),
                   PLS(n_components=3), PLS(n_components=4),
-                  Lasso(alpha=1), Lasso(alpha=0.1),
-                  Lasso(alpha=0.01), Lasso(alpha=0.001),
+                  Lasso(alpha=5), Lasso(alpha=2),
+                  Lasso(alpha=1), Lasso(alpha=0.2),
                   LassoLars(alpha=1), LassoLars(alpha=0.1),
                   LassoLars(alpha=0.01), LassoLars(alpha=0.001),
                   Ridge(alpha=0.01, max_iter=5000),
                   Ridge(alpha=0.001, max_iter=5000),
                   Ridge(alpha=0.0001, max_iter=5000),
                   Ridge(alpha=0.00001, max_iter=5000),
-                  Lars(), GaussianProcessRegressor(),
-                  GradientBoostingRegressor(), SVR(), LinearSVR(), NuSVR(),
-                  LogisticRegression(), LinearRegression(), SGDRegressor(),
-                  ElasticNet(), ARDRegression(), BayesianRidge(),
-                  HuberRegressor(), RANSACRegressor(), TheilSenRegressor(),
-                  PassiveAggressiveRegressor(),
-                  AdaBoostRegressor(), BaggingRegressor(), GradientBoostingRegressor(),
-                  RandomForestRegressor(n_estimators=10, max_depth=2),
-                  ExtraTreesRegressor(n_estimators=10, max_depth=2),
-                  KernelRidge()]
+                  Lars(), SVR(gamma='auto'), LinearSVR(max_iter=10000), NuSVR(gamma='auto'),
+                  LogisticRegression(solver='lbfgs'), LinearRegression(), KernelRidge()]
 
 model_names = ["PLS 1-component", "PLS 2-component",
                "PLS 3-component", "PLS 4-component",
-               "Lasso alpha 1", "Lasso alpha 0.1",
-               "Lasso alpha 0.01", "Lasso alpha 0.001",
+               "Lasso alpha 5", "Lasso alpha 2",
+               "Lasso alpha 1", "Lasso alpha 0.2",
                "LassoLars alpha 1", "LassoLars alpha 0.1",
                "LassoLars alpha 0.01", "LassoLars alpha 0.001",
                "Ridge alpha 0.01", "Ridge alpha 0.001",
                "Ridge alpha 0.0001", "Ridge alpha 0.00001",
-               "Lars", "Guassian Regression",
-               "Gradient Boosting",
+               "Lars",
                "SVR", "LinearSVR", "NuSVR",
-               "LogisticRegression", "LinearRegression", "SGDRegressor",
-               "ElasticNet", "ARDRegression", "BayesianRidge",
-               "HuberRegressor", "RANSACRegressor", "TheilSenRegressor",
-               "PassiveAggressiveRegressor",
-               "AdaBoostRegressor", "BaggingRegressor", "GradientBoostingRegressor",
-               "RandomForestRegressor", "ExtraTreesRegressor",
+               "LogisticRegression", "LinearRegression",
                "Kernel Ridge"
                ]
 
-y_transformations = [None, (np.exp, np.log), (np.log, np.exp), (np.log1p, np.expm1),
-                     (np.reciprocal, np.reciprocal),
-                     QuantileTransformer(n_quantiles=10),
-                     QuantileTransformer(n_quantiles=10, output_distribution='normal'),
-                     PowerTransformer()]
+y_transformations = [None, (np.exp, np.log), (np.log, np.exp),
+                     (np.reciprocal, np.reciprocal)]
 
-x_transformations = [None, np.exp, np.log, np.reciprocal, np.log1p, np.expm1]
+x_transformations = [None, np.exp, np.log]
 
 transormation_names = ["None", "Exponential", "Logarithm",
                        "Reciprocol",  "Logarithm plus 1", "Exponential minus one",
@@ -129,62 +158,83 @@ results_a = []
 results_b = []
 
 results = [results_total, results_a, results_b]
+chloro_types = ["total", "a", "b"]
 
 # print(data)
 # print(data[data["LED"] == "White LED"].groupby("Leaf number", as_index=True).mean())
-
+# x_data = 1 / x_data
+x_msc, _ = processing.msc(x_data)
+x_inv_msc = 1 / x_msc.copy()
+data_sets = [x_data.copy(), 1 / x_data, processing.snv(x_data), 1 / processing.snv(x_data), x_msc, x_inv_msc,
+             StandardScaler().fit_transform(x_data), StandardScaler().fit_transform(processing.snv(x_data)),
+             StandardScaler().fit_transform(x_msc), RobustScaler().fit_transform(x_data),
+             RobustScaler().fit_transform(processing.snv(x_data)),
+             RobustScaler().fit_transform(x_msc)]
+data_set_names = ["raw", "inverse", "SNV", "Invert SNV", "MSC", "inverse msc",
+                  "standard scalar", "Standard Scalar SNV", "Standard Scalar MSC",
+                  "Robust Scalar", "Robust Scalar SNV", "Robust Scalar MSC"]
 
 for z, result in enumerate(results):
-    for y, led in enumerate(['White LED']):
-        for i, test_model in enumerate(models_to_test):
-            for j, y_transformation in enumerate(y_transformations):
-                for k, x_transformation in enumerate(x_transformations):
 
-                    led_data = data[data["LED"] == led].groupby("Leaf number", as_index=True).mean()
-                    x_data = led_data[data_columns]
-                    y_data = led_data[y_columns[z]]
+    for w, x_data_local in enumerate(data_sets):
 
-                    print(y_columns[z], led)
+        for y, led in enumerate(data['LED'].unique()):
+            for i, test_model in enumerate(models_to_test):
+                for j, y_transformation in enumerate(y_transformations):
+                    for k, x_transformation in enumerate(x_transformations):
 
-                    title = "{0}\ny transformer: {1}" \
-                            "\nx transformer: {2}".format(model_names[i],
-                                                          transormation_names[j],
-                                                          transormation_names[k])
+                        led_data = data[data["LED"] == led].groupby("Leaf number", as_index=True).mean()
+                        x_data_local = led_data[data_columns]
+                        y_data = led_data[y_columns[z]]
 
-                    if x_transformation:
-                        x_data_new = x_transformation(x_data)
-                    else:
-                        x_data_new = x_data.copy()
+                        print(y_columns[z], led)
 
-                    if type(y_transformation) == tuple:
-                        _model = TransformedTargetRegressor(regressor=clone(test_model),
-                                                            func=y_transformation[0],
-                                                            inverse_func=y_transformation[1])
-                    elif y_transformation:
-                        _model = TransformedTargetRegressor(regressor=clone(test_model),
-                                                            transformer=y_transformation)
-                    else:
-                        _model = clone(test_model)
+                        title = "{0}\ny transformer: {1}" \
+                                "\nx transformer: {2}\n" \
+                                "{3}, {4}".format(model_names[i], transormation_names[j],
+                                             transormation_names[k], led, data_set_names[w])
 
-                    print(title)
+                        if x_transformation:
+                            x_data_new = x_transformation(x_data_local)
+                        else:
+                            x_data_new = x_data_local.copy()
 
-                    try:
-                        # fit_n_plot_estimator(x_data_new, y_columns,
-                        #                      _model, title)
-                        r2_train, mae_train, r2_test, mae_test = method_tester(x_data_new,
-                                                                               y_data,
-                                                                               _model)
-                        result.append([model_names[i], transormation_names[j],
-                                       transormation_names[k], led, r2_train,
-                                       mae_train, r2_test, mae_test])
-                        # fit_n_plot_estimator(x_data_new, y_columns,
-                        #                      _model, title)
-                        # method_tester(x_data_new, y_columns, _model)
-                    except Exception as e:
-                        print("FAIL===============>>>>>>>>>")
-                        print(e)
+                        if type(y_transformation) == tuple:
+                            _model = TransformedTargetRegressor(regressor=clone(test_model),
+                                                                func=y_transformation[0],
+                                                                inverse_func=y_transformation[1])
+                        elif y_transformation:
+                            _model = TransformedTargetRegressor(regressor=clone(test_model),
+                                                                transformer=y_transformation)
+                        else:
+                            _model = clone(test_model)
 
-    results_pd = pd.DataFrame(result, columns=["Model", "y transform", "x transform", "LED", "r2 train", "mae train", "r2 test", "mae test"])
+                        print(title)
+
+                        try:
+                            # fit_n_plot_estimator(x_data_new, y_columns,
+                            #                      _model, title)
+                            r2_train, mae_train, r2_test, mae_test = method_tester(x_data_new,
+                                                                                   y_data,
+                                                                                   _model)
+
+                            if mae_test < best_test:
+                                best_test = mae_test
+                                best_conditions = [model_names[i], transormation_names[j],
+                                                   transormation_names[k], data_set_names[w], led]
+
+                            result.append([model_names[i], data_set_names[w], transormation_names[j],
+                                           transormation_names[k], led, r2_train,
+                                           mae_train, r2_test, mae_test])
+                            print(best_test, best_conditions, led)
+                            # fit_n_plot_estimator(x_data_new, y_columns,
+                            #                      _model, title)
+                            # method_tester(x_data_new, y_columns, _model)
+                        except Exception as e:
+                            print("FAIL===============>>>>>>>>>")
+                            print(e)
+
+    results_pd = pd.DataFrame(result, columns=["Model", "preprocessing", "y transform", "x transform", "LED", "r2 train", "mae train", "r2 test", "mae test"])
     print(results_pd)
 
-    results_pd.to_csv("as7263 {0} results raw.csv".format(y_columns[z]))
+    results_pd.to_csv(os.path.join(os.getcwd(), r"as7263_{0}_results_full.csv".format(chloro_types[z])))
