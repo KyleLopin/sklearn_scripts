@@ -32,7 +32,7 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
         print(data.columns)
     elif leaf_type == 'as7263 mango':
         data = pd.read_csv('as7265x_mango_leaves.csv')
-        # print(data)
+        print(data.columns)
         # print('=======')
         data_columns = ["Leaf number", "integration time",
                         "610 nm", "680 nm", "730 nm",
@@ -46,6 +46,14 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
         data_columns.extend(chloro_columns)
         data = data[data_columns]
         # data = data.groupby(['Leaf number', 'LED']).mean()
+        print(data)
+        print('======')
+
+    elif leaf_type == 'as7265x mango':
+        data = pd.read_csv('as7265x_mango_leaves.csv')
+        # print(data)
+        # print('=======')
+
         print(data)
         print('======')
 

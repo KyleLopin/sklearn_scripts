@@ -40,7 +40,8 @@ import processing
 
 plt.style.use('ggplot')
 
-x_data, data = data_getter.get_data('as7263 mango')
+# x_data, data = data_getter.get_data('as7263 mango')
+x_data, data = data_getter.get_data('as7265x mango')
 chloro_data = data.groupby('Leaf number', as_index=True).mean()
 
 data_columns = []
@@ -237,4 +238,4 @@ for z, result in enumerate(results):
     results_pd = pd.DataFrame(result, columns=["Model", "preprocessing", "y transform", "x transform", "LED", "r2 train", "mae train", "r2 test", "mae test"])
     print(results_pd)
 
-    results_pd.to_csv(os.path.join(os.getcwd(), r"as7263_{0}_results_full.csv".format(chloro_types[z])))
+    results_pd.to_csv(os.path.join(os.getcwd(), r"as7265x_{0}_results_full.csv".format(chloro_types[z])))
