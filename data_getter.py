@@ -51,15 +51,19 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
 
     elif leaf_type == 'as7265x mango':
         data = pd.read_csv('as7265x_mango_leaves.csv')
-        # print(data)
-        # print('=======')
 
-        print(data)
-        print('======')
+    elif leaf_type == 'as7265x mango verbose':
+        data = pd.read_csv('as7265x_roseapple_rows.csv')
 
-    elif leaf_type == 'roseapple':
+    elif leaf_type == 'as7262 roseapple':
         data = pd.read_csv('as7262_roseapple.csv')
         data = data.groupby('Leaf number', as_index=True).mean()
+
+    elif leaf_type == "as7265x roseaple":
+        pass
+
+    else:
+        Exception("Wrong input type")
 
     print(data.columns)
     if only_pos2:
