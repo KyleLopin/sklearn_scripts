@@ -27,7 +27,8 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
             # data = data[data["Leaf number"] != "Leaf: 33"]
             # data = data[data["Leaf number"] != "Leaf: 34"]
             # data = data[data["Leaf number"] != "Leaf: 35"]
-        print(data)
+        print(data.columns)
+        print('+++++')
         data = data.groupby('Leaf number', as_index=True).mean()
         print(data.columns)
     elif leaf_type == 'as7263 mango':
