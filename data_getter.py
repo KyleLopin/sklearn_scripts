@@ -13,9 +13,7 @@ import pandas as pd
 def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
 
     if leaf_type == 'as7262 mango':
-        print('===')
         data = pd.read_csv('as7262_mango.csv')
-        print(data.columns)
         if remove_outlier:
             print(data.columns)
             # data = data.drop(["Leaf: 49"])
@@ -27,15 +25,14 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
             # data = data[data["Leaf number"] != "Leaf: 33"]
             # data = data[data["Leaf number"] != "Leaf: 34"]
             # data = data[data["Leaf number"] != "Leaf: 35"]
-        print(data.columns)
-        print('+++++')
+
         data = data.groupby('Leaf number', as_index=True).mean()
-        print(data.columns)
+
     elif leaf_type == 'as7263 mango':
         data = pd.read_csv('as7265x_mango_leaves.csv')
         print(data.columns)
         # print('=======')
-        data_columns = ["Leaf number", "integration time",
+        channel_data_columns = ["Leaf number", "integration time",
                         "610 nm", "680 nm", "730 nm",
                         "760 nm", "810 nm", "860 nm",
                         "position", "LED"]
@@ -44,8 +41,8 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
         for column in data.columns:
             if 'Chlorophyll' in column:
                 chloro_columns.append(column)
-        data_columns.extend(chloro_columns)
-        data = data[data_columns]
+        channel_data_columns.extend(chloro_columns)
+        data = data[channel_data_columns]
         # data = data.groupby(['Leaf number', 'LED']).mean()
         print(data)
         print('======')
@@ -53,7 +50,7 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
     elif leaf_type == 'as7265x mango':
         data = pd.read_csv('as7265x_mango_leaves.csv')
 
-    elif leaf_type == 'as7265x mango verbose':
+    elif leaf_type == 'as7265x roseapple verbose':
         data = pd.read_csv('as7265x_roseapple_rows.csv')
 
     elif leaf_type == 'as7262 roseapple':
@@ -66,16 +63,17 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
     else:
         Exception("Wrong input type")
 
-    print(data.columns)
     if only_pos2:
         data = data.loc[(data['position'] == 'pos 2')]
 
-
-    data_columns = []
+    channel_data_columns = []
+    chloro_columns = []
     for column in data.columns:
         if 'nm' in column:
-            data_columns.append(column)
-    x_data = data[data_columns]
-    print(data)
-    print('++++')
-    return x_data, data
+            channel_data_columns.append(column)
+        elif 'Chlorophyll' in column:
+            chloro_columns.append(column)
+    x_data = data[channel_data_columns]
+    chloro_data = data[chloro_columns]
+
+    return x_data, chloro_data, data

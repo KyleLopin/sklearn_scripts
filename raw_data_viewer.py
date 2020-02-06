@@ -19,7 +19,7 @@ plt.style.use('seaborn')
 
 data = pd.read_csv("as7262_mango.csv")
 
-# data = data.loc[(data['position'] == 'pos 2')]
+data = data.loc[(data['position'] == 'pos 2')]
 # data = data.loc[(data['integration time'] == 3)]
 data = data.groupby('Leaf number', as_index=True).mean()
 
@@ -50,7 +50,7 @@ print(spectrum_data)
 fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(7, 9),
                          constrained_layout=True)
 
-
+fig.suptitle("AS7262 Mango Leave Measurements")
 axes[0].plot(wavelengths, spectrum_data.T)
 axes[0].set_title('Raw Data')
 axes[0].set_ylabel("Fraction Reflectance")

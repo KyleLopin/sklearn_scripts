@@ -215,3 +215,4 @@ for z, x_data in enumerate(data_sets):
                         print(error)
 
 print(good_sets)
+print(best_score, best_conditions)

@@ -107,7 +107,7 @@ model_names = ['Linear model', "Logarithm model",
 
 chloro_columns = ['Chlorophyll a (ug/ml)', 'Chlorophyll b (ug/ml)',
                   'Total Chlorophyll (ug/ml)']
-y_name = ['Total Chlorophyll (ug/ml)']
+y_name = ['Chlorophyll b (ug/ml)']
 
 letters = ["A", "B", "C", "D", "E", "F"]
 print(x_data.index)
