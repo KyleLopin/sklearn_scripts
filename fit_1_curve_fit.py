@@ -21,12 +21,14 @@ plt.style.use('seaborn')
 
 # fitting_data = pd.read_csv('as7262_roseapple.csv')
 fitting_data = pd.read_csv("as7262_mango.csv")
+
 print(fitting_data.columns)
+# fitting_data = fitting_data.loc[(fitting_data['Total Chlorophyll (ug/ml)'] < 0.5)]
 # fitting_data = fitting_data.loc[(fitting_data['integration time'] == 3)]
 # fitting_data = fitting_data.loc[(fitting_data['position'] == 'pos 2')]
 # print(fitting_data)
-# fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
-
+fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
+#
 # fitting_data = fitting_data.drop(["Leaf: 50"])
 
 data_columns = []
@@ -34,13 +36,13 @@ for column in fitting_data.columns:
     if 'nm' in column:
         data_columns.append(column)
 #
-# spectrum_data = fitting_data[data_columns]
+spectrum_data = fitting_data[data_columns]
 
-spectrum_data, fitting_data = data_getter.get_data('mango', remove_outlier=True,
-                                                   only_pos2=True)
+# spectrum_data, fitting_data = data_getter.get_data('mango', remove_outlier=True,
+#                                                    only_pos2=True)
 
 # spectrum_data, _= processing.msc(spectrum_data)
-spectrum_data = processing.snv(spectrum_data)
+# spectrum_data = processing.snv(spectrum_data)
 spectrum_data.T.plot()
 plt.show()
 #
@@ -86,6 +88,7 @@ def fit_n_plot(_x, _y, model, axis, add_xlabel=None,
     axis.scatter(_x, _y)
     if invert_y:
         _y = 1 / _y
+
     fit_values, _ = curve_fit(model, _x, _y, maxfev=10**6)
     x_linespace = np.linspace(np.min(_x), np.max(_x))
     if invert_y:
@@ -95,6 +98,7 @@ def fit_n_plot(_x, _y, model, axis, add_xlabel=None,
         y_fit = model(_x, *fit_values)
         y_fit_line = model(x_linespace, *fit_values)
     axis.plot(x_linespace, y_fit_line, c='r')
+
     r2 = r2_score(y, y_fit)
     mae = mean_absolute_error(y, y_fit)
     print(wavelength, ',', r2, ',', mae)
@@ -149,9 +153,9 @@ models = [linear_model, log_model, exp_model, poly_2_model]
 
 model_names = ['Linear model', "Logarithm model",
                "Exponential model", "Polynomial model"]
-models = [linear_model, exp_model, poly_2_model]
-model_names = ['Linear model',
-               "Exponential model", "Polynomial model"]
+# models = [linear_model, exp_model, poly_2_model]
+# model_names = ['Linear model',
+#                "Exponential model", "Polynomial model"]
 # models = [linear_model, poly_2_model]
 # model_names = ['Linear model', "Polynomial model"]
 
@@ -177,7 +181,7 @@ for i, model in enumerate(models):
                    add_xlabel=put_xlabel,
                    figure_letter=letter,
                    wavelength=data_columns[i],
-                   invert_y=False)
+                   invert_y=True)
 
 
 plt.show()

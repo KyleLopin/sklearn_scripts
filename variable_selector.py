@@ -76,7 +76,7 @@ def pls_variable_selection(x, y, max_components, scorer, _cv, cv_groups):
             print('i, j, score = ', i, j, score_table[i, j])
 
 
-    score_table.tofile('pls_score_table2.dat')
+    score_table.tofile('pls_score_table.dat')
     mseminx, mseminy = np.where(score_table == np.max(score_table[np.nonzero(score_table)]))
     print("Optimised number of PLS components: ", mseminx[0] + 1)
     print("Wavelengths to be discarded ", mseminy[0])

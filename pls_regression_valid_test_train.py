@@ -25,6 +25,9 @@ plt.style.use('seaborn')
 # data = pd.read_csv('mango_chloro_refl3.csv')
 
 full_data = pd.read_csv('mango_flouro_rows.csv')
+# full_data = pd.read_csv('as7262_mango.csv')
+# full_data = full_data.groupby('Leaf number', as_index=True).mean()
+
 # data = data.loc[(data['integration time'] == 250)]
 print(full_data.columns)
 

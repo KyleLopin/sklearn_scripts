@@ -43,7 +43,7 @@ plt.style.use('seaborn')
 # data = data.groupby('Leaf number', as_index=True).mean()
 
 x_data, data = data_getter.get_data("as7262 mango", remove_outlier=True,
-                                    only_pos2=True)
+                                    only_pos2=False)
 
 data_columns = []
 for column in data.columns:

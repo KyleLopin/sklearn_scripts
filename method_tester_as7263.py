@@ -178,7 +178,6 @@ data_set_names = ["raw", "inverse", "SNV", "Invert SNV", "MSC", "inverse msc",
                   "standard scalar", "Standard Scalar SNV", "Standard Scalar MSC",
                   "Robust Scalar", "Robust Scalar SNV", "Robust Scalar MSC"]
 
-print(data.columns)
 for z, result in enumerate(results):
 
     for w, x_data_local in enumerate(data_sets):

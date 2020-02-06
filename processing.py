@@ -26,13 +26,14 @@ def snv(input_data):
     _columns = None
     if type(input_data) is pd.DataFrame:
         _columns = input_data.columns
+        _index = input_data.index
         input_data = input_data.to_numpy()
 
     for i in range(input_data.shape[0]):
         # Apply correction
         data_snv[i, :] = (input_data[i, :] - np.mean(input_data[i, :])) / np.std(input_data[i, :])
     if _type is pd.DataFrame:
-        return pd.DataFrame(data_snv, columns=_columns)
+        return pd.DataFrame(data_snv, columns=_columns, index=_index)
     # else return a numpy array
     return data_snv
 
@@ -43,8 +44,10 @@ def msc(input_data, reference=None):
     '''
     # mean centre correction
     _type = type(input_data)
-    _columns = input_data.columns
+
     if _type is pd.DataFrame:
+        _columns = input_data.columns
+        _index = input_data.index
         input_data = input_data.to_numpy()
     for i in range(input_data.shape[0]):
         input_data[i, :] -= input_data[i, :].mean()
@@ -62,6 +65,7 @@ def msc(input_data, reference=None):
         # Apply correction
         data_msc[i, :] = (input_data[i, :] - fit[0][1]) / fit[0][0]
     if _type is pd.DataFrame:
-        return pd.DataFrame(data_msc, columns=_columns), pd.DataFrame(ref)
+        return pd.DataFrame(data_msc, columns=_columns,
+                            index=_index), pd.DataFrame(ref)
 
     return data_msc, ref

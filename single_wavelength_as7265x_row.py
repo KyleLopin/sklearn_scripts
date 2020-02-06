@@ -21,29 +21,28 @@ import processing
 
 plt.style.use('ggplot')
 
-x_data, data = data_getter.get_data('as7263 mango')
+x_data, data = data_getter.get_data('as7265x mango verbose')
 print(data.columns)
 print('(((((((')
 print(data['integration time'].unique(), data['position'].unique())
-x_data = x_data[data['integration time'] == 200]
-x_data = x_data[data['position'] == 'pos 2']
-data = data[data['integration time'] == 200]
-data = data[data['position'] == 'pos 2']
-chloro_data = data.groupby('Leaf number', as_index=True).mean()
-
+# x_data = x_data[data['integration time'] == 200]
+# x_data = x_data[data['position'] == 'pos 2']
+# data = data[data['integration time'] == 200]
+# data = data[data['position'] == 'pos 2']
+# chloro_data = data.groupby('Leaf number', as_index=True).mean()
+data = data.groupby('Leaf number', as_index=True).mean()
 data_columns = []
 for column in data.columns:
     if 'nm' in column:
         data_columns.append(column)
-print(data_columns)
-print(x_data)
+
+x_data = data[data_columns]
 print(data)
-print(chloro_data)
 
 y_columns = ['Total Chlorophyll (ug/ml)',
              'Chlorophyll a (ug/ml)',
              'Chlorophyll b (ug/ml)']
-
+chloro_data = data[y_columns]
 def linear_model(x, a, b):
     return a * x + b
 
@@ -108,7 +107,7 @@ model_names = ['Linear model', "Logarithm model",
 
 chloro_columns = ['Chlorophyll a (ug/ml)', 'Chlorophyll b (ug/ml)',
                   'Total Chlorophyll (ug/ml)']
-y_name = ['Total Chlorophyll (ug/ml)']
+y_name = ['Chlorophyll b (ug/ml)']
 
 letters = ["A", "B", "C", "D", "E", "F"]
 print(x_data.index)
@@ -173,46 +172,46 @@ data_set_names = ["raw", "inverse", "SNV", "Invert SNV", "MSC", "inverse msc",
                   "Robust Scalar", "Robust Scalar SNV", "Robust Scalar MSC"]
 
 for z, x_data in enumerate(data_sets):
-    for led in data['LED'].unique():
-        print(led)
-        for y_invert in [True, False]:
-            for j, model in enumerate(models):
 
-                # figure, axes, = plt.subplots(3, 2, figsize=(7.5, 8.75), constrained_layout=True)
-                # axes = [axes[0][0], axes[0][1], axes[1][0],
-                #         axes[1][1], axes[2][0], axes[2][1]]
-                # figure.suptitle("{0} measured with AS7263\n and {1}".format(y_name, led), size=20,
-                #                 fontname='Franklin Gothic Medium')
-                print(len(data_columns))
-                for l in range(len(data_columns)):
+    for y_invert in [True, False]:
+        for j, model in enumerate(models):
 
-                    try:
+            # figure, axes, = plt.subplots(3, 2, figsize=(7.5, 8.75), constrained_layout=True)
+            # axes = [axes[0][0], axes[0][1], axes[1][0],
+            #         axes[1][1], axes[2][0], axes[2][1]]
+            # figure.suptitle("{0} measured with AS7263\n and {1}".format(y_name, led), size=20,
+            #                 fontname='Franklin Gothic Medium')
+            print(len(data_columns))
+            for l in range(len(data_columns)):
 
-                        y = chloro_data[y_name].iloc[:, 0]
-                        x = x_data[data['LED'] == led]
-                        x = x[data_columns[l]]
+                try:
 
-                        if invert_y:
-                            y = 1 / y
+                    y = chloro_data[y_name].iloc[:, 0]
+                    # x = x_data[data['LED'] == led]
+                    x = x_data
+                    x = x[data_columns[l]]
 
-                        fit_values, _ = curve_fit(model, x, y, maxfev=10 ** 6)
-                        y_fit = model(x, *fit_values)
-                        if invert_y:
-                            y = 1 / y
-                            y_fit = 1 / y_fit
-                        r2 = r2_score(y, y_fit)
-                        mae = mean_absolute_error(y, y_fit)
-                        print(led, model_names[j], y_invert,
-                              r2, mae, data_set_names[z])
-                        if mae < best_score:
-                            good_sets.append((best_score, best_conditions))
+                    if invert_y:
+                        y = 1 / y
 
-                            best_score = mae
-                            best_conditions = [led, y_invert, model_names[j],
-                                               data_columns[l], data_set_names[z]]
-                        print(best_score, best_conditions)
-                    except Exception as error:
-                        print(error)
+                    fit_values, _ = curve_fit(model, x, y, maxfev=10 ** 6)
+                    y_fit = model(x, *fit_values)
+                    if invert_y:
+                        y = 1 / y
+                        y_fit = 1 / y_fit
+                    r2 = r2_score(y, y_fit)
+                    mae = mean_absolute_error(y, y_fit)
+                    print(model_names[j], y_invert,
+                          r2, mae, data_set_names[z])
+                    if mae < best_score:
+                        good_sets.append((best_score, best_conditions))
+
+                        best_score = mae
+                        best_conditions = [y_invert, model_names[j],
+                                           data_columns[l], data_set_names[z]]
+                    print(best_score, best_conditions)
+                except Exception as error:
+                    print(error)
 
 print(good_sets)
-print(best_score, best_conditions)
+print(best_conditions)
