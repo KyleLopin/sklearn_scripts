@@ -125,7 +125,7 @@ models_to_test = [PLS(n_components=1), PLS(n_components=2),
                   Lasso(alpha=5), Lasso(alpha=2),
                   Lasso(alpha=1), Lasso(alpha=0.2),
                   LassoLars(alpha=1), LassoLars(alpha=0.1),
-                  LassoLars(alpha=0.01), LassoLars(alpha=0.001),
+                  LassoLars(alpha=0.01), LassoLars(alpha=0.001), LassoLars(alpha=0.0003),
                   Ridge(alpha=0.01, max_iter=5000),
                   Ridge(alpha=0.001, max_iter=5000),
                   Ridge(alpha=0.0001, max_iter=5000),
@@ -138,7 +138,7 @@ model_names = ["PLS 1-component", "PLS 2-component",
                "Lasso alpha 5", "Lasso alpha 2",
                "Lasso alpha 1", "Lasso alpha 0.2",
                "LassoLars alpha 1", "LassoLars alpha 0.1",
-               "LassoLars alpha 0.01", "LassoLars alpha 0.001",
+               "LassoLars alpha 0.01", "LassoLars alpha 0.001", "LassoLars alpha 0.0003",
                "Ridge alpha 0.01", "Ridge alpha 0.001",
                "Ridge alpha 0.0001", "Ridge alpha 0.00001",
                "Lars",
@@ -167,6 +167,7 @@ chloro_types = ["total", "a", "b"]
 # print(data)
 # print(data[data["LED"] == "White LED"].groupby("Leaf number", as_index=True).mean())
 # x_data = 1 / x_data
+x_data = x_data.diff(axis=1).iloc[:, 1:]
 x_msc, _ = processing.msc(x_data)
 x_inv_msc = 1 / x_msc.copy()
 data_sets = [x_data.copy(), 1 / x_data, processing.snv(x_data), 1 / processing.snv(x_data), x_msc, x_inv_msc,
@@ -241,4 +242,4 @@ for z, result in enumerate(results):
     results_pd = pd.DataFrame(result, columns=["Model", "preprocessing", "y transform", "x transform", "LED", "r2 train", "mae train", "r2 test", "mae test"])
     print(results_pd)
 
-    results_pd.to_csv(os.path.join(os.getcwd(), r"as7263_roseapple_{0}_results_full.csv".format(chloro_types[z])))
+    results_pd.to_csv(os.path.join(os.getcwd(), r"as7263_roseapple_diff_{0}_results_full.csv".format(chloro_types[z])))

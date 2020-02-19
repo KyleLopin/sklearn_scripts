@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 from sklearn.metrics import mean_absolute_error, r2_score
+from sklearn.preprocessing import RobustScaler, StandardScaler
 # local files
 import data_getter
 import processing
@@ -21,14 +22,12 @@ plt.style.use('seaborn')
 
 # fitting_data = pd.read_csv('as7262_roseapple.csv')
 fitting_data = pd.read_csv("as7262_mango.csv")
-
 print(fitting_data.columns)
-# fitting_data = fitting_data.loc[(fitting_data['Total Chlorophyll (ug/ml)'] < 0.5)]
 # fitting_data = fitting_data.loc[(fitting_data['integration time'] == 3)]
 # fitting_data = fitting_data.loc[(fitting_data['position'] == 'pos 2')]
 # print(fitting_data)
-fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
-#
+# fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
+
 # fitting_data = fitting_data.drop(["Leaf: 50"])
 
 data_columns = []
@@ -38,11 +37,15 @@ for column in fitting_data.columns:
 #
 spectrum_data = fitting_data[data_columns]
 
-# spectrum_data, fitting_data = data_getter.get_data('mango', remove_outlier=True,
-#                                                    only_pos2=True)
+spectrum_data, fitting_data = data_getter.get_data('mango', remove_outlier=True,
+                                                   only_pos2=True)
 
 # spectrum_data, _= processing.msc(spectrum_data)
 # spectrum_data = processing.snv(spectrum_data)
+# spectrum_data = pd.DataFrame(np.diff(spectrum_data))
+spectrum_data = spectrum_data.diff(axis=1).iloc[:, 1:]
+spectrum_data = pd.DataFrame(RobustScaler().fit_transform(spectrum_data))
+
 spectrum_data.T.plot()
 plt.show()
 #
@@ -85,7 +88,7 @@ def fit_n_plot(_x, _y, model, axis, add_xlabel=None,
                figure_letter=None, wavelength=None,
                invert_y=False):
 
-    axis.scatter(_x, _y)
+    axis.scatter(_x, _y, s=20, c='mediumseagreen')
     if invert_y:
         _y = 1 / _y
 
@@ -97,8 +100,7 @@ def fit_n_plot(_x, _y, model, axis, add_xlabel=None,
     else:
         y_fit = model(_x, *fit_values)
         y_fit_line = model(x_linespace, *fit_values)
-    axis.plot(x_linespace, y_fit_line, c='r')
-
+    axis.plot(x_linespace, y_fit_line, c='darkviolet')
     r2 = r2_score(y, y_fit)
     mae = mean_absolute_error(y, y_fit)
     print(wavelength, ',', r2, ',', mae)
@@ -106,8 +108,8 @@ def fit_n_plot(_x, _y, model, axis, add_xlabel=None,
 
     y_top = y_fit_line + mae
     y_bottom = y_fit_line - mae
-    axis.plot(x_linespace, y_top, c='black')
-    axis.plot(x_linespace, y_bottom, c='black')
+    axis.plot(x_linespace, y_top, 'k--', lw=1)
+    axis.plot(x_linespace, y_bottom, 'k--', lw=1)
     axis.annotate(u"R\u00B2 ={:.3f}".format(r2), xy=(0.7, 0.85),
                   xycoords='axes fraction', color='#101028')
     axis.annotate(u"MAE ={:.3f}".format(mae), xy=(0.7, 0.75),
@@ -153,9 +155,9 @@ models = [linear_model, log_model, exp_model, poly_2_model]
 
 model_names = ['Linear model', "Logarithm model",
                "Exponential model", "Polynomial model"]
-# models = [linear_model, exp_model, poly_2_model]
-# model_names = ['Linear model',
-#                "Exponential model", "Polynomial model"]
+models = [linear_model, exp_model, poly_2_model]
+model_names = ['Linear model',
+               "Exponential model", "Polynomial model"]
 # models = [linear_model, poly_2_model]
 # model_names = ['Linear model', "Polynomial model"]
 
@@ -170,8 +172,9 @@ for i, model in enumerate(models):
                     fontname='Franklin Gothic Medium')
     print("Model: ", model_names[i])
 
-    for i in range(6):
-        x = spectrum_data[data_columns[i]]
+    for i in range(5):
+        # x = spectrum_data[data_columns[i]]
+        x = spectrum_data.iloc[:, i]
         letter = letters[i]
         # x = 1 / x
         put_xlabel = False
@@ -181,7 +184,7 @@ for i, model in enumerate(models):
                    add_xlabel=put_xlabel,
                    figure_letter=letter,
                    wavelength=data_columns[i],
-                   invert_y=True)
+                   invert_y=False)
 
 
 plt.show()

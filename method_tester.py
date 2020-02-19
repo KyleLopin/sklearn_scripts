@@ -61,14 +61,9 @@ y_columns = ['Total Chlorophyll (ug/ml)',
 invert_y = False
 # x_data = np.log(x_data)
 conditions = "Partial Least Squared"
-if invert_y:
-    conditions += "\nInverted Y"
-    modeler = TransformedTargetRegressor(regressor=PLS(n_components=3),
-                                         func=inverse,
-                                         inverse_func=inverse)
-else:
-    modeler = PLS(n_components=1)
-    modeler_name = "Partial Least Squared"
+
+modeler = PLS(n_components=1)
+modeler_name = "Partial Least Squared"
 
 modeler = TransformedTargetRegressor(regressor=PLS(n_components=3),
                                      func=np.reciprocal,
@@ -346,6 +341,7 @@ for i, test_model in enumerate(models_to_test):
                 results.append([model_names[i], transormation_names[j],
                                 transormation_names[k], r2_train,
                                 mae_train, r2_test, mae_test])
+
                 # fit_n_plot_estimator(x_data_new, y_columns,
                 #                      _model, title)
                 # method_tester(x_data_new, y_columns, _model)
@@ -357,6 +353,6 @@ print(results)
 results_pd = pd.DataFrame(results, columns=["Model", "y transform", "x transform", "r2 train", "mae train", "r2 test", "mae test"])
 print(results_pd)
 
-results_pd.to_csv("results_Scalar_processing.csv")
+results_pd.to_csv("results_AS7262_mango.csv")
 
 plt.show()

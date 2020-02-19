@@ -8,7 +8,7 @@ Functions to make data sets that are to be analyzed
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
+# import statsmodels.api as sm
 # local files
 import helper_functions as funcs
 
@@ -18,9 +18,9 @@ __author__ = "Kyle Vitatus Lopin"
 
 # plt.xkcd()
 
-as7262_files = funcs.get_all_files_with_stub('as7265x', 'betal')
+as7262_files = funcs.get_all_files_with_stub('as7262', 'mango_data')
 print(as7262_files)
-background = [250271, 176275, 216334, 219763, 230788, 129603]
+# background = [250271, 176275, 216334, 219763, 230788, 129603]
 all_data = None
 starting = True
 
@@ -46,12 +46,12 @@ average_data = all_data.groupby('Leaf number', as_index=True).mean()
 print('++++++')
 print(average_data)
 
-chloro_data_filename = funcs.get_all_files_with_stub('absorbance')[0]
+chloro_data_filename = funcs.get_all_files_with_stub('absorbance', 'mango_data')[0]
 chlor_data = pd.read_excel(chloro_data_filename, sheet_name='Summary')
 print(chlor_data)
 # print(chlor_data.index)
 # print(chlor_data)
-chlor_data['leaf number:'] = 'Leaf: ' + chlor_data['leaf number:'].astype(str)
+chlor_data['leaf number:'] = 'Leaf: ' + chlor_data['Leaf number'].astype(str)
 print(chlor_data.columns)
 # chlor_data.rename(columns={'leaf number:', 'Leaf number'}, inplace=True)
 # chlor_data.rename(columns={'Leaf number', 'leaf number:'}, inplace=True)

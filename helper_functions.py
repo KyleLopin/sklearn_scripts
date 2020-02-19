@@ -12,8 +12,8 @@ import pandas as pd
 
 __author__ = "Kyle Vitatus Lopin"
 
-as7262_background = [250271, 176275, 216334, 219763, 230788, 129603]
-column_names_data = ['450.1', '500.1', '550.1', '570.1', '600.1', '650.1']
+# as7262_background = [250271, 176275, 216334, 219763, 230788, 129603]
+# column_names_data = ['450.1', '500.1', '550.1', '570.1', '600.1', '650.1']
 
 
 def make_file_list():
@@ -33,15 +33,15 @@ def get_all_files_with_stub(stub, folder):
     """ Find all files in current directory that have the stub in their name """
     named_files = []
     for root, directory, files in os.walk(os.getcwd()):
-        # print(root, directory, files)
+        print('root', root, folder, folder not in root, directory, files)
         if folder not in root:
             print('PASS')
             print(folder, root, files)
             continue
         print('folder', root, directory)
         for filename in files:
-            # print(filename)
-            if stub in filename and '.csv' in filename:
+            print('===>', filename)
+            if stub in filename and ('.csv' in filename or '.xlsx' in filename):
                 print(root, filename)
                 print('==================')
                 named_files.append(root+'/'+filename)
