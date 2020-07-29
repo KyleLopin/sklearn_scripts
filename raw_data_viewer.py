@@ -56,7 +56,7 @@ fig.suptitle("AS7262 Betel Leaves")
 
 axes[0].plot(wavelengths, spectrum_data.T)
 axes[0].set_title('Raw Data')
-axes[0].set_ylabel("Fraction Reflectance")
+axes[0].set_ylabel("Raw Sensor Counts")
 axes[0].annotate("A", xy=(.04, 0.80), xycoords='axes fraction',
                  size=24)
 [axes[0].lines[i].set_color(color) for i, color in enumerate(colors)]

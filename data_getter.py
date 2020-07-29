@@ -197,7 +197,7 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
         data = data.loc[(data['position'] == 'pos 2')]
         data = data.loc[(data['LED current'] == 25)]
 
-        data = data.groupby('Leaf number', as_index=True).mean()
+        # data = data.groupby('Leaf number', as_index=True).mean()
 
     elif leaf_type == 'as7263 betal':
         data = pd.read_csv('as7265x_betal_leaves.csv')

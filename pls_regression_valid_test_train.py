@@ -25,7 +25,7 @@ import data_getter
 plt.style.use('seaborn')
 
 # data = pd.read_csv('mango_chloro_refl3.csv')
-x_data, _, full_data = data_getter.get_data('as7263 mango verbose')
+x_data, _, full_data = data_getter.get_data('as7262 betal')
 
 # full_data = pd.read_csv('mango_flouro_rows.csv')
 # full_data = pd.read_csv('as7262_mango.csv')
@@ -119,25 +119,30 @@ for number_params in range(1, 20):
         #
         # print(len(full_data.loc[validation_index]['Leaf number'].unique()))
 
-        train_x_data_split = data.loc[test_train_index]
-        train_y_data_split = data.loc[test_train_index]
-        new_group_splitter = group_splitter.loc[test_train_index]
+        train_x_data_split = data.iloc[test_train_index]
+        train_y_data_split = data.iloc[test_train_index]
+        print(test_train_index)
+        new_group_splitter = group_splitter.iloc[test_train_index]
         #
         for train_index, test_index in cv_splitter_train.split(train_x_data_split,
                                                                train_y_data_split,
                                                                new_group_splitter):
 
-            # print('=====', j)
+            print('=====', j)
             j += 1
-            # print(train_index)
-            # print(test_index)
+            print(train_index)
+            print(test_index)
 
-            x_train, x_test = x_data.loc[train_index], x_data.loc[test_index]
-            y_train, y_test = y_data.loc[train_index], y_data.loc[test_index]
-            # print('X train')
-            # print(x_train)
-            # print('Y train')
-            # print(y_train)
+            x_train, x_test = x_data.iloc[train_index], x_data.iloc[test_index]
+            y_train, y_test = y_data.iloc[train_index], y_data.iloc[test_index]
+            print('X train')
+            print(x_train)
+            print('Y train')
+            print(y_train)
+            print('X test')
+            print(x_test)
+            print('Y test')
+            print(y_test)
             model_fit = pls.fit(x_train, y_train)
             y_pred_test = pls.predict(x_test)
             r2_test = r2_score(y_test, y_pred_test)

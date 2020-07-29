@@ -21,15 +21,15 @@ import processing
 
 plt.style.use('ggplot')
 
-x_data, data = data_getter.get_data('as7263 mango')
+x_data, chloro_data, data = data_getter.get_data('as7262 betal')
 print(data.columns)
 print('(((((((')
-print(data['integration time'].unique(), data['position'].unique())
-x_data = x_data[data['integration time'] == 200]
-x_data = x_data[data['position'] == 'pos 2']
-data = data[data['integration time'] == 200]
-data = data[data['position'] == 'pos 2']
-chloro_data = data.groupby('Leaf number', as_index=True).mean()
+# # print(data['integration time'].unique(), data['position'].unique())
+# x_data = x_data[data['integration time'] == 200]
+# x_data = x_data[data['position'] == 'pos 2']
+# data = data[data['integration time'] == 200]
+# data = data[data['position'] == 'pos 2']
+# chloro_data = data.groupby('Leaf number', as_index=True).mean()
 
 data_columns = []
 for column in data.columns:
@@ -174,6 +174,7 @@ data_set_names = ["raw", "inverse", "SNV", "Invert SNV", "MSC", "inverse msc",
 
 for z, x_data in enumerate(data_sets):
     for led in data['LED'].unique():
+
         print(led)
         for y_invert in [True, False]:
             for j, model in enumerate(models):

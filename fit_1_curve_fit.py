@@ -21,12 +21,12 @@ import processing
 plt.style.use('seaborn')
 
 # fitting_data = pd.read_csv('as7262_roseapple.csv')
-fitting_data = pd.read_csv("as7262_mango.csv")
+fitting_data = pd.read_csv("as7262_betal.csv")
 
 print(fitting_data.columns)
 # fitting_data = fitting_data.loc[(fitting_data['Total Chlorophyll (ug/ml)'] < 0.5)]
-# fitting_data = fitting_data.loc[(fitting_data['integration time'] == 3)]
-# fitting_data = fitting_data.loc[(fitting_data['position'] == 'pos 2')]
+fitting_data = fitting_data.loc[(fitting_data['LED current'] == 25)]
+fitting_data = fitting_data.loc[(fitting_data['position'] == 'pos 2')]
 # print(fitting_data)
 fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
 #
@@ -45,8 +45,8 @@ spectrum_data = fitting_data[data_columns]
 # spectrum_data, _= processing.msc(spectrum_data)
 # spectrum_data = processing.snv(spectrum_data)
 # spectrum_data = pd.DataFrame(np.diff(spectrum_data))
-spectrum_data = spectrum_data.diff(axis=1).iloc[:, 1:]
-spectrum_data = pd.DataFrame(RobustScaler().fit_transform(spectrum_data))
+# spectrum_data = spectrum_data.diff(axis=1).iloc[:, 1:]
+# spectrum_data = pd.DataFrame(StandardScaler().fit_transform(spectrum_data))
 
 spectrum_data.T.plot()
 plt.show()
@@ -129,11 +129,11 @@ y = predict_data
 
 models = [linear_model, log_model, exp_model, poly_2_model]
 
-model_names = ['Linear model', "Logarithm model",
-               "Exponential model", "Polynomial model"]
-# models = [linear_model, exp_model, poly_2_model]
-# model_names = ['Linear model',
+# model_names = ['Linear model', "Logarithm model",
 #                "Exponential model", "Polynomial model"]
+models = [linear_model, exp_model, poly_2_model]
+model_names = ['Linear model',
+               "Exponential model", "Polynomial model"]
 # models = [linear_model, poly_2_model]
 # model_names = ['Linear model', "Polynomial model"]
 
@@ -148,7 +148,7 @@ for i, model in enumerate(models):
                     fontname='Franklin Gothic Medium')
     print("Model: ", model_names[i])
 
-    for i in range(5):
+    for i in range(6):
         # x = spectrum_data[data_columns[i]]
         x = spectrum_data.iloc[:, i]
         letter = letters[i]
@@ -160,7 +160,7 @@ for i, model in enumerate(models):
                    add_xlabel=put_xlabel,
                    figure_letter=letter,
                    wavelength=data_columns[i],
-                   invert_y=True)
+                   invert_y=False)
 
 
 plt.show()
