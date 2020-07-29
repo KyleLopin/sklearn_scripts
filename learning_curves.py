@@ -12,30 +12,35 @@ import pandas as pd
 from sklearn import linear_model
 from sklearn.cross_decomposition import PLSRegression as PLS
 from sklearn.datasets import load_digits
+from sklearn.linear_model import Ridge, Lasso, SGDRegressor
 from sklearn.metrics import median_absolute_error
 from sklearn.model_selection import learning_curve
 from sklearn.model_selection import GroupShuffleSplit, ShuffleSplit
 from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVR
+
+# local files
+import data_getter
 
 plt.style.use('seaborn')
 
 
-x_data_columns = []
-leds = {}
-for column in data_full:
-    print(column)
-    if 'nm' in column:
-        x_data_columns.append(column)
-        print(column)
-        led = column.split(',')[1].strip()
-        print(led)
-        if led not in leds:
-            leds[led] = []
-        leds[led].append(column)
+# x_data_columns = []
+# leds = {}
+# for column in data_full:
+#     print(column)
+#     if 'nm' in column:
+#         x_data_columns.append(column)
+#         print(column)
+#         led = column.split(',')[1].strip()
+#         print(led)
+#         if led not in leds:
+#             leds[led] = []
+#         leds[led].append(column)
 
 
 def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
-                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 10)):
+                        n_jobs=None, train_sizes=np.linspace(.6, 1.0, 4)):
     """
     from:
     https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
@@ -91,7 +96,7 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
         be big enough to contain at least one sample from each class.
         (default: np.linspace(0.1, 1.0, 5))
     """
-    plt.figure()
+    plt.figure(figsize=(5, 4))
     plt.title(title)
     if ylim is not None:
         plt.ylim(*ylim)
@@ -99,7 +104,7 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
     plt.ylabel("Score")
     train_sizes, train_scores, test_scores = learning_curve(
         estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes,
-        groups=group, shuffle=True, scoring='neg_median_absolute_error')
+        groups=group, shuffle=True, scoring='r2')
     # explained_variance, neg_median_absolute_error
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
@@ -118,6 +123,9 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
              label="Cross-validation score")
 
     plt.legend(loc="best")
+    plt.grid(True)
+    plt.show()
+
     return plt
 
 
@@ -169,8 +177,6 @@ def pls_learning(num_components, num_vars):
     # y_name = 'Chlorophyll b (ug/ml)'
     y_data = data_full[y_name]
 
-
-
     x_data = data_full[x_data_columns]
 
     x_data = get_best_pls_variables(x_data, y_data,
@@ -188,7 +194,7 @@ def pls_learning(num_components, num_vars):
 
 
 def led_columns(leds):
-
+    pass
 
 
 def get_best_pls_variables(x, y, num_pls_components,
@@ -205,4 +211,22 @@ def get_best_pls_variables(x, y, num_pls_components,
     return x_scaled[columns_to_keep]
 
 if __name__ == '__main__':
-    pls_learning(10, 100)
+    pls = PLS(n_components=12)
+    ridge = Ridge(random_state=0, max_iter=5000)
+    svr = SVR(C=100)
+    lasso = Lasso(max_iter=5000, alpha=10**-4)
+    x_data, _, data = data_getter.get_data('as7263 roseapple verbose')
+    data = data.groupby('Leaf number', as_index=True).mean()
+
+    y_name = 'Total Chlorophyll (ug/ml)'
+    y_data = ( 1 / data[y_name])
+    # x_data = x_data.groupby('Leaf number', as_index=True).mean()
+
+    # x_data = data
+
+    cv = ShuffleSplit(n_splits=100, test_size=0.333, random_state=0)
+
+    plot_learning_curve(pls, 'AS7263 Roseapple 12-component PLS Learning Curve\n' \
+                                   'Total Chlorophyll', x_data, y_data, cv=cv)
+
+plt.show()

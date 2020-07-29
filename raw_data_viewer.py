@@ -19,7 +19,8 @@ import processing
 plt.style.use('seaborn')
 
 # data = pd.read_csv("as7262_mango.csv")
-x_data, data = data_getter.get_data('as7262 roseapple')
+# x_data, data = data_getter.get_data('as7262 roseapple')
+x_data, _, data = data_getter.get_data('as7262 betal')
 
 # data = data.loc[(data['position'] == 'pos 2')]
 # data = data.loc[(data['integration time'] == 3)]
@@ -51,7 +52,7 @@ print(spectrum_data)
 
 fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(7, 9),
                          constrained_layout=True)
-fig.suptitle("AS7262 Roseapple Leaves")
+fig.suptitle("AS7262 Betel Leaves")
 
 axes[0].plot(wavelengths, spectrum_data.T)
 axes[0].set_title('Raw Data')

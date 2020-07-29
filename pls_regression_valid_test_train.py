@@ -18,13 +18,16 @@ from sklearn.cross_decomposition import PLSRegression
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.model_selection import GroupShuffleSplit
 from sklearn import linear_model
+# local files
+import data_getter
 
 # plt.xkcd()
 plt.style.use('seaborn')
 
 # data = pd.read_csv('mango_chloro_refl3.csv')
+x_data, _, full_data = data_getter.get_data('as7263 mango verbose')
 
-full_data = pd.read_csv('mango_flouro_rows.csv')
+# full_data = pd.read_csv('mango_flouro_rows.csv')
 # full_data = pd.read_csv('as7262_mango.csv')
 # full_data = full_data.groupby('Leaf number', as_index=True).mean()
 

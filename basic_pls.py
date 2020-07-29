@@ -21,7 +21,7 @@ from sklearn.preprocessing import StandardScaler
 plt.style.use('seaborn')
 
 data = pd.read_csv('as7262_roseapple.csv')
-data = data.loc[(data['integration time'] == 3)]
+data = data.loc[(data['current'] == 50)]
 data = data.loc[(data['position'] == 'pos 2')]
 data = data.groupby('Leaf number', as_index=True).mean()
 

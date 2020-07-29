@@ -8,7 +8,8 @@ __author__ = "Kyle Vitatus Lopin"
 
 from graphviz import Digraph
 import numpy as np
-import data_getter
+import pandas as pd
+# import data_getter
 
 # a = np.array([2, 1, 5, 6, 10])
 # b = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]])
@@ -60,7 +61,40 @@ import data_getter
 # print(dir(diagram.edge))
 #
 # diagram.view()
-x_data, data = data_getter.get_data('as7263 mango')
-print(data)
-print(x_data)
-data.to_csv("as7263_mango.csv")
+# x_data, data = data_getter.get_data('as7263 mango')
+# print(data)
+# print(x_data)
+# data.to_csv("as7263_mango.csv")
+# df = pd.DataFrame([
+#   [1, '3 inch screw', 0.5, 0.75],
+#   [2, '2 inch nail', 0.10, 0.25],
+#   [3, 'hammer', 3.00, 5.50],
+#   [4, 'screwdriver', 2.50, 3.00]
+# ],
+#   columns=['Product ID', 'Description', 'Cost to Manufacture', 'Price']
+# )
+#
+# print(df)
+#
+# df2 = pd.DataFrame([
+#   [1, 5, 10],
+#   [2, 20, 25],
+#   [3, 30, 35],
+#   [4, 40, 45]
+# ],
+#   columns=['C1', 'C2', 'C3']
+# )
+#
+# df = pd.concat([df, df2], axis=1)
+# print(df)
+
+# print(40*np.linspace(.4, 1.0, 5))
+
+a = pd.DataFrame([[1, 2, 3]], columns=["a", "b", "c"])
+a = pd.DataFrame()
+print(a)
+b = pd.DataFrame([[10, 20, 30]], columns=["a", "b", "c"])
+print(b)
+c = pd.concat([a, b], axis=0)
+print('====')
+print(c)

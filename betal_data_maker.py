@@ -22,8 +22,8 @@ import helper_functions as funcs
 
 background = [250271, 176275, 216334, 219763, 230788, 129603]
 
-# as7262_data_file = "betal_as7262_data.csv"
-as7262_data_file = 'as7265x_betal_full.csv'
+as7262_data_file = "as7262_betal.csv"
+# as7262_data_file = 'as7265x_betal_full.csv'
 # chloro_data_file = r"/Users/kylesmac/PycharmProjects/plant_chloro_data_analysis/betal data/Wildbetal leafbush OD.xlsx"
 chloro_data_file = "betal_chloro.csv"
 as7262_data = pd.read_csv(as7262_data_file)

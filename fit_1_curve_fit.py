@@ -22,12 +22,14 @@ plt.style.use('seaborn')
 
 # fitting_data = pd.read_csv('as7262_roseapple.csv')
 fitting_data = pd.read_csv("as7262_mango.csv")
+
 print(fitting_data.columns)
+# fitting_data = fitting_data.loc[(fitting_data['Total Chlorophyll (ug/ml)'] < 0.5)]
 # fitting_data = fitting_data.loc[(fitting_data['integration time'] == 3)]
 # fitting_data = fitting_data.loc[(fitting_data['position'] == 'pos 2')]
 # print(fitting_data)
-# fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
-
+fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
+#
 # fitting_data = fitting_data.drop(["Leaf: 50"])
 
 data_columns = []
@@ -37,8 +39,8 @@ for column in fitting_data.columns:
 #
 spectrum_data = fitting_data[data_columns]
 
-spectrum_data, fitting_data = data_getter.get_data('mango', remove_outlier=True,
-                                                   only_pos2=True)
+# spectrum_data, fitting_data = data_getter.get_data('mango', remove_outlier=True,
+#                                                    only_pos2=True)
 
 # spectrum_data, _= processing.msc(spectrum_data)
 # spectrum_data = processing.snv(spectrum_data)
@@ -123,41 +125,15 @@ def fit_n_plot(_x, _y, model, axis, add_xlabel=None,
     axis.title.set_text("{0} sensor channel".format(wavelength))
 
 
-# y = predict_data
-# x = spectrum_data[data_columns[3]]
-# plt.scatter(x, y)
-#
-# fitting_model = poly_2_model
-#
-# fit_values, _ = curve_fit(fitting_model, x, y, maxfev=10000)
-# print(fit_values)
-# x_linespace = np.linspace(np.min(x), np.max(x))
-# y_fit = fitting_model(x, *fit_values)
-# y_linespace = fitting_model(x_linespace, *fit_values)
-# print(x_linespace)
-# # print(y_fit)
-# plt.plot(x_linespace, y_linespace, c='r')
-# r2 = r2_score(y, y_fit)
-# mae = mean_absolute_error(y, y_fit)
-# y_top = y_linespace + mae
-# y_bottom = y_linespace - mae
-# plt.plot(x_linespace, y_top, c='black')
-# plt.plot(x_linespace, y_bottom, c='black')
-# print(r2, mae)
-# print(plt.xlim())
-# _xy = (0.8*plt.xlim()[1], 0.8*plt.ylim()[1])
-# print(_xy)
-# plt.annotate(u'r\u00B2 = {0:.2f}\nMAE = {1:.4f}'.format(r2, mae),
-#              xy=_xy, fontsize=12)
 y = predict_data
 
 models = [linear_model, log_model, exp_model, poly_2_model]
 
 model_names = ['Linear model', "Logarithm model",
                "Exponential model", "Polynomial model"]
-models = [linear_model, exp_model, poly_2_model]
-model_names = ['Linear model',
-               "Exponential model", "Polynomial model"]
+# models = [linear_model, exp_model, poly_2_model]
+# model_names = ['Linear model',
+#                "Exponential model", "Polynomial model"]
 # models = [linear_model, poly_2_model]
 # model_names = ['Linear model', "Polynomial model"]
 
@@ -184,7 +160,7 @@ for i, model in enumerate(models):
                    add_xlabel=put_xlabel,
                    figure_letter=letter,
                    wavelength=data_columns[i],
-                   invert_y=False)
+                   invert_y=True)
 
 
 plt.show()

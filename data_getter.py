@@ -11,7 +11,11 @@ import pandas as pd
 
 
 def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
-
+    chloro_data = None
+    AS7263_channel_list = ["610 nm", "680 nm", "730 nm",
+                           "760 nm", "810 nm", "860 nm"]
+    AS7263_channel_list_2 = ["610 nm,", "680 nm,", "730 nm,",
+                             "760 nm,", "810 nm,", "860 nm,"]
     if leaf_type == 'as7262 mango':
         data = pd.read_csv('as7262_mango.csv')
         if remove_outlier:
@@ -26,6 +30,10 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
             # data = data[data["Leaf number"] != "Leaf: 34"]
             # data = data[data["Leaf number"] != "Leaf: 35"]
 
+
+        data = data.loc[data['integration time'] == 150]
+        data = data.loc[data['position'] == 'pos 2']
+        data = data.loc[data['Total Chlorophyll (ug/ml)'] < .6]
         data = data.groupby('Leaf number', as_index=True).mean()
 
     elif leaf_type == 'as7263 mango':
@@ -47,21 +55,99 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
         print(data)
         print('======')
 
+    elif leaf_type == 'as7263 mango verbose':
+        data = pd.read_csv('as7265x_mango_rows.csv')
+        print(data)
+        as7263_channels = ["Leaf number",
+                           'Chlorophyll a (ug/ml)',
+                           'Chlorophyll b (ug/ml)',
+                           'Total Chlorophyll (ug/ml)']
+        for column in data.columns:
+            print(column)
+            for led in AS7263_channel_list_2:
+                if led in column:
+                    print('=======>', column)
+                    as7263_channels.append(column)
+        data = data[as7263_channels]
+        print(data)
+        print(data.columns)
+
+    elif leaf_type == 'as7263 roseapple':
+        data = pd.read_csv('as7265x_roseapple_leaves.csv')
+        print('=======')
+        data_columns = ["Leaf number", "integration time",
+                        "610 nm", "680 nm", "730 nm",
+                        "760 nm", "810 nm", "860 nm",
+                        "position", "LED",
+                        'Chlorophyll a (ug/ml)',
+                        'Chlorophyll b (ug/ml)',
+                        'Total Chlorophyll (ug/ml)',
+                        'Chlorophyll a (ug/ml) stdev',
+                        'Chlorophyll b (ug/ml) stdev',
+                        'Total Chlorophyll (ug/ml) stdev']
+
+
+        data = data[data_columns]
+
+        channel_columns = []
+        chloro_columns = []
+        for column in data.columns:
+            print(column)
+            if 'Chlorophyll' in column:
+                chloro_columns.append(column)
+            elif 'nm' in column:
+                channel_columns.append(column)
+        print(chloro_columns)
+        chloro_data = data[chloro_columns]
+        x_data = data[channel_columns]
+        print(data.columns)
+        # for index, row in data.iterrows():
+        #     leaf = row['Leaf number']
+        #     for column in chloro_data.columns:
+        #         data.loc[index, column] = chloro_data.loc[leaf, column]
+        #     data.append(chloro_data.loc[leaf])
+        # data.to_csv("foobar55.csv")
+
+        # data = data.groupby(['Leaf number']).mean()
+
+    elif leaf_type == 'as7263 roseapple verbose':
+        data = pd.read_csv('as7265x_roseapple_rows.csv')
+        data = data.groupby('Leaf number', as_index=True).mean()
+
+        print(data)
+        as7263_channels = ['Chlorophyll a (ug/ml)',
+                           'Chlorophyll b (ug/ml)',
+                           'Total Chlorophyll (ug/ml)']
+        for column in data.columns:
+            print(column)
+            for led in AS7263_channel_list_2:
+                if led in column:
+                    print('=======>', column)
+                    as7263_channels.append(column)
+        data = data[as7263_channels]
+        print(data)
+        print(data.columns)
+
     elif leaf_type == 'as7265x mango':
         data = pd.read_csv('as7265x_mango_leaves.csv')
 
+    elif leaf_type == 'as7265x mango verbose':
+        data = pd.read_csv('as7265x_mango_rows.csv')
+        # data = data.groupby('Leaf number', as_index=True).mean()
+
     elif leaf_type == 'as7265x roseapple verbose':
         data = pd.read_csv('as7265x_roseapple_rows.csv')
+        data = data.groupby('Leaf number', as_index=True).mean()
 
     elif leaf_type == 'as7262 roseapple':
         data = pd.read_csv('as7262_roseapple.csv')
+        data = data.loc[(data['current'] == 25)]
+        data = data.loc[(data['position'] == 'pos 2')]
+
         data = data.groupby('Leaf number', as_index=True).mean()
 
     elif leaf_type == "as7265x roseaple":
         pass
-
-    else:
-        Exception("Wrong input type")
 
     elif leaf_type == 'as7263 roseapple':
         data = pd.read_csv('as7265x_roseapple.csv')
@@ -106,6 +192,53 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
         chloro_data = chloro_data[chloro_columns]
         return data, chloro_data
 
+    elif leaf_type == 'as7262 betal':
+        data = pd.read_csv('as7262_betal.csv')
+        data = data.loc[(data['position'] == 'pos 2')]
+        data = data.loc[(data['LED current'] == 25)]
+
+        data = data.groupby('Leaf number', as_index=True).mean()
+
+    elif leaf_type == 'as7263 betal':
+        data = pd.read_csv('as7265x_betal_leaves.csv')
+        # print(data.columns)
+        print(data.shape)
+        print(data['position'].unique())
+        data = data.loc[(data['position'] == ' pos 2')]
+        print(data.shape)
+        data = data.loc[(data['integration time'] == 50)]
+        print(data.shape)
+        print(data['LED'].unique())
+        data = data.loc[(data['LED'] == " UV (405 nm) LED")]
+        print(data.shape)
+
+        data_columns = ["Leaf number", "integration time",
+                        "610 nm", "680 nm", "730 nm",
+                        "760 nm", "810 nm", "860 nm",
+                        "position", "LED"]
+        chloro_columns = []
+        x_columns = ["610 nm", "680 nm", "730 nm",
+                        "760 nm", "810 nm", "860 nm"]
+        x_data = data[x_columns]
+        for column in data.columns:
+            if 'Chlorophyll' in column:
+                chloro_columns.append(column)
+        data_columns.extend(chloro_columns)
+        data = data[data_columns]
+
+        chloro_data = pd.read_csv('as7262_roseapple.csv')
+        chloro_data = chloro_data.groupby('Leaf number', as_index=True).mean()
+        # print(chloro_data)
+        chloro_columns = []
+        # print('|||||||||||||||||||||')
+        # print(chloro_data.columns)
+        for column in chloro_data.columns:
+            if 'Chlorophyll' in column:
+                chloro_columns.append(column)
+        # print(chloro_columns)
+        chloro_data = chloro_data[chloro_columns]
+        return x_data, chloro_data, data
+
     else:
         Exception("Not valid input")
 
@@ -122,5 +255,12 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
             chloro_columns.append(column)
     x_data = data[channel_data_columns]
     chloro_data = data[chloro_columns]
-
+    print('---- ', data.columns)
     return x_data, chloro_data, data
+
+
+if __name__ == '__main__':
+    a, b, c = get_data('as7263 roseapple verbose')
+    print(a.columns)
+    print(b.columns)
+    print(c.columns)

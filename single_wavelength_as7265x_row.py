@@ -21,10 +21,9 @@ import processing
 
 plt.style.use('ggplot')
 
-x_data, data = data_getter.get_data('as7265x mango verbose')
+x_data, _, data = data_getter.get_data('as7263 mango verbose')
 print(data.columns)
 print('(((((((')
-print(data['integration time'].unique(), data['position'].unique())
 # x_data = x_data[data['integration time'] == 200]
 # x_data = x_data[data['position'] == 'pos 2']
 # data = data[data['integration time'] == 200]
@@ -107,13 +106,13 @@ model_names = ['Linear model', "Logarithm model",
 
 chloro_columns = ['Chlorophyll a (ug/ml)', 'Chlorophyll b (ug/ml)',
                   'Total Chlorophyll (ug/ml)']
-y_name = ['Chlorophyll b (ug/ml)']
+y_name = ['Chlorophyll a (ug/ml)']
 
 letters = ["A", "B", "C", "D", "E", "F"]
 print(x_data.index)
 x_data = processing.snv(x_data)
 
-best_score = np.inf
+best_score = 0
 best_conditions = None
 good_sets = []
 
@@ -165,8 +164,7 @@ x_inv_msc = 1 / x_msc.copy()
 data_sets = [x_data.copy(), 1 / x_data, processing.snv(x_data), 1 / processing.snv(x_data), x_msc, x_inv_msc,
              StandardScaler().fit_transform(x_data), StandardScaler().fit_transform(processing.snv(x_data)),
              StandardScaler().fit_transform(x_msc), RobustScaler().fit_transform(x_data),
-             RobustScaler().fit_transform(processing.snv(x_data)),
-             RobustScaler().fit_transform(x_msc)]
+             RobustScaler().fit_transform(processing.snv(x_data))]
 data_set_names = ["raw", "inverse", "SNV", "Invert SNV", "MSC", "inverse msc",
                   "standard scalar", "Standard Scalar SNV", "Standard Scalar MSC",
                   "Robust Scalar", "Robust Scalar SNV", "Robust Scalar MSC"]
@@ -185,7 +183,7 @@ for z, x_data in enumerate(data_sets):
             for l in range(len(data_columns)):
 
                 try:
-
+                    print(z, j, l)
                     y = chloro_data[y_name].iloc[:, 0]
                     # x = x_data[data['LED'] == led]
                     x = x_data
@@ -194,7 +192,7 @@ for z, x_data in enumerate(data_sets):
                     if invert_y:
                         y = 1 / y
 
-                    fit_values, _ = curve_fit(model, x, y, maxfev=10 ** 6)
+                    fit_values, _ = curve_fit(model, x, y, maxfev=5000)
                     y_fit = model(x, *fit_values)
                     if invert_y:
                         y = 1 / y
@@ -203,15 +201,16 @@ for z, x_data in enumerate(data_sets):
                     mae = mean_absolute_error(y, y_fit)
                     print(model_names[j], y_invert,
                           r2, mae, data_set_names[z])
-                    if mae < best_score:
+                    if r2 > best_score:
                         good_sets.append((best_score, best_conditions))
 
-                        best_score = mae
+                        best_score = r2
                         best_conditions = [y_invert, model_names[j],
                                            data_columns[l], data_set_names[z]]
                     print(best_score, best_conditions)
                 except Exception as error:
                     print(error)
 
+print("END")
 print(good_sets)
 print(best_conditions)
