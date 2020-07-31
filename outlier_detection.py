@@ -23,8 +23,8 @@ import processing
 
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.max_rows', 500)
-x_data, y, data = data_getter.get_data('as7262 betal')
-x_data = processing.snv(x_data)
+x_data, y, data = data_getter.get_data('as7262 ylang')
+# x_data = processing.snv(x_data)
 y = y['Total Chlorophyll (ug/ml)']
 print(data.index)
 results = pd.DataFrame([], index=data.index)
@@ -61,7 +61,7 @@ results[results > -2] = 20
 ["Leaf: 35", "Leaf: 46", "Leaf: 5", "Leaf: 54"]  # 100 mA and 50
 print(results[results <= -2])
 results = results.replace({-20: 'red', 20: 'black'})
-
+print(data.shape)
 # plt.plot(x_data.T, color=results.values)
 for i, (index, x) in enumerate(x_data.iterrows()):
 

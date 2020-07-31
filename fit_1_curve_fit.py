@@ -21,12 +21,12 @@ import processing
 plt.style.use('seaborn')
 
 # fitting_data = pd.read_csv('as7262_roseapple.csv')
-fitting_data = pd.read_csv("as7262_betal.csv")
-
+# fitting_data = pd.read_csv("as7262_ylang.csv")
+x_data, _y, fitting_data = data_getter.get_data('as7263 betal')
 print(fitting_data.columns)
 # fitting_data = fitting_data.loc[(fitting_data['Total Chlorophyll (ug/ml)'] < 0.5)]
-fitting_data = fitting_data.loc[(fitting_data['LED current'] == 25)]
-fitting_data = fitting_data.loc[(fitting_data['position'] == 'pos 2')]
+# fitting_data = fitting_data.loc[(fitting_data['LED current'] == 2)]
+# fitting_data = fitting_data.loc[(fitting_data['position'] == 'pos 2')]
 # print(fitting_data)
 fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
 #

@@ -12,6 +12,7 @@ import pandas as pd
 from sklearn import linear_model
 from sklearn.cross_decomposition import PLSRegression as PLS
 from sklearn.datasets import load_digits
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import Ridge, Lasso, SGDRegressor
 from sklearn.metrics import median_absolute_error
 from sklearn.model_selection import learning_curve
@@ -104,7 +105,7 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
     plt.ylabel("Score")
     train_sizes, train_scores, test_scores = learning_curve(
         estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes,
-        groups=group, shuffle=True, scoring='r2')
+        groups=group, shuffle=True, scoring='neg_mean_absolute_error')
     # explained_variance, neg_median_absolute_error
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
@@ -211,22 +212,25 @@ def get_best_pls_variables(x, y, num_pls_components,
     return x_scaled[columns_to_keep]
 
 if __name__ == '__main__':
-    pls = PLS(n_components=12)
+    pls = PLS(n_components=3)
     ridge = Ridge(random_state=0, max_iter=5000)
     svr = SVR(C=100)
     lasso = Lasso(max_iter=5000, alpha=10**-4)
-    x_data, _, data = data_getter.get_data('as7263 roseapple verbose')
+    gradboost = GradientBoostingRegressor(max_depth=2)
+    # x_data, _, data = data_getter.get_data('as7263 betal')
+    x_data, _, data = data_getter.get_data('new as7262 mango')
     data = data.groupby('Leaf number', as_index=True).mean()
 
     y_name = 'Total Chlorophyll (ug/ml)'
-    y_data = ( 1 / data[y_name])
+    y_data = (data[y_name])
+    # y_data = np.exp(-y_data)
     # x_data = x_data.groupby('Leaf number', as_index=True).mean()
 
     # x_data = data
 
     cv = ShuffleSplit(n_splits=100, test_size=0.333, random_state=0)
 
-    plot_learning_curve(pls, 'AS7263 Roseapple 12-component PLS Learning Curve\n' \
+    plot_learning_curve(pls, 'AS7263 Betel 3-component PLS Learning Curve\n' \
                                    'Total Chlorophyll', x_data, y_data, cv=cv)
 
 plt.show()

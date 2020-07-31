@@ -14,9 +14,12 @@ import pandas as pd
 from scipy.optimize import curve_fit
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.cross_decomposition import PLSRegression
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.preprocessing import StandardScaler, RobustScaler
+from sklearn.svm import SVR
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler, RobustScaler, FunctionTransformer
 # local files
 import data_getter
 import processing
@@ -24,9 +27,9 @@ import processing
 plt.style.use('seaborn')
 
 # fitting_data = pd.read_csv('as7262_roseapple.csv')
-x_data, _, fitting_data = data_getter.get_data('as7262 betal')
-fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
-# fitting_data = fitting_data.drop(["Leaf: 17"])
+x_data, _, fitting_data = data_getter.get_data('as7263 betal')
+# fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
+# fitting_data = fitting_data.drop(["Leaf: 31", "Leaf: 39", "Leaf: 45"])
 
 print(fitting_data.columns)
 # fitting_data = fitting_data.loc[(fitting_data['integration time'] == 5) | (fitting_data['integration time'] == 4)]
@@ -34,9 +37,14 @@ print(fitting_data.columns)
 # fitting_data = fitting_data.loc[(fitting_data['position'] == 'pos 2')]
 # fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
 
-pls = PLSRegression(n_components=4)
-# pls = DecisionTreeRegressor(max_depth=5)
+# exp_transformer = FunctionTransformer(np.log, inverse_func=np.exp)
 
+pls = PLSRegression(n_components=2)
+# pls = DecisionTreeRegressor(max_depth=4)
+# pls = GradientBoostingRegressor(max_depth=2)
+
+# pls = make_pipeline(exp_transformer, pls)
+# pls = SVR()
 x_data_columns = []
 for column in fitting_data:
     if 'nm' in column:
@@ -44,7 +52,7 @@ for column in fitting_data:
 
 chloro_columns = ['Total Chlorophyll (ug/ml)', 'Chlorophyll a (ug/ml)',
                   'Chlorophyll b (ug/ml)', "Fraction Chlorophyll b"]
-
+# print(fitting_data[chloro_columns])
 y1 = fitting_data['Total Chlorophyll (ug/ml)']
 y2 = fitting_data['Chlorophyll a (ug/ml)']
 y3 = fitting_data['Chlorophyll b (ug/ml)']
@@ -53,24 +61,26 @@ y4 = y3 / (y2 + y3)
 
 x_data = fitting_data[x_data_columns]
 # x_data = processing.snv(x_data)
-# x_data = np.exp(x_data)
+# x_data = np.exp(-x_data)
+# x_data = np.log(x_data)
 # x_data = 1 / x_data
 
 x_scaled_np = StandardScaler().fit_transform(x_data)
 
 x_scaled = pd.DataFrame(x_scaled_np, columns=x_data.columns)
-
+# x_scaled = x_data
 figure, axes, = plt.subplots(2, 2, figsize=(7.5, 8.75), constrained_layout=True)
-figure.suptitle("PLS 12 components of AS7263 Roseapple data")
+figure.suptitle("PLS fit of AS7263 Betel data")
 axes = [axes[0][0], axes[0][1], axes[1][0], axes[1][1]]
-invert_y = True
+invert_y = False
 for i, y in enumerate([y1, y2, y3, y4]):
     if invert_y:
         y = 1 / y
+    # y = np.exp(-y)
     # print(1/y, 1/(1/y))
     X_train, X_test, y_train, y_test = train_test_split(x_scaled, y,
                                                         test_size=0.33,
-                                                        random_state=2)
+                                                        random_state=258)
 
     pls.fit(X_train, y_train)
     y_test_predict = pls.predict(X_test)
@@ -105,7 +115,7 @@ for i, y in enumerate([y1, y2, y3, y4]):
                      xycoords='axes fraction', color='#101028', fontsize='large')
     axes[i].annotate("MAE test ={:.3f}".format(mae_test), xy=(LEFT_ALIGN, 0.68),
                      xycoords='axes fraction', color='#101028', fontsize='large')
-    axes[i].annotate("MEA train ={:.3f}".format(mae_train), xy=(LEFT_ALIGN, 0.62),
+    axes[i].annotate("MAE train ={:.3f}".format(mae_train), xy=(LEFT_ALIGN, 0.62),
                      xycoords='axes fraction', color='#101028', fontsize='large')
     axes[i].set_title(chloro_columns[i])
     print(r2_score(y_test, y_test_predict), mean_absolute_error(y_test, y_test_predict))

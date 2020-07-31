@@ -8,6 +8,7 @@ __author__ = "Kyle Vitatus Lopin"
 
 from graphviz import Digraph
 import numpy as np
+import matplotlib.pyplot as plt
 import pandas as pd
 # import data_getter
 
@@ -90,11 +91,27 @@ import pandas as pd
 
 # print(40*np.linspace(.4, 1.0, 5))
 
-a = pd.DataFrame([[1, 2, 3]], columns=["a", "b", "c"])
-a = pd.DataFrame()
-print(a)
-b = pd.DataFrame([[10, 20, 30]], columns=["a", "b", "c"])
-print(b)
-c = pd.concat([a, b], axis=0)
-print('====')
-print(c)
+# a = pd.DataFrame([[1, 2, 3]], columns=["a", "b", "c"])
+# a = pd.DataFrame()
+# print(a)
+# b = pd.DataFrame([[10, 20, 30]], columns=["a", "b", "c"])
+# print(b)
+# c = pd.concat([a, b], axis=0)
+# print('====')
+# print(c)
+training = [.0776, .0806, 0.08997, 0.09457]
+test = [0.07825, 0.0921, 0.0962, 0.102]
+current_levels = ["12.5 mA", "25 mA", "50 mA", "100 mA"]
+x = np.arange(len(current_levels))
+fig, ax = plt.subplots()
+ax.bar(x, training, width=0.4, label="Training set")
+ax.bar(x+0.4, test, width=0.4, label="Training set")
+ax.set_ylim([0.06, 0.11])
+ax.set_xlim(-0.5, 4.5)
+ax.set_title("Error as a function of LED current\n"
+             "AS7262 with Cananga leaves")
+ax.legend(loc='lower right')
+ax.set_xticks(x)
+ax.set_xticklabels(current_levels)
+ax.set_ylabel("Mean Absolute Error")
+plt.show()

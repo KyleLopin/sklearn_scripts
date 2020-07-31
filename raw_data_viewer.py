@@ -20,7 +20,7 @@ plt.style.use('seaborn')
 
 # data = pd.read_csv("as7262_mango.csv")
 # x_data, data = data_getter.get_data('as7262 roseapple')
-x_data, _, data = data_getter.get_data('as7262 betal')
+x_data, _, data = data_getter.get_data('as7265x betal')
 
 # data = data.loc[(data['position'] == 'pos 2')]
 # data = data.loc[(data['integration time'] == 3)]
@@ -44,17 +44,26 @@ for column in data:
         spectrum_data_columns.append(column)
         wavelengths.append(column.split(' nm')[0])
 
-print(wavelengths)
+wavelengths = ['410 nm', '435 nm', '460 nm', '485 nm', '510 nm', '535 nm',
+               '560 nm', '585 nm', '610 nm', '645 nm',
+               '680 nm', '705 nm', '730 nm', '760 nm',
+               '810 nm', '860 nm', '900 nm', '940 nm']
 
-spectrum_data = data[spectrum_data_columns]
+spectrum_data = data[wavelengths]
+print(wavelengths)
+wavelengths = ['410', '435', '460', '485', '510', '535',
+               '560', '585', '610', '645', '680', '705', '730', '760',
+               '810', '860', '900', '940']
+# spectrum_data = data[spectrum_data_columns]
 
 print(spectrum_data)
 
 fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(7, 9),
                          constrained_layout=True)
-fig.suptitle("AS7262 Betel Leaves")
+fig.suptitle("AS7265x Betel Leaves (UV LED)")
 
 axes[0].plot(wavelengths, spectrum_data.T)
+axes[0].set_ylim([0, 200])
 axes[0].set_title('Raw Data')
 axes[0].set_ylabel("Raw Sensor Counts")
 axes[0].annotate("A", xy=(.04, 0.80), xycoords='axes fraction',

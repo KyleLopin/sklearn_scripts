@@ -17,7 +17,7 @@ import full_regrs
 import processing
 
 filename = "as7262 betal results.xlsx"
-x_data, _y, data = data_getter.get_data('as7263 betal')
+x_data, _y, data = data_getter.get_data('as7262 ylang')
 
 all_regressors = full_regrs.get_all_regrs()
 all_transformers = full_regrs.get_transformers()
@@ -85,8 +85,7 @@ def run_scan(X, y, sheet_name):
 ys = {"Normal Y": _y, "Inverse Y": 1/_y, "Log Y": np.log(_y),
       "Inverse Log Y": np.log(1/_y), "Exp Y": np.exp(-_y),
       }
-# ys = {"Normal Y": _y, "Exp Y": np.exp(-_y),
-#       }
+ys = {"Normal Y": _y}
 mcs_x, _ = processing.msc(x_data)
 print(mcs_x)
 
