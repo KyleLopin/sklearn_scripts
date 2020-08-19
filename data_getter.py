@@ -197,7 +197,10 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
         data = data.loc[(data['position'] == 'pos 2')]
         data = data.loc[(data['LED current'] == 25)]
 
-        # data = data.groupby('Leaf number', as_index=True).mean()
+        # drops = [81, 86, 249, 254, 297, 302, 321, 326, 393, 398, 609, 614]
+        # data = data.drop(index=drops)
+
+        data = data.groupby('Leaf number', as_index=True).mean()
 
     elif leaf_type == 'as7263 betal':
         data = pd.read_csv('as7265x_betal_leaves.csv')
@@ -249,7 +252,45 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
         data = data.groupby('Leaf number', as_index=True).mean()
 
     elif leaf_type == "as7263 ylang":
-        data = pd.read_csv('as7262_ylang.csv')
+        data = pd.read_csv('as7265x_ylang_white_led.csv')
+        # print(data.columns)
+        print(data.shape)
+        print(data['position'].unique())
+        data = data.loc[(data['position'] == 'pos 2')]
+        print(data.shape)
+        # data = data.loc[(data['integration time'] == 50)]
+        print(data.shape)
+        print(data['LED'].unique())
+        data = data.loc[(data['LED'] == "White LED")]
+        print(data.shape)
+
+        data_columns = ["Leaf number", "integration time",
+                        "610 nm", "680 nm", "730 nm",
+                        "760 nm", "810 nm", "860 nm",
+                        "position", "LED"]
+        chloro_columns = []
+        x_columns = ["610 nm", "680 nm", "730 nm",
+                     "760 nm", "810 nm", "860 nm"]
+        x_data = data[x_columns]
+        for column in data.columns:
+            if 'Chlorophyll' in column:
+                chloro_columns.append(column)
+        data_columns.extend(chloro_columns)
+        data = data[data_columns]
+
+        chloro_data = pd.read_csv('as7262_roseapple.csv')
+        chloro_data = chloro_data.groupby('Leaf number', as_index=True).mean()
+        # print(chloro_data)
+        chloro_columns = []
+        # print('|||||||||||||||||||||')
+        # print(chloro_data.columns)
+        for column in chloro_data.columns:
+            if 'Chlorophyll' in column:
+                chloro_columns.append(column)
+        # print(chloro_columns)
+        chloro_data = chloro_data[chloro_columns]
+        return x_data, chloro_data, data
+
         raise NameError("Not finished input")
 
     elif leaf_type == "as7265x betal":
@@ -258,11 +299,40 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
         print(data['position'].unique())
         data = data.loc[(data['position'] == ' pos 2')]
         print(data.shape)
-        data = data.loc[(data['integration time'] == 50)]
+        data = data.loc[(data['integration time'] == 200)]
         print(data.shape)
         print(data['LED'].unique())
-        data = data.loc[(data['LED'] == " UV (405 nm) LED")]
+        data = data.loc[(data['LED'] == " White LED")]
         print(data.shape)
+        data = data.groupby('Leaf number', as_index=True).mean()
+
+        channel_columns = ['410 nm', '435 nm', '460 nm', '485 nm', '510 nm', '535 nm',
+                           '560 nm', '585 nm', '610 nm', '645 nm',
+                           '680 nm', '705 nm', '730 nm', '760 nm',
+                           '810 nm', '860 nm', '900 nm', '940 nm']
+        chloro_columns = []
+        for column in data.columns:
+            print(column)
+            if 'Chlorophyll' in column:
+                chloro_columns.append(column)
+            # elif 'nm' in column:
+            #     channel_columns.append(column)
+        print(chloro_columns)
+        chloro_data = data[chloro_columns]
+        x_data = data[channel_columns]
+
+    elif leaf_type == "as7265x ylang":
+        data = pd.read_csv('as7265x_ylang_white_led.csv')
+        print(data.shape)
+        print(data['position'].unique())
+        data = data.loc[(data['position'] == 'pos 2')]
+        print(data.shape)
+        # data = data.loc[(data['integration time'] == 200)]
+        # print(data.shape)
+        print(data['LED'].unique())
+        data = data.loc[(data['LED'] == "White LED")]
+        print(data.shape)
+        data = data.groupby('Leaf number', as_index=True).mean()
 
         channel_columns = ['410 nm', '435 nm', '460 nm', '485 nm', '510 nm', '535 nm',
                            '560 nm', '585 nm', '610 nm', '645 nm',
@@ -281,9 +351,21 @@ def get_data(leaf_type: str, remove_outlier=False, only_pos2=False):
 
     elif leaf_type == "new as7262 mango":
         data = pd.read_csv("Mango AS7262_new.csv")
-        data = data.loc[(data['LED current'] == 25)]
+        print(data.shape)
+        data = data.loc[(data['LED current'] == "25 mA")]
+        print(data.shape)
         data = data.loc[(data['integration time'] == 100)]
+        print(data.shape)
         data = data.groupby('Leaf number', as_index=True).mean()
+
+    elif leaf_type == 'as7262 tomato':
+        data = pd.read_csv("tomatoes 1-11 AS7262.csv")
+        print(data.shape)
+        data = data.loc[(data['LED current'] == "25 mA")]
+        print(data.shape)
+        data = data.loc[(data['integration time'] == 100)]
+        print(data.shape)
+        data = data.groupby('Fruit number', as_index=True).mean()
 
     else:
         raise Exception("Not valid input")

@@ -17,7 +17,7 @@ import full_regrs
 import processing
 
 filename = "as7262 betal results.xlsx"
-x_data, _y, data = data_getter.get_data('as7262 ylang')
+x_data, _y, data = data_getter.get_data('as7265x betal')
 
 all_regressors = full_regrs.get_all_regrs()
 all_transformers = full_regrs.get_transformers()

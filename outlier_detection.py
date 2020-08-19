@@ -23,7 +23,7 @@ import processing
 
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.max_rows', 500)
-x_data, y, data = data_getter.get_data('as7262 ylang')
+x_data, y, data = data_getter.get_data('as7262 betal')
 # x_data = processing.snv(x_data)
 y = y['Total Chlorophyll (ug/ml)']
 print(data.index)

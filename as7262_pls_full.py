@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 from sklearn.metrics import mean_absolute_error, r2_score
+from sklearn.compose import TransformedTargetRegressor
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import train_test_split
@@ -27,23 +28,36 @@ import processing
 plt.style.use('seaborn')
 
 # fitting_data = pd.read_csv('as7262_roseapple.csv')
-x_data, _, fitting_data = data_getter.get_data('as7263 betal')
+x_data, _, fitting_data = data_getter.get_data('as7265x ylang')
 # fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
 # fitting_data = fitting_data.drop(["Leaf: 31", "Leaf: 39", "Leaf: 45"])
 
-print(fitting_data.columns)
+
 # fitting_data = fitting_data.loc[(fitting_data['integration time'] == 5) | (fitting_data['integration time'] == 4)]
 # fitting_data = fitting_data.loc[(fitting_data['current'] == 25)]
 # fitting_data = fitting_data.loc[(fitting_data['position'] == 'pos 2')]
 # fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
 
-# exp_transformer = FunctionTransformer(np.log, inverse_func=np.exp)
+exp_transformer = FunctionTransformer(np.exp, inverse_func=np.log)
 
-pls = PLSRegression(n_components=2)
+pls = PLSRegression(n_components=8)
 # pls = DecisionTreeRegressor(max_depth=4)
 # pls = GradientBoostingRegressor(max_depth=2)
 
+def invert(x):
+    return 1/x
+
 # pls = make_pipeline(exp_transformer, pls)
+# pls = TransformedTargetRegressor(regressor=PLSRegression(n_components=3),
+#                                  func=invert,
+#                                  inverse_func=invert)
+# pls = TransformedTargetRegressor(regressor=PLSRegression(n_components=3),
+#                                  func=np.log,
+#                                  inverse_func=np.exp)
+#
+# pls = TransformedTargetRegressor(regressor=GradientBoostingRegressor(),
+#                                  func=np.exp,
+#                                  inverse_func=np.log)
 # pls = SVR()
 x_data_columns = []
 for column in fitting_data:
@@ -60,6 +74,7 @@ y4 = y3 / (y2 + y3)
 
 
 x_data = fitting_data[x_data_columns]
+# x_data, _ = processing.msc(x_data)
 # x_data = processing.snv(x_data)
 # x_data = np.exp(-x_data)
 # x_data = np.log(x_data)
@@ -70,7 +85,9 @@ x_scaled_np = StandardScaler().fit_transform(x_data)
 x_scaled = pd.DataFrame(x_scaled_np, columns=x_data.columns)
 # x_scaled = x_data
 figure, axes, = plt.subplots(2, 2, figsize=(7.5, 8.75), constrained_layout=True)
-figure.suptitle("PLS fit of AS7263 Betel data")
+
+figure.suptitle("PLS 8-component fit to AS7265x Cananga data")
+# figure.suptitle("Gradient Boosting Regressor fit\nAS7262 Betel data")
 axes = [axes[0][0], axes[0][1], axes[1][0], axes[1][1]]
 invert_y = False
 for i, y in enumerate([y1, y2, y3, y4]):
@@ -78,9 +95,9 @@ for i, y in enumerate([y1, y2, y3, y4]):
         y = 1 / y
     # y = np.exp(-y)
     # print(1/y, 1/(1/y))
+    print(fitting_data)
     X_train, X_test, y_train, y_test = train_test_split(x_scaled, y,
-                                                        test_size=0.33,
-                                                        random_state=258)
+                                                        test_size=0.33)
 
     pls.fit(X_train, y_train)
     y_test_predict = pls.predict(X_test)
@@ -118,6 +135,9 @@ for i, y in enumerate([y1, y2, y3, y4]):
     axes[i].annotate("MAE train ={:.3f}".format(mae_train), xy=(LEFT_ALIGN, 0.62),
                      xycoords='axes fraction', color='#101028', fontsize='large')
     axes[i].set_title(chloro_columns[i])
+    axes[i].set_ylabel("Measured Chlorophyll")
+    if i >= 2:
+        axes[i].set_xlabel("Predicted Chlorophyll")
     print(r2_score(y_test, y_test_predict), mean_absolute_error(y_test, y_test_predict))
 
 plt.show()

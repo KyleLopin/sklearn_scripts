@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import linear_model
+from sklearn.compose import TransformedTargetRegressor
 from sklearn.cross_decomposition import PLSRegression as PLS
 from sklearn.datasets import load_digits
 from sklearn.ensemble import GradientBoostingRegressor
@@ -25,6 +26,9 @@ import data_getter
 
 plt.style.use('seaborn')
 
+
+def invert(x):
+    return 1/x
 
 # x_data_columns = []
 # leds = {}
@@ -102,7 +106,7 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
     if ylim is not None:
         plt.ylim(*ylim)
     plt.xlabel("Training examples")
-    plt.ylabel("Score")
+    plt.ylabel("Negative Mean Absolute Error")
     train_sizes, train_scores, test_scores = learning_curve(
         estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes,
         groups=group, shuffle=True, scoring='neg_mean_absolute_error')
@@ -118,6 +122,8 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
                      color="r")
     plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
                      test_scores_mean + test_scores_std, alpha=0.1, color="g")
+    print(test_scores_mean, train_scores_mean)
+    print(test_scores_std, train_scores_std)
     plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
              label="Training score")
     plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
@@ -212,14 +218,18 @@ def get_best_pls_variables(x, y, num_pls_components,
     return x_scaled[columns_to_keep]
 
 if __name__ == '__main__':
-    pls = PLS(n_components=3)
+    pls = PLS(n_components=8)
     ridge = Ridge(random_state=0, max_iter=5000)
     svr = SVR(C=100)
     lasso = Lasso(max_iter=5000, alpha=10**-4)
-    gradboost = GradientBoostingRegressor(max_depth=2)
-    # x_data, _, data = data_getter.get_data('as7263 betal')
-    x_data, _, data = data_getter.get_data('new as7262 mango')
-    data = data.groupby('Leaf number', as_index=True).mean()
+    gradboost = GradientBoostingRegressor()
+    ttr = TransformedTargetRegressor(regressor=PLS(n_components=3),
+                                     func=invert,
+                                     inverse_func=invert)
+    x_data, _, data = data_getter.get_data('as7265x ylang')
+    x_data = StandardScaler().fit_transform(x_data)
+    # x_data, _, data = data_getter.get_data('new as7262 mango')
+    # data = data.groupby('Leaf number', as_index=True).mean()
 
     y_name = 'Total Chlorophyll (ug/ml)'
     y_data = (data[y_name])
@@ -230,7 +240,7 @@ if __name__ == '__main__':
 
     cv = ShuffleSplit(n_splits=100, test_size=0.333, random_state=0)
 
-    plot_learning_curve(pls, 'AS7263 Betel 3-component PLS Learning Curve\n' \
+    plot_learning_curve(pls, 'AS7265x Cananga PLS Learning Curve\n'
                                    'Total Chlorophyll', x_data, y_data, cv=cv)
 
 plt.show()

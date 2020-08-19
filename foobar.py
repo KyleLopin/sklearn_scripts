@@ -98,20 +98,79 @@ import pandas as pd
 # print(b)
 # c = pd.concat([a, b], axis=0)
 # print('====')
-# print(c)
-training = [.0776, .0806, 0.08997, 0.09457]
-test = [0.07825, 0.0921, 0.0962, 0.102]
-current_levels = ["12.5 mA", "25 mA", "50 mA", "100 mA"]
-x = np.arange(len(current_levels))
-fig, ax = plt.subplots()
-ax.bar(x, training, width=0.4, label="Training set")
-ax.bar(x+0.4, test, width=0.4, label="Training set")
-ax.set_ylim([0.06, 0.11])
-ax.set_xlim(-0.5, 4.5)
-ax.set_title("Error as a function of LED current\n"
-             "AS7262 with Cananga leaves")
-ax.legend(loc='lower right')
-ax.set_xticks(x)
-ax.set_xticklabels(current_levels)
-ax.set_ylabel("Mean Absolute Error")
-plt.show()
+# # print(c)
+# training = [0.03096, .0299, .0299]
+# train_std = [0.0038, .0033, 0.0033]
+# test = [0.053, 0.0502, 0.0494]
+# test_std = [0.0096, .0078, 0.00814]
+# current_levels = ["10", "50", "200"]
+# x = np.arange(len(current_levels))
+# fig, ax = plt.subplots()
+# ax.bar(x, training, width=0.4, yerr=train_std, label="Training set")
+# ax.bar(x+0.4, test, width=0.4, yerr=test_std, label="Training set")
+# # ax.set_ylim([0.06, 0.11])
+# ax.set_xlim(-0.5, 4.2)
+# ax.set_title("Error as a function of Integration cycles\n"
+#              "AS7265x with Betel leaves")
+# ax.legend(loc='lower right')
+# ax.set_xticks(x)
+# ax.set_xticklabels(current_levels)
+# ax.set_ylabel("Mean Absolute Error")
+# ax.set_xlabel("Integration cycles")
+# plt.show()
+# data = pd.read_csv("tomato_C12880.csv")
+#
+# print(data)
+# data.T.plot()
+# plt.xlabel("Wavelength (nm)")
+# plt.ylabel("Fraction of reflectance")
+# plt.title("Reflectance of Tomatos")
+# plt.show()
+
+# data = pd.read_excel("Chlorophyll mango content.xlsx")
+# data = data.dropna()
+# print(data)
+# data['Leaf No.'] = data['Leaf No.'].astype(int)
+# print(data)
+# pd.set_option('display.max_columns', 500)
+# pd.set_option('display.max_rows', 500)
+# data.to_csv("mango_chloro.csv")
+chloro_data = pd.read_csv("mango_chloro.csv", index_col="Leaf number")
+print(chloro_data)
+new_columns = ["Leaf weight", "Chlorophyll a",
+               "Chlorophyll b",	"Total Chlorophyll",
+               "Chlorophyll a STD", "Chlorophyll b STD",
+               "Total Chlorophyll STD"]
+s_data = pd.read_csv("as7262 mango n.csv")
+print(s_data)
+
+for new_column in new_columns:
+    s_data.insert(len(s_data.columns), new_column, 0.0)
+
+
+print(s_data)
+
+# print(s_data["Leaf number"])
+leaf_n_column = s_data["Leaf number"]
+print(leaf_n_column)
+
+def mapper(leaf_num):
+    print('ln: ', leaf_num)
+    chlorophyll_level = chloro_data.loc[leaf_num]
+    print('cl: ')
+    print(chlorophyll_level)
+print(chloro_data)
+print(chloro_data.columns)
+# new_leaf_column = leaf_n_column.map(mapper)
+
+for index, row in s_data.iterrows():
+    print(row)
+    leaf_num = row["Leaf number"]
+    for column in new_columns:
+        print('oo')
+        print(chloro_data[column])
+        s_data.loc[leaf_num, column] = chloro_data[column]
+    print(s_data.loc[index])
+    print("=======")
+
+
