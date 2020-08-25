@@ -94,7 +94,7 @@ def fit_n_plot(_x, _y, model, axis, add_xlabel=None,
     if invert_y:
         _y = 1 / _y
 
-    fit_values, _ = curve_fit(model, _x, _y, maxfev=10**6)
+    fit_values, _ = curve_fit(model, _x, e_y, maxfev=10**6)
     x_linespace = np.linspace(np.min(_x), np.max(_x))
     if invert_y:
         y_fit = 1/model(_x, *fit_values)

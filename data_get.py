@@ -47,7 +47,7 @@ def get_data(_type: str, integration_time=None,
 
         return x_data, chloro_data, data
 
-    print(data.columns)
+    # print(data.columns)
     if read_number:
         data = data.loc[(data['position'] == read_number)]
     if integration_time:

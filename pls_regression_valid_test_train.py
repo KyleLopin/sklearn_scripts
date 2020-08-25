@@ -109,16 +109,16 @@ for number_params in range(1, 20):
     R2_validation_scores = []
     # print(full_data['Leaf number'])
     for test_train_index, validation_index in cv_splitter_valid.split(x_data, y_data, group_splitter):
-        # print('=======')
-        # print(test_train_index)
-        # print(validation_index)
+        print('=======')
+        print(test_train_index)
+        print(validation_index)
         # print(full_data.loc[test_train_index]['Leaf number'].unique())
         #
         # print(full_data.loc[validation_index]['Leaf number'].unique())
         # print(len(full_data.loc[test_train_index]['Leaf number'].unique()))
         #
         # print(len(full_data.loc[validation_index]['Leaf number'].unique()))
-
+        print(data)
         train_x_data_split = data.iloc[test_train_index]
         train_y_data_split = data.iloc[test_train_index]
         print(test_train_index)
