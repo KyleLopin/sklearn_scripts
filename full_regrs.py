@@ -37,10 +37,10 @@ def invert(x):
 
 def get_all_regrs():
     regrs = {"Linear regression": linear_model.LinearRegression(),
-             # "Perceptron": linear_model.Perceptron(),
-             # "Lars": linear_model.Lars(),
+             "Perceptron": linear_model.Perceptron(),
+             "Lars": linear_model.Lars(),
              "Lasso": linear_model.LassoCV(),
-             # "Passive Aggressive": linear_model.PassiveAggressiveRegressor,
+             "Passive Aggressive": linear_model.PassiveAggressiveRegressor(),
              "PLS": PLS(n_components=3),
              "Random Forest": ensemble.RandomForestRegressor(),
              "Gradient Boost": ensemble.GradientBoostingRegressor(),
@@ -48,7 +48,7 @@ def get_all_regrs():
              "Ada Boost": ensemble.AdaBoostRegressor(base_estimator=tree.DecisionTreeRegressor(max_depth=2),
                                                      n_estimators=250),
              "Gaussian Process": gaussian_process.GaussianProcessRegressor(),
-             # "Isotonic": isotonic.IsotonicRegression(),
+             "Isotonic": isotonic.IsotonicRegression(),
              "Kernel Ridge": kernel_ridge.KernelRidge(),
              "Ridge CV": linear_model.RidgeCV(),
              "Exp tranform": TransformedTargetRegressor(regressor=PLS(n_components=3),
@@ -60,17 +60,17 @@ def get_all_regrs():
              "Inv tranform": TransformedTargetRegressor(regressor=PLS(n_components=3),
                                                         func=invert,
                                                         inverse_func=invert),
-             # "Log regressor": linear_model.LogisticRegressionCV(),
-             # "ML Perceptron": neural_network.MLPRegressor(),
-             # "Linear SVR": linear_svc,
-             # "RBF SVR": svm.SVR(kernel='rbf'),
-             # "Poly SVR": svm.SVR(kernel='poly'),
-             # "Sigmoid SVR": svm.SVR(kernel='sigmoid'),
-             # "Bayesian Ridge": linear_model.BayesianRidge(),
-             # "Huber": linear_model.HuberRegressor(),
-             # "Poisson": linear_model.PoissonRegressor(),
-             "K-neighbors": neighbors.KNeighborsRegressor()}
-             # "Radius Neighbors": neighbors.RadiusNeighborsRegressor()}
+             "Log regressor": linear_model.LogisticRegressionCV(),
+             "ML Perceptron": neural_network.MLPRegressor(),
+             "Linear SVR": linear_svc,
+             "RBF SVR": svm.SVR(kernel='rbf'),
+             "Poly SVR": svm.SVR(kernel='poly'),
+             "Sigmoid SVR": svm.SVR(kernel='sigmoid'),
+             "Bayesian Ridge": linear_model.BayesianRidge(),
+             "Huber": linear_model.HuberRegressor(),
+             "Poisson": linear_model.PoissonRegressor(),
+             "K-neighbors": neighbors.KNeighborsRegressor(),
+             "Radius Neighbors": neighbors.RadiusNeighborsRegressor()}
     return regrs
 
 

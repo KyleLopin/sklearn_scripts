@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 # local files
-import data_getter
+import data_get
 import processing
 
 
@@ -20,18 +20,20 @@ plt.style.use('seaborn')
 
 # data = pd.read_csv("as7262_mango.csv")
 # x_data, data = data_getter.get_data('as7262 roseapple')
-x_data, _, data = data_getter.get_data('as7265x ylang')
+x_data, _, data = data_get.get_data('as7262 mango', integration_time=200,
+                                    led_current="50 mA", )
 print(data)
+print(data.columns)
 # data = data.loc[(data['position'] == 'pos 2')]
 # data = data.loc[(data['integration time'] == 3)]
 # data = data.groupby('Leaf number', as_index=True).mean()
 
-# accent_column = data['Total Chlorophyll (ug/ml)'].to_numpy()
-accent_column = np.ones_like(data.iloc[:, 1])
-# accent_column = accent_column / max(accent_column)
+accent_column = data['Total Chlorophyll (µg/mg)'].to_numpy()
+# accent_column = np.ones_like(data.iloc[:, 1])
+accent_column = accent_column / max(accent_column)
 # print(accent_column/max(accent_column))
 
-alphas = np.linspace(0.1, 1, 10)
+# alphas = np.linspace(0.1, 1, 10)
 colors = np.zeros((data.shape[0], 4))
 colors[:, 0] = 0.2
 colors[:, 1] = 0.6

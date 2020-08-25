@@ -135,42 +135,44 @@ import pandas as pd
 # pd.set_option('display.max_columns', 500)
 # pd.set_option('display.max_rows', 500)
 # data.to_csv("mango_chloro.csv")
-chloro_data = pd.read_csv("mango_chloro.csv", index_col="Leaf number")
-print(chloro_data)
-new_columns = ["Leaf weight", "Chlorophyll a",
-               "Chlorophyll b",	"Total Chlorophyll",
-               "Chlorophyll a STD", "Chlorophyll b STD",
-               "Total Chlorophyll STD"]
-s_data = pd.read_csv("as7262 mango n.csv")
-print(s_data)
-
-for new_column in new_columns:
-    s_data.insert(len(s_data.columns), new_column, 0.0)
-
-
-print(s_data)
-
-# print(s_data["Leaf number"])
-leaf_n_column = s_data["Leaf number"]
-print(leaf_n_column)
-
-def mapper(leaf_num):
-    print('ln: ', leaf_num)
-    chlorophyll_level = chloro_data.loc[leaf_num]
-    print('cl: ')
-    print(chlorophyll_level)
+# chloro_data = pd.read_csv("mango_chloro.csv", index_col="Leaf number")
+chloro_data = pd.read_excel("Chlorophyll mango content.xlsx", skiprows=[1])
 print(chloro_data)
 print(chloro_data.columns)
-# new_leaf_column = leaf_n_column.map(mapper)
+cols = ['Leaf number', 'Spot', 'Leaf weight (mg)', 'Mean leaf weight (mg)',
+       'A647', 'Unnamed: 5', 'Unnamed: 6', 'A664', 'Unnamed: 8', 'Unnamed: 9',
+       'Average', 'Unnamed: 11', 'Chlorophyll a (µg)', 'Chlorophyll b (µg)',
+       'Total Chlorophyll (µg)', 'Avg Chlorophyll a ', 'Avg Chlorophyll b',
+       'Avg Total Chlorophyll', 'Chlorophyll a STD', 'Chlorophyll b STD',
+       'Total Chlorophyll STD', 'Total Chlorophyll (µg/mg)',
+       'Chlorophyll a (µg/mg)', 'Chlorophyll b (µg/mg)',
+       'Total Chlorophyll (µg/cm2)', 'Chlorophyll a (µg/cm2)',
+       'Chlorophyll b (µg/cm2)']
+mean_ = chloro_data.groupby('Leaf number', as_index=True).mean()
+std_ = chloro_data.groupby('Leaf number', as_index=True).std()
 
-for index, row in s_data.iterrows():
-    print(row)
-    leaf_num = row["Leaf number"]
-    for column in new_columns:
-        print('oo')
-        print(chloro_data[column])
-        s_data.loc[leaf_num, column] = chloro_data[column]
-    print(s_data.loc[index])
-    print("=======")
+new_cols = ['Total Chlorophyll (µg/mg)', 'Chlorophyll a (µg/mg)',
+            'Chlorophyll b (µg/mg)', 'Total Chlorophyll (µg/cm2)',
+            'Chlorophyll a (µg/cm2)', 'Chlorophyll b (µg/cm2)']
 
+for col in new_cols:
+    chloro_data['Avg '+col] = 0
+    chloro_data['STD ' + col] = 0
+print(mean_.columns)
 
+for i, row in chloro_data.iterrows():
+    for col in new_cols:
+        mean_col = col
+        leaf_num = row['Leaf number']
+        print(i, mean_col, leaf_num)
+        avg_value = mean_[mean_col][leaf_num]
+        std_value = std_[mean_col][leaf_num]
+        print('===')
+        print(chloro_data.loc[i, col], '}')
+        print(avg_value)
+        print(std_value)
+        chloro_data.loc[i, 'Avg '+col] = avg_value
+        chloro_data.loc[i, 'STD ' + col] = std_value
+    # print(chloro_data.iloc[i])
+
+chloro_data.to_csv("new_chloro_mango.csv")

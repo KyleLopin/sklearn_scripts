@@ -18,11 +18,11 @@ from sklearn.linear_model import Ridge, Lasso, SGDRegressor
 from sklearn.metrics import median_absolute_error
 from sklearn.model_selection import learning_curve
 from sklearn.model_selection import GroupShuffleSplit, ShuffleSplit
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.svm import SVR
 
 # local files
-import data_getter
+import data_get
 
 plt.style.use('seaborn')
 
@@ -218,29 +218,34 @@ def get_best_pls_variables(x, y, num_pls_components,
     return x_scaled[columns_to_keep]
 
 if __name__ == '__main__':
-    pls = PLS(n_components=8)
+    pls = PLS(n_components=6)
     ridge = Ridge(random_state=0, max_iter=5000)
     svr = SVR(C=100)
     lasso = Lasso(max_iter=5000, alpha=10**-4)
-    gradboost = GradientBoostingRegressor()
+    gradboost = GradientBoostingRegressor(max_depth=2)
     ttr = TransformedTargetRegressor(regressor=PLS(n_components=3),
                                      func=invert,
                                      inverse_func=invert)
-    x_data, _, data = data_getter.get_data('as7265x ylang')
+    ttr = TransformedTargetRegressor(regressor=PLS(n_components=3),
+                                     func=np.exp,
+                                     inverse_func=np.log)
+    x_data, _, data = data_get.get_data('as7262 mango', led_current="25 mA",
+                                        integration_time=200)
     x_data = StandardScaler().fit_transform(x_data)
+    # x_data = RobustScaler().fit_transform(x_data)
     # x_data, _, data = data_getter.get_data('new as7262 mango')
     # data = data.groupby('Leaf number', as_index=True).mean()
 
-    y_name = 'Total Chlorophyll (ug/ml)'
+    y_name = 'Total Chlorophyll (µg/mg)'
     y_data = (data[y_name])
     # y_data = np.exp(-y_data)
     # x_data = x_data.groupby('Leaf number', as_index=True).mean()
 
     # x_data = data
 
-    cv = ShuffleSplit(n_splits=100, test_size=0.333, random_state=0)
+    cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
 
-    plot_learning_curve(pls, 'AS7265x Cananga PLS Learning Curve\n'
+    plot_learning_curve(gradboost, 'AS7265x Cananga PLS Learning Curve\n'
                                    'Total Chlorophyll', x_data, y_data, cv=cv)
 
 plt.show()

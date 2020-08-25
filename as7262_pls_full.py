@@ -22,13 +22,13 @@ from sklearn.svm import SVR
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, RobustScaler, FunctionTransformer
 # local files
-import data_getter
+import data_get
 import processing
 
 plt.style.use('seaborn')
 
 # fitting_data = pd.read_csv('as7262_roseapple.csv')
-x_data, _, fitting_data = data_getter.get_data('as7265x ylang')
+x_data, _, fitting_data = data_get.get_data('as7262 mango')
 # fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
 # fitting_data = fitting_data.drop(["Leaf: 31", "Leaf: 39", "Leaf: 45"])
 
@@ -40,9 +40,10 @@ x_data, _, fitting_data = data_getter.get_data('as7265x ylang')
 
 exp_transformer = FunctionTransformer(np.exp, inverse_func=np.log)
 
-pls = PLSRegression(n_components=8)
+
+pls = PLSRegression(n_components=6)
 # pls = DecisionTreeRegressor(max_depth=4)
-# pls = GradientBoostingRegressor(max_depth=2)
+pls = GradientBoostingRegressor(max_depth=2)
 
 def invert(x):
     return 1/x
@@ -64,12 +65,13 @@ for column in fitting_data:
     if 'nm' in column:
         x_data_columns.append(column)
 
-chloro_columns = ['Total Chlorophyll (ug/ml)', 'Chlorophyll a (ug/ml)',
-                  'Chlorophyll b (ug/ml)', "Fraction Chlorophyll b"]
+chloro_columns = ['Total Chlorophyll (µg/mg)', 'Chlorophyll a (µg/mg)',
+                  'Chlorophyll b (µg/mg)', "Fraction Chlorophyll b"]
 # print(fitting_data[chloro_columns])
-y1 = fitting_data['Total Chlorophyll (ug/ml)']
-y2 = fitting_data['Chlorophyll a (ug/ml)']
-y3 = fitting_data['Chlorophyll b (ug/ml)']
+print(fitting_data.columns)
+y1 = fitting_data['Total Chlorophyll (µg/mg)']
+y2 = fitting_data['Chlorophyll a (µg/mg)']
+y3 = fitting_data['Chlorophyll b (µg/mg)']
 y4 = y3 / (y2 + y3)
 
 
@@ -97,7 +99,7 @@ for i, y in enumerate([y1, y2, y3, y4]):
     # print(1/y, 1/(1/y))
     print(fitting_data)
     X_train, X_test, y_train, y_test = train_test_split(x_scaled, y,
-                                                        test_size=0.33)
+                                                        test_size=0.2)
 
     pls.fit(X_train, y_train)
     y_test_predict = pls.predict(X_test)

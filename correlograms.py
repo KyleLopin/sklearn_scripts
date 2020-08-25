@@ -12,13 +12,13 @@ import pandas as pd
 from sklearn.decomposition import KernelPCA, PCA
 import seaborn as sns
 
-import data_getter
+import data_get
 
 
-chloro_types = ['Chlorophyll a (ug/ml)', 'Chlorophyll b (ug/ml)',
-                'Total Chlorophyll (ug/ml)']
+chloro_types = ['Chlorophyll a (µg/mg)', 'Chlorophyll b (µg/mg)',
+                'Total Chlorophyll (µg/mg)']
 y_name = chloro_types[2]
-x_data, y, data = data_getter.get_data('as7263 betal')
+x_data, y, data = data_get.get_data('as7262 mango')
 print(x_data)
 print(y)
 y = y[y_name]
@@ -33,7 +33,7 @@ df = pd.DataFrame(Xpca, columns=columns_[:n_comps])
 print(y.shape)
 print(y)
 print(y.min(), y.max())
-bins = np.linspace(y.min(), y.max(), 6)
+bins = np.linspace(y.min(), y.max(), 7)
 print(10*y.values.T.astype("int"))
 print(len(10*y.values.T.astype("int")))
 print(df.shape)
@@ -42,7 +42,7 @@ print(df)
 pg = sns.pairplot(df, hue="TOC", palette='OrRd')
 # pg = sns.PairGrid(df, hue="TOC", palette='OrRd')
 pg = pg.map_diag(sns.kdeplot)
-pg = pg.map_lower(sns.kdeplot, cmap="seismic", shaded=True)
+# pg = pg.map_lower(sns.kdeplot, cmap="seismic", shaded=True)
 # pg = pg.map_upper(plt.scatter, hue="TOC", palette='OrRd')
 
 plt.gcf().suptitle("{0} Kernel PCA Pairplots"

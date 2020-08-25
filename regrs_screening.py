@@ -12,12 +12,12 @@ from sklearn.model_selection import cross_validate, RepeatedKFold
 from sklearn.pipeline import make_pipeline
 
 # local files
-import data_getter
+import data_get
 import full_regrs
 import processing
 
-filename = "as7262 betal results.xlsx"
-x_data, _y, data = data_getter.get_data('as7265x betal')
+filename = "as7262 new mango results.xlsx"
+x_data, _y, data = data_get.get_data('as7262 mango')
 
 all_regressors = full_regrs.get_all_regrs()
 all_transformers = full_regrs.get_transformers()
@@ -25,10 +25,10 @@ print(all_regressors)
 
 print(x_data)
 
-chloro_types = ['Chlorophyll a (ug/ml)', 'Chlorophyll b (ug/ml)',
-                'Total Chlorophyll (ug/ml)']
+chloro_types = ['Chlorophyll a (µg/mg)', 'Chlorophyll b (µg/mg)',
+                'Total Chlorophyll (µg/mg)']
 
-_y = _y['Total Chlorophyll (ug/ml)']
+_y = _y['Total Chlorophyll (µg/mg)']
 print(_y)
 cv = RepeatedKFold(n_splits=4, n_repeats=15)
 

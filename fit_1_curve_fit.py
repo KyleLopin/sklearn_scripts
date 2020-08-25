@@ -14,7 +14,7 @@ from scipy.optimize import curve_fit
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.preprocessing import RobustScaler, StandardScaler
 # local files
-import data_getter
+import data_get
 import processing
 
 
@@ -22,7 +22,7 @@ plt.style.use('seaborn')
 
 # fitting_data = pd.read_csv('as7262_roseapple.csv')
 # fitting_data = pd.read_csv("as7262_ylang.csv")
-x_data, _y, fitting_data = data_getter.get_data('as7263 betal')
+x_data, _y, fitting_data = data_get.get_data('as7262 mango')
 print(fitting_data.columns)
 # fitting_data = fitting_data.loc[(fitting_data['Total Chlorophyll (ug/ml)'] < 0.5)]
 # fitting_data = fitting_data.loc[(fitting_data['LED current'] == 2)]
