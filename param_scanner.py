@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.cross_decomposition import PLSRegression
+from sklearn import linear_model
 from sklearn.model_selection import cross_validate, GroupShuffleSplit, RepeatedKFold
 from sklearn.pipeline import make_pipeline
 # local files
@@ -26,6 +27,7 @@ times = full_data['integration time'].unique()
 print(currents, times)
 print(full_data['saturation check'].unique())
 pls = PLSRegression(n_components=6)
+pls = linear_model.LinearRegression()
 cv = RepeatedKFold(n_splits=5, n_repeats=20)
 cv_group = GroupShuffleSplit(n_splits=100)
 scores = []
@@ -56,5 +58,6 @@ for current in currents:
         errors.append(scores_['test_score'].std())
 
 x = np.arange(len(scores))
-plt.bar(x, scores, yerr=errors)
+
+plt.bar(x, scores, yerr=errors, labels=labels)
 plt.show()
