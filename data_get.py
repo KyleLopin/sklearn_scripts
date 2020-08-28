@@ -11,7 +11,8 @@ import pandas as pd
 
 def get_data(_type: str, integration_time=None,
              led_current=None, read_number=None, led=None, average=True,
-             remove_outlier=False, only_read=False, return_type="XYZ"):
+             remove_outlier=False, only_read=False, return_type="XYZ",
+             threshold=None):
     data = pd.DataFrame()
     data_columns = []
     y_columns = []
@@ -49,13 +50,15 @@ def get_data(_type: str, integration_time=None,
 
     # print(data.columns)
     if read_number:
-        data = data.loc[(data['position'] == read_number)]
+        data = data.loc[(data['Read number'] == read_number)]
     if integration_time:
         data = data.loc[(data['integration time'] == integration_time)]
     if led:
         data = data.loc[(data['LED'] == led)]
     if led_current:
         data = data.loc[(data['LED current'] == led_current)]
+    if threshold:
+        data = data.loc[(data['Total Chlorophyll (µg/cm2)'] >= threshold)]
 
     if average:
         data = data.groupby('Leaf number', as_index=True).mean()

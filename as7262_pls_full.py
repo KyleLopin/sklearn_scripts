@@ -18,6 +18,7 @@ from scipy.optimize import curve_fit
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.compose import TransformedTargetRegressor
 from sklearn.cross_decomposition import PLSRegression
+from sklearn.decomposition import KernelPCA
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn import feature_selection
 from sklearn.linear_model import LassoCV
@@ -33,7 +34,9 @@ import processing
 plt.style.use('seaborn')
 
 # fitting_data = pd.read_csv('as7262_roseapple.csv')
-x_data, _, fitting_data = data_get.get_data('as7262 mango')
+x_data, _, fitting_data = data_get.get_data('as7262 mango', integration_time=200,
+                                            led_current="25 mA", threshold=20,
+                                            read_number=2)
 # fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
 # fitting_data = fitting_data.drop(["Leaf: 31", "Leaf: 39", "Leaf: 45"])
 
@@ -48,15 +51,15 @@ exp_transformer = FunctionTransformer(np.exp, inverse_func=np.log)
 
 pls = PLSRegression(n_components=6)
 # pls = DecisionTreeRegressor(max_depth=4)
-pls = GradientBoostingRegressor(max_depth=2)
+# pls = GradientBoostingRegressor(max_depth=2)
 
 def invert(x):
     return 1/x
 
-cachedir = tempfile.mkdtemp()
-mem = Memory(location=cachedir, verbose=1)
-f_regression = mem.cache(feature_selection.f_regression)
-anova = feature_selection.SelectPercentile(f_regression)
+# cachedir = tempfile.mkdtemp()
+# mem = Memory(location=cachedir, verbose=1)
+# f_regression = mem.cache(feature_selection.f_regression)
+# anova = feature_selection.SelectPercentile(f_regression)
 # pls = make_pipeline(exp_transformer, pls)
 # pls = TransformedTargetRegressor(regressor=PLSRegression(n_components=3),
 #                                  func=invert,
@@ -65,8 +68,8 @@ anova = feature_selection.SelectPercentile(f_regression)
 #                                  func=np.log,
 #                                  inverse_func=np.exp)
 #
-pls = LassoCV()
-pls = make_pipeline(anova, LassoCV())
+# pls = LassoCV()
+# pls = make_pipeline(anova, LassoCV())
 # pls = TransformedTargetRegressor(regressor=GradientBoostingRegressor(),
 #                                  func=np.exp,
 #                                  inverse_func=np.log)
@@ -85,10 +88,10 @@ chloro_columns = ['Total Chlorophyll (µg/mg)', 'Chlorophyll a (µg/mg)',
                   'Chlorophyll b (µg/mg)', "Fraction Chlorophyll b"]
 # print(fitting_data[chloro_columns])
 print(fitting_data.columns)
-y1 = fitting_data['Total Chlorophyll (µg/mg)']
+# y1 = fitting_data['Total Chlorophyll (µg/mg)']
 y1 = fitting_data['Total Chlorophyll (µg/cm2)']
-y2 = fitting_data['Chlorophyll a (µg/mg)']
-y3 = fitting_data['Chlorophyll b (µg/mg)']
+y2 = fitting_data['Chlorophyll a (µg/cm2)']
+y3 = fitting_data['Chlorophyll b (µg/cm2)']
 # y3 = fitting_data['Chlorophyll a (µg/mg)']
 y4 = y3 / (y2 + y3)
 # y4 = fitting_data['Chlorophyll a (µg/mg)']
@@ -103,17 +106,17 @@ x_data = fitting_data[x_data_columns]
 # x_data = np.exp(-x_data)
 # x_data = np.log(x_data)
 # x_data = 1 / x_data
-
+# scalar = make_pipeline(StandardScaler(), PolynomialFeatures(), KernelPCA(kernel='rbf'))
 x_scaled_np = StandardScaler().fit_transform(x_data)
-x_scaled_np = PolynomialFeatures().fit_transform(x_scaled_np)
-
+# x_scaled_np = PolynomialFeatures(degree=2).fit_transform(x_scaled_np)
+# x_scaled_np = scalar.fit_transform(x_data)
 # x_scaled = pd.DataFrame(x_scaled_np, columns=x_data.columns)
 x_scaled = pd.DataFrame(x_scaled_np)
 # x_scaled = x_data
 print(x_scaled)
 figure, axes, = plt.subplots(2, 2, figsize=(7.5, 8.75), constrained_layout=True)
 
-figure.suptitle("PLS 8-component fit to AS7265x Cananga data")
+figure.suptitle("Model fit to new AS7262 Mango data")
 # figure.suptitle("Gradient Boosting Regressor fit\nAS7262 Betel data")
 axes = [axes[0][0], axes[0][1], axes[1][0], axes[1][1]]
 invert_y = False
