@@ -14,15 +14,16 @@ from sklearn.compose import TransformedTargetRegressor
 from sklearn.cross_decomposition import PLSRegression as PLS
 from sklearn.datasets import load_digits
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.linear_model import Ridge, Lasso, SGDRegressor
+from sklearn.linear_model import Ridge, Lasso, SGDRegressor, LinearRegression
 from sklearn.metrics import median_absolute_error
 from sklearn.model_selection import learning_curve
 from sklearn.model_selection import GroupShuffleSplit, ShuffleSplit
-from sklearn.preprocessing import StandardScaler, RobustScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler, PolynomialFeatures
 from sklearn.svm import SVR
 
 # local files
 import data_get
+import processing
 
 plt.style.use('seaborn')
 
@@ -45,7 +46,7 @@ def invert(x):
 
 
 def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
-                        n_jobs=None, train_sizes=np.linspace(.6, 1.0, 4)):
+                        n_jobs=None, ax=None, train_sizes=np.linspace(.6, 1.0, 4)):
     """
     from:
     https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
@@ -101,12 +102,14 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
         be big enough to contain at least one sample from each class.
         (default: np.linspace(0.1, 1.0, 5))
     """
-    plt.figure(figsize=(5, 4))
-    plt.title(title)
+    if not ax:
+        figure, ax, = plt.subplots(1, 1, figsize=(5, 4), constrained_layout=True)
+
+    # ax.set_title(title)
     if ylim is not None:
-        plt.ylim(*ylim)
-    plt.xlabel("Training examples")
-    plt.ylabel("Negative Mean Absolute Error")
+        ax.set_ylim(*ylim)
+    # ax.set_xlabel("Training examples")
+    # ax.set_ylabel("Negative Mean Absolute Error")
     train_sizes, train_scores, test_scores = learning_curve(
         estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes,
         groups=group, shuffle=True, scoring='neg_mean_absolute_error')
@@ -115,25 +118,24 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
     train_scores_std = np.std(train_scores, axis=1)
     test_scores_mean = np.mean(test_scores, axis=1)
     test_scores_std = np.std(test_scores, axis=1)
-    plt.grid()
 
-    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+    ax.fill_between(train_sizes, train_scores_mean - train_scores_std,
                      train_scores_mean + train_scores_std, alpha=0.1,
                      color="r")
-    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+    ax.fill_between(train_sizes, test_scores_mean - test_scores_std,
                      test_scores_mean + test_scores_std, alpha=0.1, color="g")
     print(test_scores_mean, train_scores_mean)
     print(test_scores_std, train_scores_std)
-    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+    ax.plot(train_sizes, train_scores_mean, 'o-', color="r",
              label="Training score")
-    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+    ax.plot(train_sizes, test_scores_mean, 'o-', color="g",
              label="Cross-validation score")
 
-    plt.legend(loc="best")
-    plt.grid(True)
-    plt.show()
+    # ax.legend(loc="best")
+    ax.grid(True)
+    # plt.show()
 
-    return plt
+    # return plt
 
 
 def mango_refl3_linear():
@@ -217,12 +219,69 @@ def get_best_pls_variables(x, y, num_pls_components,
     print(columns_to_keep)
     return x_scaled[columns_to_keep]
 
+
+def plot_4_learning_curves(estimators, est_names, cv, X, Y, ylim=None):
+    figure, axes, = plt.subplots(2, 2, figsize=(7.5, 8.75), constrained_layout=True)
+
+    figure.suptitle("Model fit to new AS7262 Mango data")
+    # figure.suptitle("Gradient Boosting Regressor fit\nAS7262 Betel data")
+    axes_ = [axes[0][0], axes[0][1], axes[1][0], axes[1][1]]
+    print(axes_)
+    for i, ax in enumerate(axes_):
+        print('i=', i, ax)
+        plot_learning_curve(estimators[i], est_names[i], X, Y,
+                            cv=cv, ax=ax, ylim=ylim)
+    plt.show()
+
+
+def plot_param_learning_curves():
+    x_data, _y, full_data = data_get.get_data('as7262 mango', average=False)
+    pls = PLS(n_components=6)
+    print(full_data.columns)
+    currents = full_data['LED current'].unique()
+    times = full_data['integration time'].unique()
+    print(currents, times)
+    print(full_data['saturation check'].unique())
+    figure, axes, = plt.subplots(len(currents), len(times),
+                                 figsize=(9, 12),
+                                 constrained_layout=True)
+
+    figure.suptitle("Parameter scan of new AS7262 Mango data")
+    # figure.suptitle("Gradient Boosting Regressor fit\nAS7262 Betel data")
+    # axes_ = [axes[0][0], axes[0][1], axes[0][2], axes[0][3],
+    #          axes[1][0], axes[1][1], axes[1][2], axes[1][3],
+    #          axes[2][0], axes[2][1], axes[2][2], axes[2][3],
+    #          axes[3][0], axes[3][1], axes[3][2], axes[3][3],
+    #          axes[4][0], axes[4][1], axes[4][2], axes[4][3],]
+
+    current_i = 0
+    time_i = 0
+    for current in currents:
+        for time in times:
+            X, Y = data_get.get_data("as7262 mango", integration_time=time, led_current=current, return_type="XY")
+
+            X = StandardScaler().fit_transform(X)
+            X = PolynomialFeatures().fit_transform(X)
+
+            Y = Y['Total Chlorophyll (µg/mg)']
+            title = str(time*2.8)+" ms "+current
+            print(title)
+
+            plot_learning_curve(pls, title, X, Y,
+                                cv=cv, ax=axes[current_i][time_i], ylim=[-0.3, -.1])
+
+            time_i += 1
+        time_i = 0
+        current_i += 1
+
+
 if __name__ == '__main__':
     pls = PLS(n_components=6)
-    ridge = Ridge(random_state=0, max_iter=5000)
-    svr = SVR(C=100)
+    ridge = Ridge(random_state=0, max_iter=20000)
+    svr = SVR(C=10)
     lasso = Lasso(max_iter=5000, alpha=10**-4)
     gradboost = GradientBoostingRegressor(max_depth=2)
+    lr = LinearRegression()
     ttr = TransformedTargetRegressor(regressor=PLS(n_components=3),
                                      func=invert,
                                      inverse_func=invert)
@@ -230,8 +289,11 @@ if __name__ == '__main__':
                                      func=np.exp,
                                      inverse_func=np.log)
     x_data, _, data = data_get.get_data('as7262 mango', led_current="25 mA",
-                                        integration_time=200)
+                                        integration_time=100)
+
+    # x_data, _ = processing.msc(x_data)
     x_data = StandardScaler().fit_transform(x_data)
+    x_data = PolynomialFeatures().fit_transform(x_data)
     # x_data = RobustScaler().fit_transform(x_data)
     # x_data, _, data = data_getter.get_data('new as7262 mango')
     # data = data.groupby('Leaf number', as_index=True).mean()
@@ -245,7 +307,11 @@ if __name__ == '__main__':
 
     cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
 
-    plot_learning_curve(gradboost, 'AS7265x Cananga PLS Learning Curve\n'
-                                   'Total Chlorophyll', x_data, y_data, cv=cv)
+    # plot_learning_curve(lasso, 'AS7262 Mango Learning Curve\n'
+    #                                'Total Chlorophyll', x_data, y_data, cv=cv)
+    estimators = [lasso, svr, pls, lr]
+    est_names = ["Lasso", "SVR", "PLS", "Linear Regression"]
+    # plot_4_learning_curves(estimators, est_names, cv, x_data, y_data, [-0.5, 0])
+    plot_param_learning_curves()
 
-plt.show()
+    plt.show()

@@ -9,6 +9,10 @@ __author__ = "Kyle Vitatus Lopin"
 import pandas as pd
 
 
+def format_input_to_list(x):
+    return [x] if isinstance(x, str) else x
+
+
 def get_data(_type: str, integration_time=None,
              led_current=None, read_number=None, led=None, average=True,
              remove_outlier=False, only_read=False, return_type="XYZ",
@@ -23,6 +27,8 @@ def get_data(_type: str, integration_time=None,
                 data_columns.append(column)
             if "Chloro" in column or "chloro" in column:
                 y_columns.append(column)
+
+
 
 
     elif _type == "as7263 betal":
@@ -48,15 +54,21 @@ def get_data(_type: str, integration_time=None,
 
         return x_data, chloro_data, data
 
+
     # print(data.columns)
     if read_number:
+        read_number = format_input_to_list(read_number)
         data = data.loc[(data['Read number'] == read_number)]
     if integration_time:
+        integration_time = format_input_to_list(integration_time)
         data = data.loc[(data['integration time'] == integration_time)]
     if led:
+        led = format_input_to_list(led)
         data = data.loc[(data['LED'] == led)]
     if led_current:
-        data = data.loc[(data['LED current'] == led_current)]
+        # data = data.loc[(data['LED current'] == led_current)]
+        led_current = format_input_to_list(led_current)
+        data = data[data['LED current'].isin(led_current)]
     if threshold:
         data = data.loc[(data['Total Chlorophyll (µg/cm2)'] >= threshold)]
 
