@@ -28,9 +28,6 @@ def get_data(_type: str, integration_time=None,
             if "Chloro" in column or "chloro" in column:
                 y_columns.append(column)
 
-
-
-
     elif _type == "as7263 betal":
         data = pd.read_csv('as7265x_betal_leaves.csv')
 

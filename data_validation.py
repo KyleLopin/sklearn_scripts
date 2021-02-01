@@ -53,6 +53,7 @@ def chloro_graph_means_and_pts(_data, style='per area'):
 if __name__ == '__main__':
     data = pd.read_csv("new_chloro_mango.csv")
     data = pd.read_excel("Sugarcane Chlorophyll content.xlsx")
+    data = pd.read_excel("new_chloro_rice.xlsx")
     print(data)
     print(data.columns)
     print(data.iloc[238])

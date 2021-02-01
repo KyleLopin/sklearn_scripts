@@ -136,43 +136,73 @@ import pandas as pd
 # pd.set_option('display.max_rows', 500)
 # data.to_csv("mango_chloro.csv")
 # chloro_data = pd.read_csv("mango_chloro.csv", index_col="Leaf number")
-chloro_data = pd.read_excel("Chlorophyll mango content.xlsx", skiprows=[1])
-print(chloro_data)
-print(chloro_data.columns)
-cols = ['Leaf number', 'Spot', 'Leaf weight (mg)', 'Mean leaf weight (mg)',
-       'A647', 'Unnamed: 5', 'Unnamed: 6', 'A664', 'Unnamed: 8', 'Unnamed: 9',
-       'Average', 'Unnamed: 11', 'Chlorophyll a (µg)', 'Chlorophyll b (µg)',
-       'Total Chlorophyll (µg)', 'Avg Chlorophyll a ', 'Avg Chlorophyll b',
-       'Avg Total Chlorophyll', 'Chlorophyll a STD', 'Chlorophyll b STD',
-       'Total Chlorophyll STD', 'Total Chlorophyll (µg/mg)',
-       'Chlorophyll a (µg/mg)', 'Chlorophyll b (µg/mg)',
-       'Total Chlorophyll (µg/cm2)', 'Chlorophyll a (µg/cm2)',
-       'Chlorophyll b (µg/cm2)']
-mean_ = chloro_data.groupby('Leaf number', as_index=True).mean()
-std_ = chloro_data.groupby('Leaf number', as_index=True).std()
+# chloro_data = pd.read_excel("Chlorophyll mango content.xlsx", skiprows=[1])
+# print(chloro_data)
+# print(chloro_data.columns)
+# cols = ['Leaf number', 'Spot', 'Leaf weight (mg)', 'Mean leaf weight (mg)',
+#        'A647', 'Unnamed: 5', 'Unnamed: 6', 'A664', 'Unnamed: 8', 'Unnamed: 9',
+#        'Average', 'Unnamed: 11', 'Chlorophyll a (µg)', 'Chlorophyll b (µg)',
+#        'Total Chlorophyll (µg)', 'Avg Chlorophyll a ', 'Avg Chlorophyll b',
+#        'Avg Total Chlorophyll', 'Chlorophyll a STD', 'Chlorophyll b STD',
+#        'Total Chlorophyll STD', 'Total Chlorophyll (µg/mg)',
+#        'Chlorophyll a (µg/mg)', 'Chlorophyll b (µg/mg)',
+#        'Total Chlorophyll (µg/cm2)', 'Chlorophyll a (µg/cm2)',
+#        'Chlorophyll b (µg/cm2)']
+# mean_ = chloro_data.groupby('Leaf number', as_index=True).mean()
+# std_ = chloro_data.groupby('Leaf number', as_index=True).std()
+#
+# new_cols = ['Total Chlorophyll (µg/mg)', 'Chlorophyll a (µg/mg)',
+#             'Chlorophyll b (µg/mg)', 'Total Chlorophyll (µg/cm2)',
+#             'Chlorophyll a (µg/cm2)', 'Chlorophyll b (µg/cm2)']
+#
+# for col in new_cols:
+#     chloro_data['Avg '+col] = 0
+#     chloro_data['STD ' + col] = 0
+# print(mean_.columns)
+#
+# for i, row in chloro_data.iterrows():
+#     for col in new_cols:
+#         mean_col = col
+#         leaf_num = row['Leaf number']
+#         print(i, mean_col, leaf_num)
+#         avg_value = mean_[mean_col][leaf_num]
+#         std_value = std_[mean_col][leaf_num]
+#         print('===')
+#         print(chloro_data.loc[i, col], '}')
+#         print(avg_value)
+#         print(std_value)
+#         chloro_data.loc[i, 'Avg '+col] = avg_value
+#         chloro_data.loc[i, 'STD ' + col] = std_value
+#     # print(chloro_data.iloc[i])
+#
+# chloro_data.to_csv("new_chloro_mango.csv")
 
-new_cols = ['Total Chlorophyll (µg/mg)', 'Chlorophyll a (µg/mg)',
-            'Chlorophyll b (µg/mg)', 'Total Chlorophyll (µg/cm2)',
-            'Chlorophyll a (µg/cm2)', 'Chlorophyll b (µg/cm2)']
+BACKGROUND = [687.65, 9453.7, 23218.35, 9845.05, 15496.7,
+              18118.55, 7023.8, 7834.1, 28505.9, 4040.9,
+              5182.3, 1282.55, 2098.85, 1176.1, 994.45,
+              496.45, 377.55, 389.75]
 
-for col in new_cols:
-    chloro_data['Avg '+col] = 0
-    chloro_data['STD ' + col] = 0
-print(mean_.columns)
-
-for i, row in chloro_data.iterrows():
-    for col in new_cols:
-        mean_col = col
-        leaf_num = row['Leaf number']
-        print(i, mean_col, leaf_num)
-        avg_value = mean_[mean_col][leaf_num]
-        std_value = std_[mean_col][leaf_num]
-        print('===')
-        print(chloro_data.loc[i, col], '}')
-        print(avg_value)
-        print(std_value)
-        chloro_data.loc[i, 'Avg '+col] = avg_value
-        chloro_data.loc[i, 'STD ' + col] = std_value
-    # print(chloro_data.iloc[i])
-
-chloro_data.to_csv("new_chloro_mango.csv")
+plt.style.use('dark_background')
+# local files
+# import get_data
+# x, y = get_data.get_data("mango", "as7265x", int_time=150,
+#                          position=2, led="b'White'",
+#                          led_current="25 mA")
+#
+# ax = plt.subplot(111)
+# plt.plot(x.iloc[0]/BACKGROUND, color='limegreen')
+# plt.xticks(x.columns, rotation=60)
+# plt.ylabel("Reflectance", size=14)
+# ax.spines['right'].set_visible(False)
+# ax.spines['top'].set_visible(False)
+# ax.set_title("Reflectance from rice leaf")
+# plt.tight_layout()
+# plt.show()
+nums = [['-1.71', '2.95', '4.61', '0.07'],
+        ['-1', '-1', '-1', '-1']]
+plt.table(cellText=nums, rowLabels=['foobar', 'bar'],
+          rowColours=['black', 'black', 'black'],
+          cellColours=[['black', 'black', 'black', 'black'],
+                       ['black', 'black', 'black', 'black']],
+          colColours=['red', 'red', 'red', 'red'])
+plt.show()
