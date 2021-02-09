@@ -78,7 +78,7 @@ def sfs_full(regr, X_original, y, cv, max_components=None, penalty_rate=0.0):
                                     return_train_score=True)
             penalty = penalty_rate * x_new.shape[1]
             # print(scores)
-            # print(scores.keys())
+            # print(scores.keys())0º)
             cv_score = scores['test_score'].mean()
             train_score = scores['train_score'].mean()
             if cv_score - penalty > best_scan_score:
