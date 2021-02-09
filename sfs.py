@@ -45,23 +45,32 @@ def sfs_back(est, X_original, Y, cv, penalty_rate=0.002):
             print('best scan columns: ', best_columns)
 
 
-def sfs_full(regr, X_original, y, cv, min_components=4, penalty_rate=0.0):
+def sfs_full(regr, X_original, y, cv, max_components=None, penalty_rate=0.0):
     cv_scores = []
     test_scores = []
+    best_test = 0.0
+    best_columns = []
     current_column_set = X_original.columns
     X = X_original.copy()
-    while X.shape[1] > min_components:
+    print(X_original.shape)
+    if not max_components:
+        max_components = X_original.shape[1]
+
+    for i in range(max_components):
         print('i = ', X.shape[1])
         # print(current_column_set)
         x_current = X[current_column_set]
 
         best_scan_score = -np.inf
+        best_new_column = None
         best_scan_train_score = 0
         best_scan_columns = []
-        for j, new_column in enumerate(x_current.columns):
+        for j, new_column in enumerate(X.columns):
+            if new_column in current_column_set:
+                continue
             # print(j, new_column)
             x_new = x_current.copy()
-            x_new.drop(new_column, axis=1)
+            x_new[new_column] = X[new_column]
             # print(x_new.columns)
             # score = cross_val_score(regr, x_new, y, cv=cv, scoring='neg_mean_absolute_error').mean()
             scores = cross_validate(regr, x_new, y, cv=cv,

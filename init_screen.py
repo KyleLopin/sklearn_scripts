@@ -197,10 +197,10 @@ if __name__ == "__main__":
     print(x_trans)
     svr = SVR()
     pls = PLSRegression(n_components=6)
-
+    regr = pls
     print(y.columns)
-    pls.fit(x, y['Avg Total Chlorophyll (µg/cm2)'])
-    print(pls.coef_)
+    # pls.fit(x, y['Avg Total Chlorophyll (µg/cm2)'])
+    # print(pls.coef_)
     # plot_learning_curve(pls, "", x_trans, y['Avg Total Chlorophyll (µg/cm2)'])
     # ham
-    # pls_comp_screen(x_trans, y, regr, max_comps=n_comps)
+    pls_comp_screen(x_trans, y, regr, max_comps=n_comps)
