@@ -43,10 +43,11 @@ def get_data(specimen: str, sensor: str, led_current: str=None,
             y_columns.append(column)
     print(data_columns)
     print('1:', data.shape)
+    print(data.columns)
 
     if led_current:
         led_current = format_input_to_list(led_current)
-        data = data[data['led current'].isin(led_current)]
+        data = data[data['LED current'].isin(led_current)]
         # print(data)
         # data.to_csv("foobar")
 

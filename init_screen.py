@@ -6,7 +6,9 @@
 
 __author__ = "Kyle Vitatus Lopin"
 
-
+# standard libraries
+import pickle
+# installed libraries
 import matplotlib.pyplot as plt
 from mlxtend.feature_selection import SequentialFeatureSelector
 from mlxtend.plotting import plot_sequential_feature_selection as sfs_plot
@@ -14,6 +16,7 @@ import numpy as np
 import pandas as pd
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.linear_model import LassoCV, MultiTaskLassoCV
+from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import (learning_curve,
     RepeatedKFold, ShuffleSplit, train_test_split)
 from sklearn.pipeline import make_pipeline
@@ -141,9 +144,10 @@ def sfs_screen(x, y, regr):
     pass
 
 
-def pls_comp_screen(x, y, regr, max_comps=12):
+def pls_sfs_screen(x, y, n_comps=6):
     cv = RepeatedKFold(n_splits=4, n_repeats=5)
     print(x.shape)
+    regr = PLSRegression(n_components=n_comps)
     # sfs = SequentialFeatureSelector(regr,
     #                                 k_features=(max_comps, 2*max_comps),
     #                                 forward=False,
@@ -151,22 +155,23 @@ def pls_comp_screen(x, y, regr, max_comps=12):
     #                                 scoring='neg_mean_absolute_error',
     #                                 cv=cv, verbose=2)
     # sfs_fit = sfs.fit(x, y)
-    sfs_fit = sfs.sfs_full(regr, x, y, cv)
-    print(sfs.subsets_)
-    print('========')
-    print(sfs.get_metric_dict())
-    print('+++++++')
-    cv_scores = []
-    test_scores = []
-    for key, data in sfs.subsets_.items():
+    sfs_fit = sfs.sfs_full(regr, x, y, cv, min_components=n_comps)
+    # print(sfs.subsets_)
+    # print('========')
+    # print(sfs.get_metric_dict())
+    # print('+++++++')
+    # cv_scores = []
+    # test_scores = []
+    with open("sfs_test.pkl", 'wb') as f:
+        pickle.dump(sfs_fit, f)
+    for key, data in sfs_fit.items():
         print(data)
         print(key)
-        cv_scores.append(data['avg_score'])
-        test_scores.append(sfs_fit['mean_test_score'])
+        # cv_scores.append(data['avg_score'])
+        # test_scores.append(sfs_fit['mean_test_score'])
     print('--------')
-    print(cv_scores)
-    sfs_plot(sfs.get_metric_dict(), kind='std_dev')
-    plt.show()
+    # print(cv_scores)
+    # sfs_plot(sfs.get_metric_dict(), kind='std_dev')
 
 
 def average_reads():
@@ -174,33 +179,52 @@ def average_reads():
 
 
 if __name__ == "__main__":
-    x, y = get_data.get_data("mango", "as7265x", int_time=150,
-                             position=2, led="b'White'",
+    x, y = get_data.get_data("mango", "as7262", int_time=150,
+                             position=2,
                              led_current="25 mA")
-    print(x.shape)
-    # pls_screen_as726x(x, y, n_comps=10)
+
+    pls = PLSRegression(n_components=6)
+    y = y['Total Chlorophyll (µg/cm2)']
+    # x, y = get_data.get_data("mango", "as7262", int_time=150,
+    #                          position=2, led="b'White'",
+    #                          led_current="25 mA")
+    # print(x.shape)
+    # # pls_screen_as726x(x, y, n_comps=10)
+    # print(type(x))
     poly = PolynomialFeatures()
     x_trans = poly.fit_transform(x)
-    n_comps = 6
-    regr = PLSRegression(n_components=n_comps)
-    print(x_trans.shape)
-    print(poly.get_feature_names())
-
-    x_trans = pd.DataFrame(x_trans, columns=poly.get_feature_names())
-    print(x_trans)
-    cols_to_use = []
-    for column in poly.get_feature_names():
-        if ' ' not in column:
-            cols_to_use.append(column)
-    print(cols_to_use)
-    x_trans = x_trans[cols_to_use]
-    print(x_trans)
-    svr = SVR()
-    pls = PLSRegression(n_components=6)
-    regr = pls
-    print(y.columns)
-    # pls.fit(x, y['Avg Total Chlorophyll (µg/cm2)'])
-    # print(pls.coef_)
-    # plot_learning_curve(pls, "", x_trans, y['Avg Total Chlorophyll (µg/cm2)'])
+    # pls.fit(x_trans, y)
+    # y_predict = pls.predict(x_trans)
+    # print(mean_absolute_error(y, y_predict))
     # ham
-    pls_comp_screen(x_trans, y, regr, max_comps=n_comps)
+    # n_comps = 6
+    # regr = PLSRegression(n_components=n_comps)
+    # print(x_trans.shape)
+    # print(poly.get_feature_names())
+    #
+    x_trans = pd.DataFrame(x_trans, columns=poly.get_feature_names())
+    # print(x_trans)
+    # cols_to_use = []
+    # for column in poly.get_feature_names():
+    #     if ' ' not in column:
+    #         cols_to_use.append(column)
+    # print(cols_to_use)
+    # x_trans = x_trans[cols_to_use]
+    # print(x_trans)
+    # svr = SVR()
+    # pls = PLSRegression(n_components=6)
+    # regr = pls
+    # print(y.columns)
+    # # pls.fit(x, y['Avg Total Chlorophyll (µg/cm2)'])
+    # # print(pls.coef_)
+    # # plot_learning_curve(pls, "", x_trans, y['Avg Total Chlorophyll (µg/cm2)'])
+    # # ham
+    pls_sfs_screen(x_trans, y)
+
+    with open("sfs_test.pkl", 'rb') as f:
+        sfs_fit = pickle.load(f)
+    for key, value in sfs_fit.items():
+        print(key)
+    plt.plot(sfs_fit["n columns"], sfs_fit['test scores'], color='green')
+    plt.plot(sfs_fit["n columns"], sfs_fit['training scores'], color='red')
+    plt.show()
