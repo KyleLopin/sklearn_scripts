@@ -34,7 +34,6 @@ def invert(x):
     return 1/x
 
 
-
 def get_all_regrs():
     regrs = {"Linear regression": linear_model.LinearRegression(),
              "Perceptron": linear_model.Perceptron(),

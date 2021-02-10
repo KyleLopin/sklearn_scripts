@@ -140,12 +140,18 @@ def pls_screen_as726x(x, y, n_comps=8):
     plt.show()
 
 
-def sfs_screen(x, y, regr):
-    pass
+def pls_comp_screen(x, y, max_comps=6):
+    data_fits = dict()
+    for i in range(1, max_comps):
+        print('n_comps = ', i)
+        run_fit = pls_sfs_screen(x, y, n_comps=i)
+        data_fits[i] = run_fit
+    with open("sfs_test.pkl", 'wb') as f:
+        pickle.dump(data_fits, f)
 
 
 def pls_sfs_screen(x, y, n_comps=6):
-    cv = RepeatedKFold(n_splits=4, n_repeats=5)
+    cv = RepeatedKFold(n_splits=4, n_repeats=25)
     print(x.shape)
     regr = PLSRegression(n_components=n_comps)
     # sfs = SequentialFeatureSelector(regr,
@@ -162,20 +168,23 @@ def pls_sfs_screen(x, y, n_comps=6):
     # print('+++++++')
     # cv_scores = []
     # test_scores = []
-    with open("sfs_test.pkl", 'wb') as f:
-        pickle.dump(sfs_fit, f)
-    for key, data in sfs_fit.items():
-        print(data)
-        print(key)
+    # with open("sfs_test.pkl", 'wb') as f:
+    #     pickle.dump(sfs_fit, f)
+    # for key, data in sfs_fit.items():
+    #     print(data)
+    #     print(key)
         # cv_scores.append(data['avg_score'])
         # test_scores.append(sfs_fit['mean_test_score'])
     print('--------')
     # print(cv_scores)
     # sfs_plot(sfs.get_metric_dict(), kind='std_dev')
+    return sfs_fit
 
 
-def average_reads():
-    pass
+def find_maxfit(data):
+    max_score = 100
+    print(data["training scores"])
+    return max(data["training scores"])
 
 
 if __name__ == "__main__":
@@ -191,7 +200,7 @@ if __name__ == "__main__":
     # print(x.shape)
     # # pls_screen_as726x(x, y, n_comps=10)
     # print(type(x))
-    poly = PolynomialFeatures()
+    poly = PolynomialFeatures(degree=3)
     x_trans = poly.fit_transform(x)
     # pls.fit(x_trans, y)
     # y_predict = pls.predict(x_trans)
@@ -219,12 +228,19 @@ if __name__ == "__main__":
     # # print(pls.coef_)
     # # plot_learning_curve(pls, "", x_trans, y['Avg Total Chlorophyll (µg/cm2)'])
     # # ham
-    pls_sfs_screen(x_trans, y)
+    # pls_sfs_screen(x_trans, y)
+    pls_comp_screen(x_trans, y, max_comps=30)
 
     with open("sfs_test.pkl", 'rb') as f:
         sfs_fit = pickle.load(f)
+    n_comps = []
+    best_score = []
     for key, value in sfs_fit.items():
-        print(key)
-    plt.plot(sfs_fit["n columns"], sfs_fit['test scores'], color='green')
-    plt.plot(sfs_fit["n columns"], sfs_fit['training scores'], color='red')
+        print('n comp:', key)
+        # find_maxfit(value)
+        n_comps.append(key)
+        best_score.append(find_maxfit(value))
+    plt.plot(n_comps, best_score)
+    # # plt.plot(sfs_fit["n columns"], sfs_fit['test scores'], color='green')
+    # # plt.plot(sfs_fit["n columns"], sfs_fit['training scores'], color='red')
     plt.show()

@@ -86,13 +86,15 @@ def sfs_full(regr, X_original, y, cv, min_components=1, penalty_rate=0.0):
                 best_scan_train_score = train_score
                 best_scan_columns = x_new.columns
                 worse_new_column = new_column
-                print('new score: ', best_scan_score, best_scan_train_score, len(best_scan_columns))
+                # print('new score: ', best_scan_score, best_scan_train_score, len(best_scan_columns))
 
                 # print('best scan columns: ', best_scan_columns)
         print("dropping: ", X.shape)
         n_columns.append(X.shape[1])
         X = X.drop(worse_new_column, axis=1)
         print('dropped: ', X.shape)
+        print('new score: ', best_scan_score, best_scan_train_score, len(best_scan_columns))
+
         test_scores.append(best_scan_score)
         training_scores.append(best_scan_train_score)
         best_columns.append(best_scan_columns)
