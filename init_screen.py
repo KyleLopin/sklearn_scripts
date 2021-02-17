@@ -142,7 +142,7 @@ def pls_screen_as726x(x, y, n_comps=8):
 
 def pls_comp_screen(x, y, max_comps=6):
     data_fits = dict()
-    for i in range(1, max_comps):
+    for i in range(1, max_comps-1):
         print('n_comps = ', i)
         run_fit = pls_sfs_screen(x, y, n_comps=i)
         data_fits[i] = run_fit
@@ -212,14 +212,14 @@ if __name__ == "__main__":
     # print(poly.get_feature_names())
     #
     x_trans = pd.DataFrame(x_trans, columns=poly.get_feature_names())
-    # print(x_trans)
-    # cols_to_use = []
-    # for column in poly.get_feature_names():
-    #     if ' ' not in column:
-    #         cols_to_use.append(column)
-    # print(cols_to_use)
-    # x_trans = x_trans[cols_to_use]
-    # print(x_trans)
+    print(x_trans)
+    cols_to_use = []
+    for column in poly.get_feature_names():
+        if ' ' not in column:
+            cols_to_use.append(column)
+    print(cols_to_use)
+    x_trans = x_trans[cols_to_use]
+    print(x_trans)
     # svr = SVR()
     # pls = PLSRegression(n_components=6)
     # regr = pls
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     # # plot_learning_curve(pls, "", x_trans, y['Avg Total Chlorophyll (µg/cm2)'])
     # # ham
     # pls_sfs_screen(x_trans, y)
-    pls_comp_screen(x_trans, y, max_comps=30)
+    pls_comp_screen(x_trans, y, max_comps=18)
 
     with open("sfs_test.pkl", 'rb') as f:
         sfs_fit = pickle.load(f)
@@ -243,4 +243,5 @@ if __name__ == "__main__":
     plt.plot(n_comps, best_score)
     # # plt.plot(sfs_fit["n columns"], sfs_fit['test scores'], color='green')
     # # plt.plot(sfs_fit["n columns"], sfs_fit['training scores'], color='red')
+    print("Done")
     plt.show()

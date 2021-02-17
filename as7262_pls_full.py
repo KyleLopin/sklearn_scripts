@@ -28,7 +28,7 @@ from sklearn.svm import SVR
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, RobustScaler, FunctionTransformer, PolynomialFeatures
 # local files
-import data_get
+import get_data
 import processing
 import sfs
 
@@ -38,9 +38,12 @@ plt.style.use('seaborn')
 # x_data, _, fitting_data = data_get.get_data('as7262 mango', integration_time=150,
 #                                             led_current="12.5 mA",
 #                                             read_number=2)
-x_data1, _, fitting_data2 = data_get.get_data('as7263 mango', integration_time=150,
-                                              led_current="12.5 mA",
-                                              read_number=2)
+# x_data1, _, fitting_data2 = data_get.get_data('as7263 mango', integration_time=150,
+#                                               led_current="12.5 mA",
+#                                               read_number=2)
+x_data, _, fitting_data = get_data.get_data("mango", "as7262", int_time=150,
+                                              position=2,
+                                              led_current="25 mA", return_type="XYZ")
 # x_data2, _, fitting_data2 = data_get.get_data('as7262 mango', integration_time=100,
 #                                             led_current="12.5 mA",
 #                                             read_number=1)
@@ -60,7 +63,7 @@ print(x_data)
 exp_transformer = FunctionTransformer(np.exp, inverse_func=np.log)
 
 
-pls = PLSRegression(n_components=15)
+pls = PLSRegression(n_components=12)
 # pls = SGDRegressor()
 # pls = DecisionTreeRegressor(max_depth=4)
 # pls = GradientBoostingRegressor(max_depth=2)
@@ -88,9 +91,11 @@ pls = PLSRegression(n_components=6)
 #                                  inverse_func=np.log)
 # pls = GradientBoostingRegressor()
 # pls = SVR()
-# pls = TransformedTargetRegressor(regressor=rgs,
-#                                  func=np.exp,
-#                                  inverse_func=np.log)
+# rgs = PLSRegression(n_components=6)
+
+pls = TransformedTargetRegressor(regressor=pls,
+                                 func=np.log,
+                                 inverse_func=np.exp)
 # pls = SVR()
 x_data_columns = []
 for column in fitting_data:
@@ -113,17 +118,18 @@ y4 = y3 / (y2 + y3)
 # y4 = fitting_data['Total Chlorophyll (µg/mg)']
 
 
-x_data = fitting_data[x_data_columns]
+# x_data = fitting_data[x_data_columns]
 # x_data, _ = processing.msc(x_data)
 # x_data = processing.snv(x_data)
 # x_data = np.exp(-x_data)
 # x_data = np.log(x_data)
 # x_data = 1 / x_data
 # scalar = make_pipeline(StandardScaler(), PolynomialFeatures(), KernelPCA(kernel='rbf'))
-x_scaled_np = StandardScaler().fit_transform(x_data)
-x_scaled_np = PolynomialFeatures(degree=2).fit_transform(x_scaled_np)
+x_data = StandardScaler().fit_transform(x_data)
+x_scaled_np = PolynomialFeatures(degree=2).fit_transform(x_data)
 # x_scaled_np = PCA(n_components=12).fit_transform(x_scaled_np)
 # x_scaled_np = KernelPCA(kernel='rbf', n_components=12).fit_transform(x_scaled_np)
+# x_scaled_np = x_data
 
 print('====')
 
@@ -143,7 +149,7 @@ axes = [axes[0][0], axes[0][1], axes[1][0], axes[1][1]]
 invert_y = False
 convert_y = False
 
-for i, y in enumerate([y1, y2, y3, y4]):
+for i, y in enumerate([y1]):
     if convert_y:
         y = np.exp(-y)
     if invert_y:
@@ -163,7 +169,7 @@ for i, y in enumerate([y1, y2, y3, y4]):
     y_test_predict = pls.predict(X_test)
     y_train_predict = pls.predict(X_train)
     print(y)
-    print(pls.coef_)
+    # print(pls.coef_)
 
     if invert_y:
         y_train = 1 / y_train
