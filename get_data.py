@@ -46,8 +46,12 @@ def get_data(specimen: str, sensor: str, led_current: str=None,
     print(data.columns)
 
     if led_current:
+        print(data.columns)
+        led_key = "LED current"
+        if led_key not in data.columns:
+            led_key = "led current"
         led_current = format_input_to_list(led_current)
-        data = data[data['LED current'].isin(led_current)]
+        data = data[data[led_key].isin(led_current)]
         # print(data)
         # data.to_csv("foobar")
 

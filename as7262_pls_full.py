@@ -24,7 +24,7 @@ from sklearn import feature_selection
 from sklearn.linear_model import LassoCV, SGDRegressor
 from sklearn.model_selection import cross_validate, train_test_split
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.svm import SVR
+from sklearn.svm import SVR, LinearSVR
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, RobustScaler, FunctionTransformer, PolynomialFeatures
 # local files
@@ -84,18 +84,30 @@ def invert(x):
 #                                  inverse_func=np.exp)
 #
 # pls = LassoCV(max_iter=5000)
-pls = PLSRegression(n_components=6)
+# pls = PLSRegression(n_components=4)
 # pls = make_pipeline(PLSRegression(n_components=6), LassoCV())
 # pls = TransformedTargetRegressor(regressor=GradientBoostingRegressor(),
 #                                  func=np.exp,
 #                                  inverse_func=np.log)
 # pls = GradientBoostingRegressor()
-# pls = SVR()
-# rgs = PLSRegression(n_components=6)
+# pls = SVR(kernel="linear")
+def neg_exp(x):
+    return np.exp(-x)
 
-pls = TransformedTargetRegressor(regressor=pls,
-                                 func=np.log,
-                                 inverse_func=np.exp)
+
+def neg_log(x):
+    return -np.log(x)
+
+
+pls = LinearSVR()
+# pls = TransformedTargetRegressor(regressor=LinearSVR(),
+#                                  func=neg_log,
+#                                  inverse_func=neg_exp)
+# rgs = PLSRegression(n_components=6)
+#
+# pls = TransformedTargetRegressor(regressor=pls,
+#                                  func=np.log,
+#                                  inverse_func=np.exp)
 # pls = SVR()
 x_data_columns = []
 for column in fitting_data:
@@ -107,15 +119,11 @@ chloro_columns = ['Total Chlorophyll (µg/mg)', 'Chlorophyll a (µg/mg)',
 # print(fitting_data[chloro_columns])
 print(fitting_data.columns)
 # y1 = fitting_data['Total Chlorophyll (µg/mg)']
-y1 = fitting_data['Total Chlorophyll (µg/cm2)']
-y2 = fitting_data['Chlorophyll a (µg/cm2)']
-y3 = fitting_data['Chlorophyll b (µg/cm2)']
-# y3 = fitting_data['Chlorophyll a (µg/mg)']
+y1 = fitting_data['Avg Total Chlorophyll (µg/cm2)']
+y2 = fitting_data['Avg Chlorophyll a (µg/cm2)']
+y3 = fitting_data['Avg Chlorophyll b (µg/cm2)']
 y4 = y3 / (y2 + y3)
-# y4 = fitting_data['Chlorophyll a (µg/mg)']
-# y2 = fitting_data['Total Chlorophyll (µg/mg)']
-# y3 = fitting_data['Total Chlorophyll (µg/mg)']
-# y4 = fitting_data['Total Chlorophyll (µg/mg)']
+
 
 
 # x_data = fitting_data[x_data_columns]
@@ -127,20 +135,10 @@ y4 = y3 / (y2 + y3)
 # scalar = make_pipeline(StandardScaler(), PolynomialFeatures(), KernelPCA(kernel='rbf'))
 x_data = StandardScaler().fit_transform(x_data)
 x_scaled_np = PolynomialFeatures(degree=2).fit_transform(x_data)
-# x_scaled_np = PCA(n_components=12).fit_transform(x_scaled_np)
-# x_scaled_np = KernelPCA(kernel='rbf', n_components=12).fit_transform(x_scaled_np)
-# x_scaled_np = x_data
 
-print('====')
-
-# print(x_scaled_np)
-# x_scaled_np = PLSRegression(n_components=12).fit_transform(x_scaled_np)
-print(x_scaled_np)
-# x_scaled_np = scalar.fit_transform(x_data)
-# x_scaled = pd.DataFrame(x_scaled_np, columns=x_data.columns)
 x_scaled = pd.DataFrame(x_scaled_np)
-# x_scaled = x_data
-print(x_scaled)
+# x_scaled = processing.snv(x_data)
+
 figure, axes, = plt.subplots(2, 2, figsize=(7.5, 8.75), constrained_layout=True)
 
 figure.suptitle("Model fit to new AS7262 Mango data")
@@ -150,54 +148,23 @@ invert_y = False
 convert_y = False
 
 for i, y in enumerate([y1]):
-    if convert_y:
-        y = np.exp(-y)
-    if invert_y:
-        y = 1 / y
-    # y = np.exp(-y)
-    # print(1/y, 1/(1/y))
-    # print(fitting_data)
+
     bins = np.linspace(y.min(), y.max(), 5)
     labels = ["1", "2", "3", "4"]
-    Y_groups = pd.cut(y, bins)
-    print(Y_groups)
+    # Y_groups = pd.cut(y, bins)
+    # print(Y_groups)
     print('===')
     X_train, X_test, y_train, y_test = train_test_split(x_scaled, y,
                                                         test_size=0.2)
-
     pls.fit(X_train, y_train)
     y_test_predict = pls.predict(X_test)
     y_train_predict = pls.predict(X_train)
-    print(y)
-    # print(pls.coef_)
-
-    if invert_y:
-        y_train = 1 / y_train
-        y_test = 1 / y_test
-        y_test_predict = 1 / y_test_predict
-        y_train_predict = 1 / y_train_predict
-    if convert_y:
-        y_train = -np.log(y_train)
-        y_test = -np.log(y_test)
-        y_test_predict = -np.log(y_test_predict)
-        y_train_predict = -np.log(y_train_predict)
-
-    # y = 1 / y
-    # y_predict = 1 / y_predict
-    # x_linespace = np.linspace(np.min(y_train_predict), np.max(y_train_predict))
-    # print(x_linespace)
-    # y_linespace = pls.predict(x_linespace.reshape(-1, 1))
 
     axes[i].scatter(y_test_predict, y_test, color='forestgreen', label="Test set")
     axes[i].scatter(y_train_predict, y_train, color='indigo', label="Training set")
     y_line = [np.min(y_train_predict), np.max(y_train_predict)]
     axes[i].plot(y_line, y_line, color='red', lw=1, linestyle='--')
     axes[i].legend()
-    # axes[i].scatter(1/y, 1/(1/y))
-    # print(y_test)
-    # print(y_test_predict)
-    # print(X_test)
-    # print(pls.regressor_.coef_)
 
     r2_test = r2_score(y_test, y_test_predict)
     # r2_test=1

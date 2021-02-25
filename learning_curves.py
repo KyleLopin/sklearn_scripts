@@ -19,10 +19,11 @@ from sklearn.metrics import median_absolute_error
 from sklearn.model_selection import learning_curve
 from sklearn.model_selection import GroupShuffleSplit, ShuffleSplit
 from sklearn.preprocessing import StandardScaler, RobustScaler, PolynomialFeatures
-from sklearn.svm import SVR
+from sklearn.svm import SVR, LinearSVR
 
 # local files
 import data_get
+import get_data
 import processing
 
 plt.style.use('seaborn')
@@ -282,23 +283,34 @@ if __name__ == '__main__':
     lasso = Lasso(max_iter=5000, alpha=10**-4)
     gradboost = GradientBoostingRegressor(max_depth=2)
     lr = LinearRegression()
-    ttr = TransformedTargetRegressor(regressor=PLS(n_components=3),
-                                     func=invert,
-                                     inverse_func=invert)
-    ttr = TransformedTargetRegressor(regressor=PLS(n_components=3),
-                                     func=np.exp,
-                                     inverse_func=np.log)
-    x_data, _, data = data_get.get_data('as7262 mango', led_current="25 mA",
-                                        integration_time=100)
 
+
+    def neg_exp(x):
+        return np.exp(-x)
+
+
+    def neg_log(x):
+        return -np.log(x)
+
+
+    pls = LinearSVR()
+    pls = TransformedTargetRegressor(regressor=LinearSVR(max_iter=20000),
+                                     func=neg_log,
+                                     inverse_func=neg_exp)
+    # x_data, _, data = data_get.get_data('as7262 mango', led_current="25 mA",
+    #                                     integration_time=100)
+    x_data, _, data = get_data.get_data("mango", "as7262", int_time=150,
+                                        position=2, led_current="25 mA",
+                                        return_type="XYZ")
     # x_data, _ = processing.msc(x_data)
+    # x_data = processing.snv(x_data)
     x_data = StandardScaler().fit_transform(x_data)
-    x_data = PolynomialFeatures().fit_transform(x_data)
+    x_data = PolynomialFeatures(degree=2).fit_transform(x_data)
     # x_data = RobustScaler().fit_transform(x_data)
     # x_data, _, data = data_getter.get_data('new as7262 mango')
     # data = data.groupby('Leaf number', as_index=True).mean()
 
-    y_name = 'Total Chlorophyll (µg/mg)'
+    y_name = 'Avg Total Chlorophyll (µg/mg)'
     y_data = (data[y_name])
     # y_data = np.exp(-y_data)
     # x_data = x_data.groupby('Leaf number', as_index=True).mean()
@@ -307,11 +319,11 @@ if __name__ == '__main__':
 
     cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
 
-    # plot_learning_curve(lasso, 'AS7262 Mango Learning Curve\n'
-    #                                'Total Chlorophyll', x_data, y_data, cv=cv)
-    estimators = [lasso, svr, pls, lr]
-    est_names = ["Lasso", "SVR", "PLS", "Linear Regression"]
+    plot_learning_curve(pls, 'AS7262 Mango Learning Curve\n'
+                                   'Total Chlorophyll', x_data, y_data, cv=cv)
+    # estimators = [lasso, svr, pls, lr]
+    # est_names = ["Lasso", "SVR", "PLS", "Linear Regression"]
     # plot_4_learning_curves(estimators, est_names, cv, x_data, y_data, [-0.5, 0])
-    plot_param_learning_curves()
+    # plot_param_learning_curves()
 
     plt.show()

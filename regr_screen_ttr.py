@@ -25,10 +25,11 @@ import processing
 sensor = "as7262"
 sensors = ["as7262", "as7263"]
 leafs = ["mango", "rice", "jasmine", "banana", "sugarcane"]
+leafs = ["banana"]
 
 filename = f"ini_screen_results.xlsx"
-with pd.ExcelWriter(filename, mode='w') as writer:
-    pd.DataFrame().to_excel(writer)
+# with pd.ExcelWriter(filename, mode='w') as writer:
+#     pd.DataFrame().to_excel(writer)
 
 def neg_exp(x):
     return np.exp(-x)
@@ -70,11 +71,11 @@ y = y['Total Chlorophyll (µg/cm2)']
 # ttr.score(x, y)
 # ham
 
-ttr_funcs = [("Square", np.square, np.sqrt),
+ttr_funcs = [("None"),
+             ("Square", np.square, np.sqrt),
              ("Square root", np.sqrt, np.square),
-             ("Log", neg_log, neg_exp),
-             ("SS", StandardScaler()),
-             ("RS", RobustScaler())]
+             ("Log", neg_log, neg_exp)]
+# ttr_funcs = [[("None")]]
 
 all_regressors = full_regrs.get_all_regrs()
 all_transformers = full_regrs.get_transformers()
@@ -86,7 +87,8 @@ regressors = []
 df_columns = []
 for trns in all_transformers.keys():
     for score_set in [" train", " test"]:
-        df_columns.append(trns+score_set)
+        for ttr_func in ttr_funcs:
+            df_columns.append(trns+" "+ttr_func[0]+score_set)
 
 
 def run_scan(x, y, sheetname):
@@ -108,8 +110,10 @@ def run_scan(x, y, sheetname):
                     ttr_regr = TransformedTargetRegressor(regressor=regr,
                                                           func=ttr[1],
                                                           inverse_func=ttr[2])
+                elif len(ttr) == 1:
+                    ttr_regr = regr
 
-                print(name, tr_name, ttr[0])
+                print(name, tr_name, ttr[0], sheetname)
                 regressors.append(name)
                 try:
                     scores = cross_validate(ttr_regr, x_tr, y, cv=cv,
@@ -123,9 +127,9 @@ def run_scan(x, y, sheetname):
                     # print(mae_scores)
                     training_scores.append(mae_scores[0])
                     test_scores.append(mae_scores[1])
-                    print(mae_scores[1])
-                    results_df[tr_name+" train"][name] = mae_scores[0]
-                    results_df[tr_name + " test"][name] = mae_scores[1]
+                    print(mae_scores[1], tr_name+" "+ttr[0]+" train")
+                    results_df[tr_name+" "+ttr[0]+" train"][name] = mae_scores[0]
+                    results_df[tr_name+" "+ttr[0]+" test"][name] = mae_scores[1]
                 except:
                     pass
 
@@ -136,5 +140,13 @@ def run_scan(x, y, sheetname):
 if __name__ == "__main__":
     for sensor in sensors:
         for leaf in leafs:
+            x, y = get_data.get_data(leaf, sensor, int_time=150,
+                                     position=2,
+                                     led_current="25 mA")
+            print(y.columns)
+            y_column = 'Total Chlorophyll (µg/cm2)'
+            if y_column not in y.columns:
+                y_column = 'Avg Total Chlorophyll (µg/cm2)'
+            y = y[y_column]
             name = f"{sensor}_{leaf}"
             run_scan(x, y, name)
