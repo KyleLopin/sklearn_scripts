@@ -60,7 +60,8 @@ def get_all_regrs():
              #                                            func=invert,
              #                                            inverse_func=invert),
              # "Log regressor": linear_model.LogisticRegressionCV(),
-             "ML Perceptron": neural_network.MLPRegressor(),
+             "ML Perceptron": neural_network.MLPRegressor(max_iter=50000,
+                                                          hidden_layer_sizes=(5, 5)),
              "Linear SVR": linear_svc,
              "RBF SVR": svm.SVR(kernel='rbf'),
              "Poly SVR": svm.SVR(kernel='poly'),
@@ -70,6 +71,18 @@ def get_all_regrs():
              # "Poisson": linear_model.PoissonRegressor(),
              "K-neighbors": neighbors.KNeighborsRegressor()}
              # "Radius Neighbors": neighbors.RadiusNeighborsRegressor()}
+    return regrs
+
+
+def get_all_regrs_2():
+    regrs = {"Lasso": linear_model.LassoCV(max_iter=5000),
+             "Random Forest": ensemble.RandomForestRegressor(),
+             "Gradient Boost": ensemble.GradientBoostingRegressor(),
+             "Extra Trees": ensemble.ExtraTreesRegressor(max_depth=2),
+             "Ada Boost": ensemble.AdaBoostRegressor(base_estimator=tree.DecisionTreeRegressor(max_depth=2),
+                                                     n_estimators=250),
+             "Linear pipe SVR": linear_svc,
+             "Linear SVR": svm.LinearSVR()}
     return regrs
 
 
@@ -83,21 +96,33 @@ def get_transformers():
                   "Quant normal": QuantileTransformer(n_quantiles=10,
                                                       output_distribution='uniform'),
                   "Power": PowerTransformer(),
-                  "K bins 3 uniform": KBinsDiscretizer(n_bins=3, encode='ordinal',
-                                                       strategy='uniform'),
-                  "K bins 3 kmeans": KBinsDiscretizer(n_bins=3, encode='ordinal',
-                                                      strategy='kmeans'),
                   "K bins 5 uniform": KBinsDiscretizer(n_bins=5, encode='ordinal',
                                                        strategy='uniform'),
                   "K bins 5 kmeans": KBinsDiscretizer(n_bins=5, encode='ordinal',
                                                       strategy='kmeans'),
-                  "K bins 7 uniform": KBinsDiscretizer(n_bins=7, encode='ordinal',
+                  "K bins 8 uniform": KBinsDiscretizer(n_bins=8, encode='ordinal',
                                                        strategy='uniform'),
-                  "K bins 7 kmeans": KBinsDiscretizer(n_bins=7, encode='ordinal',
+                  "K bins 8 kmeans": KBinsDiscretizer(n_bins=8, encode='ordinal',
+                                                      strategy='kmeans'),
+                  "K bins 12 uniform": KBinsDiscretizer(n_bins=12, encode='ordinal',
+                                                       strategy='uniform'),
+                  "K bins 12 kmeans": KBinsDiscretizer(n_bins=12, encode='ordinal',
                                                       strategy='kmeans')
                   }
     return transforms
 
+
+def get_transformers_2():
+    transforms = {"Standard": StandardScaler(),
+                  "Robust": RobustScaler(),
+                  "Polynomial": PolynomialFeatures(),
+                  "Normalizer": Normalizer(),
+                  "Quant normal": QuantileTransformer(n_quantiles=10,
+                                                      output_distribution='normal'),
+                  "Quant normal": QuantileTransformer(n_quantiles=10,
+                                                      output_distribution='uniform'),
+                  "Power": PowerTransformer()}
+    return transforms
 
 # regers with params: Ridge, Lasso, LassoLars, BayesianRidge, HuberRegressor,
 # PoissonRegressor, K-Neighbors, SVR, DecisionTreeRegressor, AdaBoost, Kernal Ridge

@@ -41,7 +41,7 @@ plt.style.use('seaborn')
 # x_data1, _, fitting_data2 = data_get.get_data('as7263 mango', integration_time=150,
 #                                               led_current="12.5 mA",
 #                                               read_number=2)
-x_data, _, fitting_data = get_data.get_data("mango", "as7262", int_time=150,
+x_data, _, fitting_data = get_data.get_data("banana", "as7263", int_time=150,
                                               position=2,
                                               led_current="25 mA", return_type="XYZ")
 # x_data2, _, fitting_data2 = data_get.get_data('as7262 mango', integration_time=100,
@@ -100,9 +100,9 @@ def neg_log(x):
 
 
 pls = LinearSVR()
-# pls = TransformedTargetRegressor(regressor=LinearSVR(),
-#                                  func=neg_log,
-#                                  inverse_func=neg_exp)
+pls = TransformedTargetRegressor(regressor=LinearSVR(),
+                                 func=neg_log,
+                                 inverse_func=neg_exp)
 # rgs = PLSRegression(n_components=6)
 #
 # pls = TransformedTargetRegressor(regressor=pls,

@@ -115,6 +115,7 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
         estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes,
         groups=group, shuffle=True, scoring='neg_mean_absolute_error')
     # explained_variance, neg_median_absolute_error
+    print(test_scores)
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
     test_scores_mean = np.mean(test_scores, axis=1)
@@ -293,8 +294,8 @@ if __name__ == '__main__':
         return -np.log(x)
 
 
-    pls = LinearSVR()
-    pls = TransformedTargetRegressor(regressor=LinearSVR(max_iter=20000),
+    # pls = LinearSVR()
+    pls = TransformedTargetRegressor(regressor=LinearSVR(max_iter=2000000),
                                      func=neg_log,
                                      inverse_func=neg_exp)
     # x_data, _, data = data_get.get_data('as7262 mango', led_current="25 mA",
@@ -305,25 +306,25 @@ if __name__ == '__main__':
     # x_data, _ = processing.msc(x_data)
     # x_data = processing.snv(x_data)
     x_data = StandardScaler().fit_transform(x_data)
-    x_data = PolynomialFeatures(degree=2).fit_transform(x_data)
+    # x_data = PolynomialFeatures(degree=2).fit_transform(x_data)
     # x_data = RobustScaler().fit_transform(x_data)
     # x_data, _, data = data_getter.get_data('new as7262 mango')
     # data = data.groupby('Leaf number', as_index=True).mean()
 
-    y_name = 'Avg Total Chlorophyll (µg/mg)'
+    y_name = 'Avg Total Chlorophyll (µg/cm2)'
     y_data = (data[y_name])
     # y_data = np.exp(-y_data)
     # x_data = x_data.groupby('Leaf number', as_index=True).mean()
 
     # x_data = data
 
-    cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
+    cv = ShuffleSplit(n_splits=100, test_size=0.2)
 
     plot_learning_curve(pls, 'AS7262 Mango Learning Curve\n'
                                    'Total Chlorophyll', x_data, y_data, cv=cv)
     # estimators = [lasso, svr, pls, lr]
     # est_names = ["Lasso", "SVR", "PLS", "Linear Regression"]
-    # plot_4_learning_curves(estimators, est_names, cv, x_data, y_data, [-0.5, 0])
+    # plot_4_learning_curves(estimators, est_names, cv, x_data, y_data, [-15, 0])
     # plot_param_learning_curves()
 
     plt.show()

@@ -25,11 +25,11 @@ import processing
 sensor = "as7262"
 sensors = ["as7262", "as7263"]
 leafs = ["mango", "rice", "jasmine", "banana", "sugarcane"]
-leafs = ["banana"]
+# leafs = ["banana"]
 
-filename = f"ini_screen_results.xlsx"
-# with pd.ExcelWriter(filename, mode='w') as writer:
-#     pd.DataFrame().to_excel(writer)
+filename = f"init_screen_results_r2_cm_long.xlsx"
+with pd.ExcelWriter(filename, mode='w') as writer:
+    pd.DataFrame().to_excel(writer)
 
 def neg_exp(x):
     return np.exp(-x)
@@ -57,10 +57,10 @@ def neg_log(x):
 # ham
 
 
-x, y = get_data.get_data("mango", "as7262", int_time=150,
-                             position=2,
-                             led_current="25 mA")
-y = y['Total Chlorophyll (µg/cm2)']
+# x, y = get_data.get_data("mango", "as7262", int_time=150,
+#                              position=2,
+#                              led_current="25 mA")
+# y = y['Total Chlorophyll (µg/cm2)']
 # x =
 
 # ttr = TransformedTargetRegressor(regressor=PLS(n_components=3),
@@ -85,19 +85,25 @@ training_scores = []
 test_scores = []
 regressors = []
 df_columns = []
+processors_names = ["Normal", "MSC", "SNV", "Inv", "Log", "Inv Log"]
 for trns in all_transformers.keys():
-    for score_set in [" train", " test"]:
+    for score_set in [" train ", " test "]:
         for ttr_func in ttr_funcs:
-            df_columns.append(trns+" "+ttr_func[0]+score_set)
+            for name in processors_names:
+                df_columns.append(trns+" "+ttr_func[0]+score_set+name)
 
 
-def run_scan(x, y, sheetname):
+def run_scan(x, y, sheetname, processor):
     results_df = pd.DataFrame([], index=all_regressors.keys(), columns=df_columns)
     for tr_name, transform in all_transformers.items():
         # print('tr: ', tr_name)
         # print(x.shape)
         # print(y.shape)
-        x_tr = transform.fit_transform(x)
+        try:
+            x_tr = transform.fit_transform(x)
+        except Exception as error:
+            print("transform error")
+            continue
         for name, regr in all_regressors.items():
 
             for ttr in ttr_funcs:
@@ -110,10 +116,11 @@ def run_scan(x, y, sheetname):
                     ttr_regr = TransformedTargetRegressor(regressor=regr,
                                                           func=ttr[1],
                                                           inverse_func=ttr[2])
-                elif len(ttr) == 1:
+                else:
                     ttr_regr = regr
 
-                print(name, tr_name, ttr[0], sheetname)
+                # print(len(ttr))
+                # print(name, tr_name, ttr[0], sheetname, ttr_regr)
                 regressors.append(name)
                 try:
                     scores = cross_validate(ttr_regr, x_tr, y, cv=cv,
@@ -127,11 +134,13 @@ def run_scan(x, y, sheetname):
                     # print(mae_scores)
                     training_scores.append(mae_scores[0])
                     test_scores.append(mae_scores[1])
-                    print(mae_scores[1], tr_name+" "+ttr[0]+" train")
-                    results_df[tr_name+" "+ttr[0]+" train"][name] = mae_scores[0]
-                    results_df[tr_name+" "+ttr[0]+" test"][name] = mae_scores[1]
-                except:
-                    pass
+
+                    results_df[tr_name+" "+ttr[0]+" train "+processor][name] = r2_scores[0]
+                    results_df[tr_name+" "+ttr[0]+" test "+processor][name] = r2_scores[1]
+                    print(r2_scores[1], tr_name + " " + ttr[0] + " train "+processor, name)
+                    print(sheetname)
+                except Exception as error:
+                    print("Error: ", error)
 
     with pd.ExcelWriter(filename, mode='a') as writer:
         results_df.to_excel(writer, sheet_name=sheetname)
@@ -145,8 +154,21 @@ if __name__ == "__main__":
                                      led_current="25 mA")
             print(y.columns)
             y_column = 'Total Chlorophyll (µg/cm2)'
+            # y_column = 'Total Chlorophyll (µg/mg)'
             if y_column not in y.columns:
                 y_column = 'Avg Total Chlorophyll (µg/cm2)'
+                # y_column = 'Avg Total Chlorophyll (µg/mg)'
             y = y[y_column]
+            print(x)
+            x_msc, _ = processing.msc(x)
+            x_snv = processing.snv(x)
+
+            xs = [("Normal", x), ("MSC", x_msc), ("SNV", x_snv),
+                  ("Inv", 1/x), ("Log", np.log(x)), ("Inv Log", np.log(1/x))]
+
             name = f"{sensor}_{leaf}"
-            run_scan(x, y, name)
+            for processor_name, new_x in xs:
+                print(processor_name)
+                print(new_x)
+
+                run_scan(new_x, y, name, processor_name)
