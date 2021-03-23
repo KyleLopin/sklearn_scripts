@@ -22,7 +22,7 @@ from sklearn.decomposition import KernelPCA, PCA
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn import feature_selection
 from sklearn.linear_model import LassoCV, SGDRegressor
-from sklearn.model_selection import cross_validate, train_test_split
+from sklearn.model_selection import cross_validate, train_test_split, GroupKFold
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.svm import SVR, LinearSVR
 from sklearn.pipeline import make_pipeline
@@ -41,16 +41,20 @@ plt.style.use('seaborn')
 # x_data1, _, fitting_data2 = data_get.get_data('as7263 mango', integration_time=150,
 #                                               led_current="12.5 mA",
 #                                               read_number=2)
-x_data, _, fitting_data = get_data.get_data("banana", "as7263", int_time=150,
-                                              position=2,
+x_data, y_data, fitting_data = get_data.get_data("mango", "as7262", int_time=150,
+                                              position=[1, 2, 3], average=True,
                                               led_current="25 mA", return_type="XYZ")
+# x_data, y_data, fitting_data = get_data.get_data_as726x_serial("mango", "as7262", int_times=[150],
+#                                               positions=[1, 2, 3],
+#                                               led_currents=["25 mA"], return_type="XYZ")
 # x_data2, _, fitting_data2 = data_get.get_data('as7262 mango', integration_time=100,
 #                                             led_current="12.5 mA",
 #                                             read_number=1)
 
 # x_data = pd.concat([x_data, x_data1], axis=1)
-print(x_data)
-# ham
+print(x_data.to_string())
+print(y_data.to_string())
+
 # fitting_data = fitting_data.groupby('Leaf number', as_index=True).mean()
 # fitting_data = fitting_data.drop(["Leaf: 31", "Leaf: 39", "Leaf: 45"])
 
@@ -63,7 +67,7 @@ print(x_data)
 exp_transformer = FunctionTransformer(np.exp, inverse_func=np.log)
 
 
-pls = PLSRegression(n_components=12)
+pls = PLSRegression(n_components=6)
 # pls = SGDRegressor()
 # pls = DecisionTreeRegressor(max_depth=4)
 # pls = GradientBoostingRegressor(max_depth=2)
@@ -100,7 +104,7 @@ def neg_log(x):
 
 
 pls = LinearSVR()
-pls = TransformedTargetRegressor(regressor=LinearSVR(),
+pls = TransformedTargetRegressor(regressor=pls,
                                  func=neg_log,
                                  inverse_func=neg_exp)
 # rgs = PLSRegression(n_components=6)
@@ -119,12 +123,13 @@ chloro_columns = ['Total Chlorophyll (µg/mg)', 'Chlorophyll a (µg/mg)',
 # print(fitting_data[chloro_columns])
 print(fitting_data.columns)
 # y1 = fitting_data['Total Chlorophyll (µg/mg)']
-y1 = fitting_data['Avg Total Chlorophyll (µg/cm2)']
-y2 = fitting_data['Avg Chlorophyll a (µg/cm2)']
-y3 = fitting_data['Avg Chlorophyll b (µg/cm2)']
+# y1 = y_data['Avg Total Chlorophyll (µg/mg)']
+y1 = y_data['Avg Total Chlorophyll (µg/cm2)']
+y2 = y_data['Avg Chlorophyll a (µg/cm2)']
+y3 = y_data['Avg Chlorophyll b (µg/cm2)']
 y4 = y3 / (y2 + y3)
 
-
+cv = GroupKFold(n_splits=5)
 
 # x_data = fitting_data[x_data_columns]
 # x_data, _ = processing.msc(x_data)
@@ -138,6 +143,7 @@ x_scaled_np = PolynomialFeatures(degree=2).fit_transform(x_data)
 
 x_scaled = pd.DataFrame(x_scaled_np)
 # x_scaled = processing.snv(x_data)
+# x_scaled = x_data
 
 figure, axes, = plt.subplots(2, 2, figsize=(7.5, 8.75), constrained_layout=True)
 
@@ -147,15 +153,20 @@ axes = [axes[0][0], axes[0][1], axes[1][0], axes[1][1]]
 invert_y = False
 convert_y = False
 
-for i, y in enumerate([y1]):
+for i, y in enumerate([y1, y2, y3]):
 
     bins = np.linspace(y.min(), y.max(), 5)
     labels = ["1", "2", "3", "4"]
     # Y_groups = pd.cut(y, bins)
     # print(Y_groups)
     print('===')
+    print(x_scaled.shape)
+    print(y.shape)
     X_train, X_test, y_train, y_test = train_test_split(x_scaled, y,
                                                         test_size=0.2)
+
+    # train_index, test_index = cv.split(x_scaled, y, groups=)
+
     pls.fit(X_train, y_train)
     y_test_predict = pls.predict(X_test)
     y_train_predict = pls.predict(X_train)

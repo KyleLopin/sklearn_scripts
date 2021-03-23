@@ -177,12 +177,12 @@ import pandas as pd
 #
 # chloro_data.to_csv("new_chloro_mango.csv")
 
-BACKGROUND = [687.65, 9453.7, 23218.35, 9845.05, 15496.7,
-              18118.55, 7023.8, 7834.1, 28505.9, 4040.9,
-              5182.3, 1282.55, 2098.85, 1176.1, 994.45,
-              496.45, 377.55, 389.75]
-
-plt.style.use('dark_background')
+# BACKGROUND = [687.65, 9453.7, 23218.35, 9845.05, 15496.7,
+#               18118.55, 7023.8, 7834.1, 28505.9, 4040.9,
+#               5182.3, 1282.55, 2098.85, 1176.1, 994.45,
+#               496.45, 377.55, 389.75]
+#
+# plt.style.use('dark_background')
 # local files
 # import get_data
 # x, y = get_data.get_data("mango", "as7265x", int_time=150,
@@ -197,12 +197,24 @@ plt.style.use('dark_background')
 # ax.spines['top'].set_visible(False)
 # ax.set_title("Reflectance from rice leaf")
 # plt.tight_layout()
+# # plt.show()
+# nums = [['-1.71', '2.95', '4.61', '0.07'],
+#         ['-1', '-1', '-1', '-1']]
+# plt.table(cellText=nums, rowLabels=['foobar', 'bar'],
+#           rowColours=['black', 'black', 'black'],
+#           cellColours=[['black', 'black', 'black', 'black'],
+#                        ['black', 'black', 'black', 'black']],
+#           colColours=['red', 'red', 'red', 'red'])
 # plt.show()
-nums = [['-1.71', '2.95', '4.61', '0.07'],
-        ['-1', '-1', '-1', '-1']]
-plt.table(cellText=nums, rowLabels=['foobar', 'bar'],
-          rowColours=['black', 'black', 'black'],
-          cellColours=[['black', 'black', 'black', 'black'],
-                       ['black', 'black', 'black', 'black']],
-          colColours=['red', 'red', 'red', 'red'])
-plt.show()
+
+df1 = pd.DataFrame([1, 2, 3, 4, 5, 6], index=[0, 0, 1, 1, 2, 2],
+                   columns=['animal'])
+
+df3 = pd.DataFrame([['a'], ['b']],
+                   columns=['letter'])
+
+print(df1.to_string())
+print('==')
+print(df3.to_string())
+print("+++")
+print(pd.concat([df1, df3], axis=1))

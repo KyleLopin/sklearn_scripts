@@ -146,7 +146,7 @@ def pls_comp_screen(x, y, max_comps=6):
         print('n_comps = ', i)
         run_fit = pls_sfs_screen(x, y, n_comps=i)
         data_fits[i] = run_fit
-    with open("sfs_test.pkl", 'wb') as f:
+    with open("sfs_test_degree1.pkl", 'wb') as f:
         pickle.dump(data_fits, f)
 
 
@@ -184,7 +184,7 @@ def pls_sfs_screen(x, y, n_comps=6):
 def find_maxfit(data):
     max_score = 100
     print(data["training scores"])
-    return max(data["training scores"])
+    return max(data["test scores"]), max(data["training scores"])
 
 
 if __name__ == "__main__":
@@ -200,7 +200,7 @@ if __name__ == "__main__":
     # print(x.shape)
     # # pls_screen_as726x(x, y, n_comps=10)
     # print(type(x))
-    poly = PolynomialFeatures(degree=3)
+    poly = PolynomialFeatures(degree=1)
     x_trans = poly.fit_transform(x)
     # pls.fit(x_trans, y)
     # y_predict = pls.predict(x_trans)
@@ -229,18 +229,30 @@ if __name__ == "__main__":
     # # plot_learning_curve(pls, "", x_trans, y['Avg Total Chlorophyll (µg/cm2)'])
     # # ham
     # pls_sfs_screen(x_trans, y)
-    pls_comp_screen(x_trans, y, max_comps=18)
+    pls_comp_screen(x_trans, y, max_comps=6)
 
-    with open("sfs_test.pkl", 'rb') as f:
+    with open("sfs_test_degree1.pkl", 'rb') as f:
         sfs_fit = pickle.load(f)
+    # sfs_fit.pop(13, None)
     n_comps = []
     best_score = []
+    training = []
     for key, value in sfs_fit.items():
         print('n comp:', key)
+        print(value)
+        if not value['test scores']:
+            print('breaking')
+            continue
         # find_maxfit(value)
         n_comps.append(key)
-        best_score.append(find_maxfit(value))
-    plt.plot(n_comps, best_score)
+        test, train = find_maxfit(value)
+        print(test, train)
+        best_score.append(test)
+        training.append(train)
+
+        # print(best_score)
+    plt.plot(n_comps, best_score, 'k-')
+    plt.plot(n_comps, training, 'r-')
     # # plt.plot(sfs_fit["n columns"], sfs_fit['test scores'], color='green')
     # # plt.plot(sfs_fit["n columns"], sfs_fit['training scores'], color='red')
     print("Done")

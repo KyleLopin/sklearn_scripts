@@ -12,17 +12,19 @@ import pandas as pd
 from sklearn.decomposition import KernelPCA, PCA
 import seaborn as sns
 
-import data_get
+import get_data
 
 
 chloro_types = ['Chlorophyll a (µg/mg)', 'Chlorophyll b (µg/mg)',
                 'Total Chlorophyll (µg/mg)']
-y_name = chloro_types[2]
-x_data, y, data = data_get.get_data('as7262 mango')
+# y_name = chloro_types[2]
+y_name = 'Avg Total Chlorophyll (µg/cm2)'
+x_data, y, data = get_data.get_data("mango", "as7262", int_time=[150],
+                                   position=[1, 2, 3], led_current=["25 mA"], return_type="XYZ")
 print(x_data)
 print(y)
 y = y[y_name]
-n_comps = 5
+n_comps = 2
 kernel = 'rbf'
 pca = PCA(n_components=n_comps)
 pca = KernelPCA(n_components=n_comps, kernel=kernel)
@@ -34,10 +36,10 @@ print(y.shape)
 print(y)
 print(y.min(), y.max())
 bins = np.linspace(y.min(), y.max(), 7)
-print(10*y.values.T.astype("int"))
-print(len(10*y.values.T.astype("int")))
-print(df.shape)
-df["TOC"] = (5*y.values).T.astype("int")
+# print(10*y.values.T.astype("int"))
+# print(len(10*y.values.T.astype("int")))
+# print(df.shape)
+df["TOC"] = (n_comps*y.values).T.astype("int")
 print(df)
 pg = sns.pairplot(df, hue="TOC", palette='OrRd')
 # pg = sns.PairGrid(df, hue="TOC", palette='OrRd')
