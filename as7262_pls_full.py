@@ -153,7 +153,7 @@ axes = [axes[0][0], axes[0][1], axes[1][0], axes[1][1]]
 invert_y = False
 convert_y = False
 
-for i, y in enumerate([y1, y2, y3]):
+for i, y in enumerate([y1]):
 
     bins = np.linspace(y.min(), y.max(), 5)
     labels = ["1", "2", "3", "4"]
