@@ -14,10 +14,10 @@ from sklearn.compose import TransformedTargetRegressor
 from sklearn.cross_decomposition import PLSRegression as PLS
 from sklearn.datasets import load_digits
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.linear_model import Ridge, Lasso, SGDRegressor, LinearRegression
+from sklearn.linear_model import Ridge, Lasso, SGDRegressor, LinearRegression, LassoCV
 from sklearn.metrics import median_absolute_error
 from sklearn.model_selection import learning_curve
-from sklearn.model_selection import GroupShuffleSplit, ShuffleSplit
+from sklearn.model_selection import GroupShuffleSplit, ShuffleSplit, RepeatedKFold
 from sklearn.preprocessing import StandardScaler, RobustScaler, PolynomialFeatures
 from sklearn.svm import SVR, LinearSVR
 
@@ -126,14 +126,17 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, group=None,
                      color="r")
     ax.fill_between(train_sizes, test_scores_mean - test_scores_std,
                      test_scores_mean + test_scores_std, alpha=0.1, color="g")
+    print('ppppp====')
     print(test_scores_mean, train_scores_mean)
     print(test_scores_std, train_scores_std)
     ax.plot(train_sizes, train_scores_mean, 'o-', color="r",
              label="Training score")
     ax.plot(train_sizes, test_scores_mean, 'o-', color="g",
              label="Cross-validation score")
-
-    # ax.legend(loc="best")
+    ax.set_xlabel("Number of leaves in model", size=14)
+    ax.set_ylabel("Negative Mean Absolute Error\n(µg/cm\u00B2)", size=14)
+    ax.set_title("Learning curve for Linear Regression", size=16)
+    ax.legend(loc="best")
     ax.grid(True)
     # plt.show()
 
@@ -278,6 +281,15 @@ def plot_param_learning_curves():
 
 
 if __name__ == '__main__':
+
+    x_data, y, fitting_data = get_data.get_data("mango", "as7265x", int_time=150,
+                                           position=2, average=False, led="b'White'",
+                                           led_current="25 mA", return_type="XYZ")
+
+    y.to_csv("y_.csv")
+    x_data.to_csv("x_.csv")
+    ham
+
     pls = PLS(n_components=6)
     ridge = Ridge(random_state=0, max_iter=20000)
     svr = SVR(C=10)
@@ -295,18 +307,29 @@ if __name__ == '__main__':
 
 
     # pls = LinearSVR()
-    pls = TransformedTargetRegressor(regressor=LinearSVR(max_iter=2000000),
-                                     func=neg_log,
-                                     inverse_func=neg_exp)
+    pls = LinearRegression()
+    pls = LassoCV()
+    pls = PLS(n_components=12)
+    # pls = SVR(kernel='rbf', C=10)
+    pls = TransformedTargetRegressor(regressor=pls,
+                                     func=np.log,
+                                     inverse_func=np.exp)
+    # pls = TransformedTargetRegressor(regressor=LinearSVR(max_iter=2000000),
+    #                                  func=neg_log,
+    #                                  inverse_func=neg_exp)
     # x_data, _, data = data_get.get_data('as7262 mango', led_current="25 mA",
     #                                     integration_time=100)
     x_data, _, data = get_data.get_data("mango", "as7262", int_time=150,
                                         position=2, led_current="25 mA",
                                         return_type="XYZ")
+    x_data, y, fitting_data = get_data.get_data("mango", "as7265x", int_time=150,
+                                           position=2, average=False, led="b'White'",
+                                           led_current="25 mA", return_type="XYZ")
+
     # x_data, _ = processing.msc(x_data)
     # x_data = processing.snv(x_data)
     x_data = StandardScaler().fit_transform(x_data)
-    # x_data = PolynomialFeatures(degree=2).fit_transform(x_data)
+    x_data = PolynomialFeatures(degree=2).fit_transform(x_data)
     # x_data = RobustScaler().fit_transform(x_data)
     # x_data, _, data = data_getter.get_data('new as7262 mango')
     # data = data.groupby('Leaf number', as_index=True).mean()
@@ -319,8 +342,9 @@ if __name__ == '__main__':
     # x_data = data
 
     cv = ShuffleSplit(n_splits=100, test_size=0.2)
+    cv = RepeatedKFold(n_splits=5, n_repeats=10)
 
-    plot_learning_curve(pls, 'AS7262 Mango Learning Curve\n'
+    plot_learning_curve(pls, 'AS7265X Mango Learning Curve\n'
                                    'Total Chlorophyll', x_data, y_data, cv=cv)
     # estimators = [lasso, svr, pls, lr]
     # est_names = ["Lasso", "SVR", "PLS", "Linear Regression"]

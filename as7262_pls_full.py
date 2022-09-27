@@ -146,10 +146,12 @@ x_scaled = pd.DataFrame(x_scaled_np)
 # x_scaled = x_data
 
 figure, axes, = plt.subplots(2, 2, figsize=(7.5, 8.75), constrained_layout=True)
+figure, axes = plt.subplots(1, 1, figsize=(8, 8), constrained_layout=True)
 
 figure.suptitle("Model fit to new AS7262 Mango data")
 # figure.suptitle("Gradient Boosting Regressor fit\nAS7262 Betel data")
-axes = [axes[0][0], axes[0][1], axes[1][0], axes[1][1]]
+# axes = [axes[0][0], axes[0][1], axes[1][0], axes[1][1]]
+axes = [axes]
 invert_y = False
 convert_y = False
 

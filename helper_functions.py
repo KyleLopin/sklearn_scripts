@@ -35,8 +35,8 @@ def get_all_files_with_stub(stub, folder):
     for root, directory, files in os.walk(os.getcwd()):
         print('root', root, folder, folder not in root, directory, files)
         if folder not in root:
-            print('PASS')
-            print(folder, root, files)
+            # print('PASS')
+            # print(folder, root, files)
             continue
         print('folder', root, directory)
         for filename in files:

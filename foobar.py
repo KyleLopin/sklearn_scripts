@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 # import data_getter
+import helper_functions as funcs
 
 # a = np.array([2, 1, 5, 6, 10])
 # b = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]])
@@ -207,14 +208,99 @@ import pandas as pd
 #           colColours=['red', 'red', 'red', 'red'])
 # plt.show()
 
-df1 = pd.DataFrame([1, 2, 3, 4, 5, 6], index=[0, 0, 1, 1, 2, 2],
-                   columns=['animal'])
+# df1 = pd.DataFrame([1, 2, 3, 4, 5, 6], index=[0, 0, 1, 1, 2, 2],
+#                    columns=['animal'])
+#
+# df3 = pd.DataFrame([['a'], ['b']],
+#                    columns=['letter'])
+#
+# print(df1.to_string())
+# print('==')
+# print(df3.to_string())
+# print("+++")
+# print(pd.concat([df1, df3], axis=1))
+#########################
+# tomato_files = funcs.get_all_files_with_stub('AS7265X', 'tomato_data_parts')
+# print("=====")
+# print(tomato_files)
+# for file in tomato_files:
+#     print(file)
+#
+# df = pd.DataFrame()
+# for file in tomato_files:
+#     print(file)
+#     new_df = pd.read_csv(file)
+#     # print(new_df["Fruit number"].str.strip().str[-1])
+#     new_df['spot'] = new_df["Fruit number"].str.strip().str[-1]
+#     new_df['Fruit'] = new_df["Fruit number"].str.strip().str[:-1]
+#
+#     print(new_df)
+#     df = pd.concat([df, new_df], axis=0)
+#     print('+++++')
+#     print(df)
+# df.to_csv("tomato_as7265x2_data.csv")
+# print(df['Fruit'].unique())
+##########################
 
-df3 = pd.DataFrame([['a'], ['b']],
-                   columns=['letter'])
+# df = pd.read_csv("Mango AS7263 fruit fixed.csv")
+# df["Fruit"] = df["Fruit number"].str.split(" ").str[1].astype(np.int)
+# df["Spot"] = df["Fruit number"].str.split(" ").str[3]
+# df.to_csv("Mango AS7263 fruit2.csv")
+# ham
 
-print(df1.to_string())
-print('==')
-print(df3.to_string())
-print("+++")
-print(pd.concat([df1, df3], axis=1))
+# df = pd.read_csv("Mangos C12880 fruit.csv")
+# df = df[df.Spot != "AVR"]
+#
+# df = df.fillna(method='ffill')
+# df = df.set_index("Fruit")
+# df.index = df.index.astype(np.int)
+# print(df.to_string())
+# df.to_csv("Mangos C12880 fruit2.csv")
+# ham
+# df = pd.read_csv("Mangos C12880 fruit2.csv", index_col="Fruit")
+df = pd.read_csv("mango c12880 reflectance.csv")
+df = df.fillna(method='ffill')
+df = df.set_index("Leaf No.")
+df.index = df.index.astype(np.int)
+# df.index = df.index.astype(np.int)
+# hplc_data = pd.read_excel("Mango HPLC.xlsx", sheet_name="Summary", index_col="Fruit")
+# chloro_data = pd.read_csv("mango_leaves_chlorophyll_C12880.csv", index_col="Leaf No.")
+chloro_data = pd.read_csv("mango_leaves_chlorophyll_C12880.csv")
+print(chloro_data)
+chloro_data = chloro_data.fillna(method='ffill')
+chloro_data = chloro_data.set_index("Leaf No.")
+chloro_data.index = chloro_data.index.astype(np.int)
+print(chloro_data)
+
+mean_ = chloro_data.groupby(chloro_data.index, as_index=True).mean()
+# std_ = chloro_data.groupby(chloro_data.index, as_index=True).std()
+
+print(mean_)
+# for col in chloro_data.columns:
+#     chloro_data['Avg '+col] = 0
+#     chloro_data['STD ' + col] = 0
+#     print(chloro_data.to_string())
+
+# print(chloro_data.index)
+print("=====")
+print(df)
+# print(df["Fruit number"].str.split(" ").str[1], df["Fruit number"].str.split(" ").str[3])
+# df["Fruit"] = df["Fruit number"].str.split(" ").str[1]
+# df["Spot"] = df["Fruit number"].str.split(" ").str[3]
+# df.to_csv("Mango AS7265X fruit2.csv")
+new_df = df.join(mean_)
+print(new_df)
+new_df.to_csv("mango_c12880_data_full2.csv")
+# for column in hplc_data.columns:
+#     print(column)
+#     df[column]
+
+#########
+# df1 = pd.DataFrame({"A": [1, 2, 3, 4]}, index=[0, 0, 1, 1])
+# df2 = pd.DataFrame({"B": [6, 8]}, index=[0, 1])
+# print(df1)
+# print('====')
+# print(df2)
+# print(df1.join(df2))
+
+

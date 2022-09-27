@@ -101,8 +101,8 @@ def ax_turn_on(ax):
 # plt.show()
 
 fig = plt.figure(figsize=(11, 9))
-fig.suptitle("Machine learning process\nPartial Least Squares Regression (PLS)",
-             size=20)
+# fig.suptitle("Machine learning process\nPartial Least Squares Regression (PLS)",
+#              size=20)
 gs = GridSpec(3, 3, figure=fig, height_ratios=[2, 1, 2])
 ax1 = fig.add_subplot(gs[0, :3], zorder=4)
 ax2 = fig.add_subplot(gs[2, :3], zorder=3)
@@ -193,7 +193,7 @@ def runner(i):
                        fontsize=15, bbox=props, color='black',
                        ha='center')
         text1.append(tx1)
-    if i == frame_delay[3]:
+    if i == 100*frame_delay[3]:
         ax1.plot(x_reflect.T, color='limegreen')
         ax1.set_xticklabels(x.columns, rotation=60)
         ax1.set_title("Raw Reflectance",
@@ -204,7 +204,7 @@ def runner(i):
     if i == frame_delay[4]:
         for tx in text1:
             tx.set_visible(False)
-    if i == frame_delay[5]:
+    if i == 100*frame_delay[5]:
         tx1 = ax2.text(0.5, 0.8, "Scatter correction\nfix surface effects of reflection",
                        transform=ax2.transAxes,
                        bbox=props,
@@ -239,6 +239,9 @@ def runner(i):
         #           head_width=0.025, head_length=0.1)
         make_arrows(ax2, 0.0)
         make_arrows(ax2, 0.55)
+        fig.savefig("scatter correct.png")
+        print("Saved figure")
+
     if i == frame_delay[7]:
         # delete scatter correction explaination
         for tx in text1:
@@ -525,6 +528,8 @@ def runner(i):
         refl_line.set_ydata(x_msc.iloc[leaf_no])
         fig.savefig("final_pls_explainer.png")
 
+for i in range(30):
+    runner(i)
 # time = range(220)
 # ani = FuncAnimation(fig, runner, repeat=False,
 #                     frames=time, interval=1000)

@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import KernelPCA, PCA
+from sklearn.cross_decomposition import PLSRegression
 import seaborn as sns
 
 import get_data
@@ -24,10 +25,11 @@ x_data, y, data = get_data.get_data("mango", "as7262", int_time=[150],
 print(x_data)
 print(y)
 y = y[y_name]
-n_comps = 2
+n_comps = 3
 kernel = 'rbf'
 pca = PCA(n_components=n_comps)
-pca = KernelPCA(n_components=n_comps, kernel=kernel)
+# pca = KernelPCA(n_components=n_comps, kernel=kernel)
+pca = PLSRegression(n_components=3)
 Xpca = pca.fit_transform(x_data)
 
 columns_ = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5']

@@ -34,14 +34,19 @@ chloro_columns = ['Avg Total Chlorophyll (µg/cm2)']
 #                 172, 100, 120, 15, 257,
 #                 65, 9, 174, 249, 96,
 #                 213]
-drop_indexes = [238, 8, 11, 217, 136,  # mango
-                37, 133, 220, 59]
+# drop_indexes = [238, 8, 11, 217, 136,  # mango
+#                 37, 133, 220, 59]
 # drop_indexes = [42, 292, 154, 119, 78]  # jasmine
 # drop_indexes = [238]
+drop_indexes = [80, 178, 261, 146, 175, 177, 205,
+                71, 176, 172, 207, 194]  # mangoes beta-carotene
+drop_indexes = [166, 13, 205, 272, 128, 126, 266]  # tomato beta-carotene
+drop_indexes = [216, 233, 166, 123, 45, 288, 287, 134, 290]  # tomato Lycopene
+drop_indexes = []
 drop_leafs = [66]
 drop_leafs = []
 
-an_pos = (3, 50)
+an_pos = (1, 7)
 
 
 plt.style.use('bmh')
@@ -238,6 +243,94 @@ def plot_res_hist(data):
     plt.show()
 
 
+def plot_hplc_res(data):
+    fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2,
+                                   figsize=(8, 4))
+
+    y = data[['sample', 'mg/100 FW']].set_index('sample')
+    print(y)
+    x = y.groupby('sample').mean()
+    x.columns = ["mg/100 FW average"]
+    print(x)
+    combined = y.join(x)
+    print(combined)
+    y = combined["mg/100 FW"]
+    x = combined["mg/100 FW average"]
+    ax1.scatter(x, y, marker='x', c='k', s=20, alpha=0.6,
+                lw=1, label="Full data set")
+
+    ax1.set_xlabel(u"Average Measured\nLycopene content (mg/100 g)")
+    ax1.set_ylabel(u"Individual Measured\nLycopene content (mg/100 g)")
+
+    data = data.drop(drop_indexes)
+    y = data[['sample', 'mg/100 FW']].set_index('sample')
+    print(y)
+    x = y.groupby('sample').mean()
+    x.columns = ["mg/100 FW average"]
+    print(x)
+    combined = y.join(x)
+    print(combined)
+    y = combined["mg/100 FW"]
+    x = combined["mg/100 FW average"]
+
+    ax1.scatter(x, y, marker='o', c='b', s=20,
+                alpha=0.2, label="Outliers Removed")
+
+    mea_orig = mean_absolute_error(x, y)
+    r2_orig = r2_score(x, y)
+    print('mea: ', mea_orig)
+    print('r2: ', r2_orig)
+    str_ = f"MEA = {mea_orig:.3f}\n" \
+           f"r\u00B2 = {r2_orig:.3f}\n"
+    ax1.annotate(str_, (.1, .6), xycoords='axes fraction')
+
+    residues = y - x
+    abs_res = np.abs(residues)
+    data2 = pd.DataFrame()
+    print(data2)
+    print(data2.columns)
+    data2['res'] = abs_res
+    data2['zscores'] = stats.zscore(residues)
+    zscores = stats.zscore(residues)
+
+    print('zscore max:', zscores.argmax(), zscores.argmin(),
+          zscores[zscores.argmax()], zscores[zscores.argmin()])
+    print('max:', data.iloc[zscores.argmax()])
+    print('min:', data.iloc[zscores.argmin()])
+    sigma = np.sqrt(np.var(residues))
+    x_hist = np.linspace(min(residues), max(residues), 100)
+    print('hist')
+
+    print(np.histogram(residues))
+    n, bins, _ = ax2.hist(residues, bins=50)
+    print('n:', n)
+    print('bins: ', bins)
+    print(len(n), len(bins))
+
+    popt, pcov = curve_fit(gauss_function, bins[:len(n)], n)
+    # p0=[20, mean, sigma])
+    print('fit data: ', popt)
+    new_fit = gauss_function(x_hist, *popt)
+    # print(new_fit)
+    ax2.plot(x_hist, new_fit, 'r--')
+    ax2.axvline(3 * sigma, ls='--', c='k')
+    ax2.axvline(-3 * sigma, ls='--', c='k')
+    print(3*sigma)
+
+    ax2.set_xlabel(u"Measured Lycopene (mg/100 g)\n"  # (µg/cm\u00B2)
+                   u"Residues in Tomatoes")
+    ax2.set_title("Histogram of residues of \n"
+                  "Lycopene content", fontsize=11)
+    fig.suptitle("Residues from measuring Lycopene from HPLC "
+                 "in Tomatoes", fontsize=14)
+    fig.subplots_adjust(bottom=0.2)
+    fig.subplots_adjust(top=0.82)
+    # plt.tight_layout()
+    # print(data2.iloc[169:175, :])
+    # print(data.iloc[169:175, :])
+    plt.show()
+
+
 if __name__ == '__main__':
     # data = pd.read_csv("new_chloro_mango.csv")
     # data = pd.read_excel("Sugarcane Chlorophyll content.xlsx")
@@ -247,13 +340,22 @@ if __name__ == '__main__':
     # print(data.columns)
     # fix_chloro_file("Mango Chlorophyll content.csv", "new_chloro_mango.csv")
     filename = "new_chloro_mango.csv"
-    data = pd.read_csv(filename)
+    # data = pd.read_csv(filename)
     # plot_data_pts(data)
     # outlier_finder(data)
-    print(data.index)
-    print(data.shape)
+    # print(data.index)
+    # print(data.shape)
     # for leaf_no in drop_leafs:
     #     data = data[data["Leaf No."] != leaf_no]
     # data = data.drop(drop_indexes)
-    print(data.shape)
-    plot_res_hist(data)
+    # print(data.shape)
+    # plot_res_hist(data)
+    # df = pd.read_excel("Mango HPLC.xlsx", sheet_name="Raw data from TPC")
+    # df = pd.read_excel("HPLC Tomato.xlsx", sheet_name="Beta-carotene")
+    # df = pd.read_excel("HPLC Tomato.xlsx", sheet_name="Lycopene")
+    # df = df.fillna(method='ffill')
+    print(df)
+    # df = df[df.spot != "AVR"]
+    # print(df)
+    # plot_hplc_res(df)
+    plot_res_hist(df)

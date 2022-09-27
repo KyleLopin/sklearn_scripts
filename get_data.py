@@ -10,6 +10,25 @@ __author__ = "Kyle Vitatus Lopin"
 import numpy as np
 import pandas as pd
 
+c12880_y_columns = ["DM", "lycopene DW", "lycopene FW",
+                    "beta-carotene DW", "beta-carotene FW"]
+# c12880_y_columns = ["DM", "phenols (FW)", "phenols (DW)",
+#                     "carotene (DW)", "carotene (FW)"]
+chloro_fruits = ["mango", "banana", "rice", "sugarcane", "jasmine"]
+hplc_fruits = ["mangoes", "tomato"]
+fruit_y_columns_tomato = ["%DM", "lycopene (DW)", "lycopene (FW)", "beta-carotene (DW)", "beta-carotene (FW)"]
+fruit_y_columns_mango = ["%DM", "phenols (FW)", "phenols (DW)", "carotene (DW)", "carotene (FW)"]
+
+
+def is_float(x):
+    try:
+        num = float(x)
+        return num
+    except:
+        return False
+
+
+
 
 def format_input_to_list(x):
     """
@@ -33,21 +52,36 @@ def get_data(specimen: str, sensor: str, led_current: str=None,
     :param return_type: (str)
     :return:
     """
-    filename = f"{specimen}_{sensor}_data.csv"
-    data = pd.read_csv(filename, index_col="Leaf number")
-    data_columns = []
+    index_coln = "Leaf number"
     y_columns = []
+    if specimen in hplc_fruits:
+        index_coln = "Fruit"
+    filename = f"{specimen}_{sensor}_data.csv"
+    print(index_coln, filename)
+    data = pd.read_csv(filename, index_col=index_coln)
+    data_columns = []
+
     for column in data.columns:
         if "nm" in column:
             data_columns.append(column)
         elif "Chloro" in column:
             y_columns.append(column)
+    if specimen in hplc_fruits:
+        if specimen == "mangoes":
+            y_columns = fruit_y_columns_mango
+        elif specimen == "tomato":
+            y_columns = fruit_y_columns_tomato
+    if sensor == "c12880":  # data columns are different
+        data_columns = []
+        for column in data.columns:
+            if is_float(column):
+                data_columns.append(column)
     print(data_columns)
     print('1:', data.shape)
     print(data.columns)
 
     if led_current:
-        print(data.columns)
+        # print(data.columns)
         led_key = "LED current"
         if led_key not in data.columns:
             led_key = "led current"
@@ -68,12 +102,20 @@ def get_data(specimen: str, sensor: str, led_current: str=None,
     if led:
         led = format_input_to_list(led)
         print(data["led"].unique())
+        if led not in data["led"].unique():
+            raise Exception("{0} not in data, valid leds are {1}".format(led, data["led"].unique()))
         data = data[data["led"].isin(led)]
     print('3:', data.shape)
+    if average:
+
+        data = data.groupby([index_coln]).mean()
+        print('4:', data.shape)
     if return_type == "XY":
         return data[data_columns], data[y_columns]
     elif return_type == "XYZ":
         return data[data_columns], data[y_columns], data
+    elif return_type == "XY lambda":
+        return data[data_columns], data[y_columns], data_columns
 
 
 def get_data_as726x_serial(specimen: str, sensor: str, led_currents: list=["25 mA"],
@@ -151,4 +193,5 @@ def get_data_as726x_serial(specimen: str, sensor: str, led_currents: list=["25 m
 
 if __name__ == "__main__":
     get_data_as726x_serial("mango", "as7262", positions=[1, 2, 3])
+    print("In main")
 

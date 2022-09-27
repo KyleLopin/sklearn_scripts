@@ -28,8 +28,8 @@ plt.style.use('seaborn')
 # x_data, y_data = get_data.get_data_as726x_serial("mango", "as7262", int_times=[150],
 #                                                  positions=[1, 2, 3],
 #                                                  led_currents=["25 mA"])
-x_data, y_data = get_data.get_data("mango", "as7262", int_time=[150],
-                                   position=[2], led_current=["25 mA"])
+x_data, y_data = get_data.get_data("mango", "as7262", int_time=[150], average=False,
+                                   position=[1, 2, 3], led_current=["25 mA"])
 
 print(x_data)
 print('==')
@@ -38,24 +38,8 @@ print('======')
 
 y_data = y_data['Avg Total Chlorophyll (µg/cm2)']
 print(x_data.shape, y_data.shape)
-x_data = StandardScaler().fit_transform(x_data)
-x_scaled_np = PolynomialFeatures(degree=2).fit_transform(x_data)
-
-x_data = pd.DataFrame(x_scaled_np)
-
-
-def neg_exp(x):
-    return np.exp(-x)
-
-
-def neg_log(x):
-    return -np.log(x)
-
 
 pls = PLSRegression(n_components=6)
-pls = TransformedTargetRegressor(regressor=pls,
-                                 func=neg_log,
-                                 inverse_func=neg_exp)
 
 
 X_train, X_test, y_train, y_test = train_test_split(x_data, y_data,
