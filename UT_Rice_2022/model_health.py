@@ -19,7 +19,7 @@ from sklearn.svm import SVR
 AXIS_LABEL_FONTSIZE = 20
 TITLE_LABEL_FONTSIZE = 30
 
-df = pd.read_excel("ctrl_and_dead.xlsx")
+df = pd.read_excel("ctrl_and_dead_raw.xlsx")
 print(df)
 x_columns = []
 for column in df.columns:
@@ -36,12 +36,12 @@ regr.fit(x_data, y)
 y_predict = regr.predict(x_data)
 print(f"score: {regr.score(x_data, y)}")
 plt.scatter(y, y_predict)
-# plt.show()
+plt.show()
 
-all_data = pd.read_excel("first_set_reflectance.xlsx")
+all_data = pd.read_excel("first_set_raw.xlsx")
 x_data = all_data[x_columns]
 modeled_health = regr.predict(x_data)
 print(modeled_health)
 all_data["modeled_health"] = modeled_health
 print(all_data)
-all_data.to_excel("modeled_health.xlsx", encoding="utf-16")
+all_data.to_excel("modeled_health_first_raw.xlsx")

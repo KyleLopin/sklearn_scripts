@@ -77,14 +77,14 @@ if __name__ == "__main__":
     # reflectance = get_data("08-06")
     # print(reflectance)
 
-    # df = get_all_data(return_type='reflectance', set=2)
-    # df.to_excel("second_set_reflectance.xlsx", encoding="utf-16")
+    # df = get_all_data(return_type='raw', set=1)
+    # df.to_excel("first_set_reflectance.xlsx", encoding="utf-16")
 
     # df.to_excel("second_set_raw.xlsx", encoding="utf-16")
     # df1 = pd.DataFrame({'a': [10], 'b': [20], 'c': [30]})
     # df2 = pd.DataFrame({'a': [1], 'b': [2], 'c': [3]})
     # print(df1)
     # print(df1.div(df2, axis='columns'))
-    df, _ = get_data("09-25", file_end="dead")
+    df, _ = get_data("09-25", file_end="dead", data_type='raw')
     print(df)
-    df.to_excel("dead_leaves_reflectance.xlsx", encoding="utf-16")
+    df.to_excel("dead_leaves_raw.xlsx")
