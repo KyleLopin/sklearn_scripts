@@ -11,4 +11,19 @@ import pandas as pd
 
 
 # get control data
-ctrl_data = pd.read_excel("w chloro raw first set.xlsx")
+ctrl_data = pd.read_excel("first_set_reflectance.xlsx")
+print(ctrl_data)
+ctrl_data = ctrl_data.loc[ctrl_data["type exp"] == "control"]
+print(ctrl_data)
+ctrl_data["health"] = 1.0
+print(ctrl_data)
+
+dead_leafs = pd.read_excel("dead_leaves_reflectance.xlsx")
+
+print(dead_leafs.shape)
+print(ctrl_data.shape)
+dead_leafs["health"] = 0
+# print(dead_leafs)
+
+final_df = pd.concat([ctrl_data, dead_leafs])
+final_df.to_excel("ctrl_and_dead.xlsx", encoding="utf-16")

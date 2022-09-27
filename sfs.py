@@ -10,11 +10,15 @@ import numpy as np
 from sklearn.model_selection import cross_val_score, cross_validate
 
 
-def sfs_back(est, X_original, Y, cv, penalty_rate=0.002):
+def sfs_back(regr, X_original, Y, cv, penalty_rate=0.002, group=None):
     best_score = -np.inf
     best_columns = []
+    column_to_drop = None
     current_column_set = X_original.columns
     X = X_original.copy()
+    test_scores = []
+    training_scores = []
+    n_columns = []
 
     while X.shape[1] > 3:
         print('i = ', X.shape[1])
@@ -24,25 +28,41 @@ def sfs_back(est, X_original, Y, cv, penalty_rate=0.002):
         best_scan_score = -np.inf
         best_scan_columns = []
 
-        for j, new_column in enumerate():
+        for j, new_column in enumerate(current_column_set):
+            # print(j, new_column)
 
             x_new = x_current.copy()
-            x_new.drop(new_column)
+            # print(x_new)
+            x_new.drop(new_column, axis=1)
 
-            score = cross_val_score(est, x_new, Y, cv=cv, scoring='neg_mean_absolute_error').mean()
+            scores = cross_validate(regr, x_new, Y, cv=cv,
+                                    scoring='r2', groups=group,
+                                    return_train_score=True)
+
             penalty = penalty_rate * x_new.shape[1]
-            print(score)
-            if score - penalty > best_scan_score:
-                best_scan_score = score - penalty
-                print('new score: ', best_scan_score)
+            cv_score = scores['test_score'].mean() + penalty
+            train_score = scores['train_score'].mean()
+            if cv_score - penalty > best_scan_score:
+                best_scan_score = cv_score - penalty
+                print('new score: ', best_scan_score, x_new.shape[1])
                 best_scan_columns = x_new.columns
-                print('best scan columns: ', best_scan_columns)
+                # print('best scan columns: ', best_scan_columns)
+                best_scan_train_score = train_score
 
         if best_scan_score > best_score:
             best_score = best_scan_score
             print('new score: ', best_scan_score)
             best_columns = best_scan_columns
             print('best scan columns: ', best_columns)
+
+        test_scores.append(best_scan_score)
+        training_scores.append(best_scan_train_score)
+        best_columns.append(best_scan_columns)
+
+    return {"test scores": test_scores,
+            "training scores": training_scores,
+            "columns": best_columns,
+            "n columns": n_columns}
 
 
 def sfs_full(regr, X_original, y, cv, min_components=1, penalty_rate=0.0):
@@ -74,7 +94,7 @@ def sfs_full(regr, X_original, y, cv, min_components=1, penalty_rate=0.0):
             # print(x_new.columns)
             # score = cross_val_score(regr, x_new, y, cv=cv, scoring='neg_mean_absolute_error').mean()
             scores = cross_validate(regr, x_new, y, cv=cv,
-                                    scoring='neg_mean_absolute_error',
+                                    scoring='r2',
                                     return_train_score=True)
             penalty = penalty_rate * x_new.shape[1]
             # print(scores)

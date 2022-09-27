@@ -13,13 +13,14 @@ import pandas as pd
 pd.set_option('display.max_columns', None)
 
 
-def get_data(date, sensor="AS7265x", data_type='reflectance'):
+def get_data(date, sensor="AS7265x", data_type='reflectance',
+             file_end="UT_rice"):
     if sensor not in ["AS7265x", "AS7262"]:
         raise ValueError("sensor has to be 'AS7265x', or 'AS7262'")
     x_columns = []
     wavelengths = []
     try:
-        filename = f"2022-{date}_{sensor}_UT_rice.xlsx"
+        filename = f"2022-{date}_{sensor}_{file_end}.xlsx"
         print(f"Getting file: {filename}")
         data = pd.read_excel(filename)
         data = data.dropna(axis='index', how='all')
@@ -76,10 +77,14 @@ if __name__ == "__main__":
     # reflectance = get_data("08-06")
     # print(reflectance)
 
-    df = get_all_data(return_type='reflectance', set=2)
-    df.to_excel("second_set_reflectance.xlsx", encoding="utf-16")
+    # df = get_all_data(return_type='reflectance', set=2)
+    # df.to_excel("second_set_reflectance.xlsx", encoding="utf-16")
+
     # df.to_excel("second_set_raw.xlsx", encoding="utf-16")
     # df1 = pd.DataFrame({'a': [10], 'b': [20], 'c': [30]})
     # df2 = pd.DataFrame({'a': [1], 'b': [2], 'c': [3]})
     # print(df1)
     # print(df1.div(df2, axis='columns'))
+    df, _ = get_data("09-25", file_end="dead")
+    print(df)
+    df.to_excel("dead_leaves_reflectance.xlsx", encoding="utf-16")

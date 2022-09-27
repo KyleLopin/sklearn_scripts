@@ -20,6 +20,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 # local files
 import get_data
+import sfs
 
 plt.style.use('seaborn')
 
@@ -34,11 +35,12 @@ print('======')
 y_data = y_data['Avg Total Chlorophyll (µg/cm2)']
 print(x_data.shape, y_data.shape)
 # x_data_ss = StandardScaler().fit_transform(x_data)
-x_scaled_np = PolynomialFeatures(degree=2).fit_transform(x_data)
+poly_feat = PolynomialFeatures(degree=2)
+x_scaled_np = poly_feat.fit_transform(x_data)
 
 # x_scaled_np = StandardScaler().fit_transform(x_scaled_np)
-
-x_data = pd.DataFrame(x_scaled_np, index=x_data.index)
+x_data = pd.DataFrame(x_scaled_np, index=x_data.index,
+                      columns=poly_feat.get_feature_names())
 
 
 def neg_exp(x):
@@ -91,14 +93,42 @@ def pls_optimize_comps(x, y, max_comps):
     return (opt_comps+1, max_score, test_scores, training_scores)
 
 
-y_cv, score, rmsecv = base_pls_cv(x_data, y_data, 5)
-print(y_cv)
-print(score)
-print(rmsecv)
-print('=====', x_data.shape)
-opt_comps, min_score, test_sc, train_sc = pls_optimize_comps(x_data, y_data, 11)
-print(opt_comps)
-print(min_score)
-plt.plot(test_sc, 'r')
-plt.plot(train_sc, 'blue')
-plt.show()
+def get_max_score(sfs_scores):
+    print(sfs_scores)
+    max_cv_score = max(sfs_scores["test scores"])
+    max_score_index = sfs_scores["test scores"].index(max_cv_score)
+    best_columns = sfs_scores["columns"][max_score_index]
+    print(max_cv_score)
+    print(max_score_index)
+    print(best_columns)
+    ham
+
+
+def pls_optimize_n_comps_with_sfs(x, y, max_comps):
+    test_scores = np.zeros(max_comps)
+    training_scores = np.zeros(max_comps)
+    for i in range(1, max_comps + 1, 1):
+        pls_base = PLSRegression(n_components=i)
+        ttr_pls = TransformedTargetRegressor(regressor=pls_base,
+                                             func=neg_log,
+                                             inverse_func=neg_exp)
+        sfs_scores = sfs.sfs_back(ttr_pls, x, y, cv_ss, group=x.index)
+        print(sfs_scores)
+        print('=====')
+
+
+if __name__ == "__main__":
+    # y_cv, score, rmsecv = base_pls_cv(x_data, y_data, 5)
+    #
+    # print(y_cv)
+    # print(score)
+    # print(rmsecv)
+    # print('=====', x_data.shape)
+    # opt_comps, min_score, test_sc, train_sc = pls_optimize_comps(x_data, y_data, 11)
+    # print(opt_comps)
+    # print(min_score)
+    # print(x_data)
+    pls_optimize_n_comps_with_sfs(x_data, y_data, 12)
+    # plt.plot(test_sc, 'r')
+    # plt.plot(train_sc, 'blue')
+    # plt.show()
