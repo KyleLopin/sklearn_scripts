@@ -20,15 +20,13 @@ plt.rcParams['font.family'] = 'TH Sarabun New'
 plt.rcParams['xtick.labelsize'] = 20.0
 plt.rcParams['ytick.labelsize'] = 20.0
 
-# data = pd.read_excel("first_4_days_raw.xlsx")
-data = pd.read_excel("w chloro raw first set.xlsx")
-# data = pd.read_excel("w chloro raw second set green.xlsx")
-# data = pd.read_excel("w chloro raw first set.xlsx")
-# data = pd.read_excel("summary_08-12.xlsx.xlsx")
+TYPE = "raw"
+SET = "first"
+SENSOR = "AS7265X"
+MODEL = "random_forest"
 
-# data = data[data["variety"] == names[3]]
-print(data)
-# model = joblib.load("rice_coeff.joblib")
+data = pd.read_excel(f"chloro_{SENSOR}_{SET}_set_{TYPE}_{MODEL}.xlsx")
+
 x_columns = []
 wavelengths = []
 for column in data.columns:

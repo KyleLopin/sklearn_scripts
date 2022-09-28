@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import pandas as pd
 
+SET = "first"
+SENSOR = "AS7265x"
+
 fm.fontManager.addfont('THSarabunNew.ttf')
 plt.rcParams['font.family'] = 'TH Sarabun New'
 plt.rcParams['xtick.labelsize'] = 20.0
@@ -25,8 +28,8 @@ CONDITIONS = ['control', 'งดน้ำ']
 LINESTYLES = {'control': "solid", 'งดน้ำ': "dashed"}
 MARKERS = {'control': "o", 'งดน้ำ': "x"}
 
-df = pd.read_excel("modeled_health.xlsx")
-df_summary = df.groupby(["type exp", "variety", "day", "pot number"],
+df = pd.read_excel(f"modeled_health_{SET}_{SENSOR}_reflectance.xlsx")
+df_summary = df.groupby(["type exp", "variety", "day"],
                         as_index=False).mean(numeric_only=True)
 df_std = df.groupby(["type exp", "variety", "day", "pot number"]
                     ).std(numeric_only=True)
@@ -47,6 +50,8 @@ for i, condition in enumerate(CONDITIONS):
         plt.scatter(df_cond["day"], df_cond["modeled_health"],
                     color=COLORS[variety], label=variety,
                     ls=LINESTYLES[condition])
+    plt.xlabel("Days", fontsize=AXIS_LABEL_FONTSIZE)
+    plt.ylabel("Modeled health", fontsize=AXIS_LABEL_FONTSIZE)
     plt.legend()
 
 plt.show()

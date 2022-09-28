@@ -11,8 +11,13 @@ import joblib
 # installed libraries
 import pandas as pd
 
-data = pd.read_excel("second_set_raw.xlsx")
-model = joblib.load('rice_coeff_high_chloro.joblib')
+TYPE = "raw"
+SET = "first"
+SENSOR = "AS7265X"
+MODEL = "random_forest"
+
+data = pd.read_excel(f"{SET}_set_{SENSOR}_{TYPE}.xlsx")
+model = joblib.load(f'rice_{MODEL}_full_chloro.joblib')
 x_columns = []
 wavelengths = []
 for column in data.columns:
@@ -20,8 +25,8 @@ for column in data.columns:
         x_columns.append(column)
 x_data = data[x_columns]
 # x_data = x_data.iloc[:, :12]
-# chloro_predict = model.predict(x_data)
-chloro_predict = x_data.iloc[:, 5] - x_data.iloc[:, 7]
-print(chloro_predict)
+chloro_predict = model.predict(x_data)
+# chloro_predict = x_data.iloc[:, 5] - x_data.iloc[:, 7]
+# print(chloro_predict)
 data["chloro"] = chloro_predict
-data.to_excel("w chloro raw second set green.xlsx", encoding="utf-16")
+data.to_excel(f"chloro_{SENSOR}_{SET}_set_{TYPE}_{MODEL}.xlsx")

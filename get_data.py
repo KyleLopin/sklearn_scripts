@@ -192,6 +192,11 @@ def get_data_as726x_serial(specimen: str, sensor: str, led_currents: list=["25 m
         return final_df, y_data, data
 
 if __name__ == "__main__":
-    get_data_as726x_serial("mango", "as7262", positions=[1, 2, 3])
+    # get_data_as726x_serial("mango", "as7262", positions=[1, 2, 3])
+    _, _, df = get_data("rice", "as7265x", int_time=[150], led="b'White UV IR'",
+                                   position=[1, 2, 3], led_current=["12.5 mA"],
+                                   average=False, return_type="XYZ")
+    # df.to_excel("rice_leave_data.xlsx")
+
     print("In main")
 

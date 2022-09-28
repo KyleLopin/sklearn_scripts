@@ -60,14 +60,7 @@ data = data[data['variety'] != "กระดาษขาว"]
 # data = data.groupby('variety', as_index=False).mean()
 data = data.groupby(["variety", "type exp"], as_index=False).mean()
 y = data["variety"]
-# ['กระดาษขาว' 'กข43' 'กข79' 'กข85' 'ปทุมธานี 1']
-# data = data[data['variety'] == 'กข85']
-print(data)
 
-print('[[[[')
-print(data['variety'].unique())
-print(data)
-print(names)
 for column in data.columns:
     if 'nm' in column:
         x_columns.append(column)

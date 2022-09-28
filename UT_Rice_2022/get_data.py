@@ -47,7 +47,7 @@ def get_data(date, sensor="AS7265x", data_type='reflectance',
         raise ValueError("data_type has to be 'reflectance' or 'raw'")
 
 
-def get_all_data(return_type='raw', set=1):
+def get_all_data(return_type='raw', set=1, sensor="AS7625x"):
     if set == 1:
         dates = ["08-06", "08-08", "08-10", "08-12",
                  "08-14", "08-16", "08-18", "08-20",
@@ -61,7 +61,7 @@ def get_all_data(return_type='raw', set=1):
                  "09-18"]
     final_df = pd.DataFrame()
     for i, date in enumerate(dates):
-        new_df, _ = get_data(date, data_type=return_type)
+        new_df, _ = get_data(date, data_type=return_type, sensor=sensor)
         # print(new_df)
         # print(new_df["gain"])
         day_map = {64.0: 2*i}
@@ -76,15 +76,23 @@ def get_all_data(return_type='raw', set=1):
 if __name__ == "__main__":
     # reflectance = get_data("08-06")
     # print(reflectance)
+    SENSOR = "AS7265x"
+    TYPE = 'raw'
+    SET = "first"
 
-    # df = get_all_data(return_type='raw', set=1)
-    # df.to_excel("first_set_reflectance.xlsx", encoding="utf-16")
+    if SET == "first":
+        _set = 1
+    elif SET == "second":
+        _set = 2
+
+    df = get_all_data(return_type=TYPE, set=_set, sensor=SENSOR)
+    df.to_excel(f"{SET}_set_{SENSOR}_{TYPE}.xlsx")
 
     # df.to_excel("second_set_raw.xlsx", encoding="utf-16")
     # df1 = pd.DataFrame({'a': [10], 'b': [20], 'c': [30]})
     # df2 = pd.DataFrame({'a': [1], 'b': [2], 'c': [3]})
     # print(df1)
     # print(df1.div(df2, axis='columns'))
-    df, _ = get_data("09-25", file_end="dead", data_type='raw')
-    print(df)
-    df.to_excel("dead_leaves_raw.xlsx")
+    # df, _ = get_data("09-25", file_end="dead", data_type='raw')
+    # print(df)
+    # df.to_excel("dead_leaves_raw.xlsx")
