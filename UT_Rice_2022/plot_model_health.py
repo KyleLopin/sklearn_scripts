@@ -13,11 +13,12 @@ import pandas as pd
 
 SET = "first"
 SENSOR = "AS7265x"
+TYPE = "reflectance"
 
-fm.fontManager.addfont('THSarabunNew.ttf')
-plt.rcParams['font.family'] = 'TH Sarabun New'
-plt.rcParams['xtick.labelsize'] = 20.0
-plt.rcParams['ytick.labelsize'] = 20.0
+# fm.fontManager.addfont('THSarabunNew.ttf')
+# plt.rcParams['font.family'] = 'TH Sarabun New'
+# plt.rcParams['xtick.labelsize'] = 20.0
+# plt.rcParams['ytick.labelsize'] = 20.0
 AXIS_LABEL_FONTSIZE = 20
 TITLE_LABEL_FONTSIZE = 30
 
@@ -28,7 +29,8 @@ CONDITIONS = ['control', 'งดน้ำ']
 LINESTYLES = {'control': "solid", 'งดน้ำ': "dashed"}
 MARKERS = {'control': "o", 'งดน้ำ': "x"}
 
-df = pd.read_excel(f"modeled_health_{SET}_{SENSOR}_reflectance.xlsx")
+# df = pd.read_excel(f"modeled_health_{SET}_{SENSOR}_reflectance.xlsx")
+df = pd.read_excel(f"daily_modeled_health_{SET}_{SENSOR}_{TYPE}.xlsx")
 df_summary = df.groupby(["type exp", "variety", "day"],
                         as_index=False).mean(numeric_only=True)
 df_std = df.groupby(["type exp", "variety", "day", "pot number"]

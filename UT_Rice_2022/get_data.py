@@ -39,7 +39,7 @@ def get_data(date, sensor="AS7265x", data_type='reflectance',
     elif data_type == 'reflectance':
         # get average of the white reference
         reference = data[data["variety"] == "กระดาษขาว"]
-        reference = reference.groupby("variety").mean()
+        reference = reference.groupby("variety").mean(numeric_only=True)
         for column in x_columns:
             data[column] = data[column]/reference[column].values
         return data, wavelengths
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     # reflectance = get_data("08-06")
     # print(reflectance)
     SENSOR = "AS7265x"
-    TYPE = 'raw'
+    TYPE = 'reflectance'
     SET = "first"
 
     if SET == "first":
