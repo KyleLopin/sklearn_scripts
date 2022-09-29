@@ -76,7 +76,7 @@ if __name__ == "__main__":
                                             "09-18"]
     else:
         dates = None
-    pdf_file = PdfPages('set_1_average_daily.pdf')
+    pdf_file = PdfPages(f'set_{DATASET}_{SENSOR}_average_daily.pdf')
     for _date in dates:
         _fig = make_daily_average_figure(_date, sensor=SENSOR)
         pdf_file.savefig(_fig)
