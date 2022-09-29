@@ -26,8 +26,9 @@ dead_leaf_data = pd.read_excel(f"ctrl_and_dead_{SET}_{SENSOR}_{TYPE}.xlsx")
 dead_leaf_data = dead_leaf_data.loc[dead_leaf_data["health"] == 0]
 all_data = pd.read_excel(f"{SET}_set_{SENSOR}_{TYPE}.xlsx")
 print(dead_leaf_data)
-VARIETIES = all_data["variety"].unique()
+VARIETIES = ['กข43', 'กข79', 'กข85', 'ปทุมธานี 1']
 print(VARIETIES)
+
 ham
 x_columns = []
 for column in dead_leaf_data.columns:
