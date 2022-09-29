@@ -7,105 +7,75 @@
 __author__ = "Kyle Vitatus Lopin"
 
 # installed libraries
+from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
-import pandas as pd
 # local files
 import get_data
-import processing
 
-# font_manager = fm.
-# font_files = fm.findSystemFonts(fontpaths=["/resources/fonts"])
-# font_list = fm.createFontList(['THSarabunNew.ttf'])
-# ff = fm.fontManager.findfont('THSarabunNew.ttf')
-# print(ff)
 fm.fontManager.addfont('THSarabunNew.ttf')
-# fm.fontManager.ttflist.extend(font_list)
 plt.rcParams['font.family'] = 'TH Sarabun New'
 plt.rcParams['xtick.labelsize'] = 20.0
 plt.rcParams['ytick.labelsize'] = 20.0
 ALPHA = 0.9
-# "การทดลอง"- type of experiment , "พันธุ์ข้าว" - rice variety, "หมายเหตุ" - notes
-fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(9, 5),
-                         constrained_layout=True)
-data, wavelengths = get_data.get_data("09-07")
-# print(data)
-leaf_nums = data['Leaf number'].unique()
-print(leaf_nums)
-leaf_exp_map = {}
-leaf_var_map = {}
-for leaf_num in leaf_nums:
-    # print(data[data['Leaf number'] == leaf_num])
-    df_slice = data[data['Leaf number'] == leaf_num]
-    leaf_exp_map[leaf_num] = df_slice["type exp"].unique().tolist()[0]
-    leaf_var_map[leaf_num] = df_slice["variety"].unique().tolist()[0]
-print(leaf_exp_map)
-print(leaf_var_map)
 
-print('+=====+=+')
-print(data)
-print(data.columns)
-print('----')
-data = data.groupby('Leaf number', as_index=False).mean()
-data["type exp"] = data["Leaf number"].map(leaf_exp_map)
-data["variety"] = data["Leaf number"].map(leaf_var_map)
-print(data)
-print(data.columns)
-names = data["variety"].unique()[1:]
-colors = ["navy", "turquoise", "darkorange", "magenta"]
-# names = data["พันธุ์ข้าว"].unique()
 
-x_columns = []
-data = data[data['variety'] != "กระดาษขาว"]
-# data = data.groupby('variety', as_index=False).mean()
-data = data.groupby(["variety", "type exp"], as_index=False).mean()
-y = data["variety"]
+def make_daily_average_figure(date):
+        fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(9, 5),
+                                 constrained_layout=True)
+        data, wavelengths = get_data.get_data(date)
+        print(data.shape)
+        colors = ["navy", "turquoise", "darkorange", "magenta"]
 
-for column in data.columns:
-    if 'nm' in column:
-        x_columns.append(column)
-x_data = data[x_columns]
+        x_columns = []
+        data = data[data['variety'] != "กระดาษขาว"]
+        print(data.shape)
+        # data = data.groupby(["variety", "type exp"], as_index=False).mean(numeric_only=True)
+        # data_std = data.groupby(["variety", "type exp"], as_index=False).std(ddof=1, numeric_only=True)
 
-# axes[0].plot(wavelengths, x_data.T)
-axes.set_title("Raw Data")
-axes.set_ylabel("Reflectance")
-for color, name in zip(colors, names):
-    print(name)
-    ser1 = y == name
-    for ls, exp_type in zip(['solid', 'dashed'], ['control', 'งดน้ำ']):
-        ser2 = data["type exp"] == exp_type
-        mask = ser1 & ser2
-        # print(wavelengths)
-        # print(x_data[mask].T)
-        _y = x_data[mask].values.tolist()[0]
-        _y = x_data.loc[mask].T.values[:, :]
-        print(_y)
-        print(len(wavelengths), len(_y))
-        print(type(wavelengths), type(_y))
-        # axes.plot(wavelengths, _y)
-        axes.plot(wavelengths, x_data.loc[mask].T.values[:,:], ls=ls,
-                  color=color, label=f"{name}, {exp_type}",
-                  alpha=ALPHA)
+        # print(data_std.shape)
+        for column in data.columns:
+            if 'nm' in column:
+                x_columns.append(column)
+        # x_data = data[x_columns]
+        # x_data_std = data_std[x_columns]
+        axes.set_title(f"Raw Data: {date}", fontsize=18)
+        axes.set_ylabel("Reflectance", fontsize=15)
+        axes.set_xlabel("Wavelengths (nm)", fontsize=15)
+        for color, variety in zip(colors, data['variety'].unique()):
+            for ls, exp_type in zip(['solid', 'dashed'], ['control', 'งดน้ำ']):
+                data_slice = data.loc[(data["type exp"] == exp_type) &
+                                      (data["variety"] == variety)]
+                mean = data_slice[x_columns].mean()
+                std = data_slice[x_columns].std()
+                axes.plot(wavelengths, mean.T,
+                          ls=ls, color=color, alpha=ALPHA,
+                          label=f"{variety}, {exp_type}")
+                axes.fill_between(wavelengths,
+                                  (mean-std).T,
+                                  (mean+std).T, color=color,
+                                  alpha=0.08)
 
-# handles, labels = axes[0].get_legend_handles_labels()
-# by_label = dict(zip(labels, handles))
-# axes[0].legend(by_label.values(),
-#                by_label.keys(),
-#                prop={'size': 20})
-axes.legend(prop={'size': 20})
-# SNV Data
-# snv_data = processing.snv(x_data)
-# axes[1].set_title("SNV Data")
-# axes[1].set_ylabel("Reflectance")
-# for color, name in zip(colors, names):
-#     axes[1].plot(wavelengths, snv_data[y == name].T,
-#                  color=color, label=name, alpha=alpha)
-#
-# msc_data, _ = processing.msc(x_data)
-# axes[2].set_title("MSC Data")
-# axes[2].set_ylabel("Reflectance")
-# for color, name in zip(colors, names):
-#     axes[2].plot(wavelengths, msc_data[y == name].T,
-#                  color=color, label=name, alpha=alpha)
+        axes.legend(prop={'size': 14})
+        return fig
 
-plt.show()
+
+if __name__ == "__main__":
+    set = 1
+    if set == 1:
+        dates = ["08-06", "08-08", "08-10", "08-12",
+                 "08-14", "08-16", "08-18", "08-20",
+                 "08-22", "08-24", "08-26", "08-28",
+                 "08-30", "09-01", "09-05", "09-07",
+                 "09-09", "09-11"]
+    elif set == 2:
+        dates = ["08-27", "08-29", "08-31",
+                 "09-02", "09-04", "09-06", "09-08",
+                 "09-10", "09-12", "09-14", "09-16"
+                 "09-18"]
+    pdf_file = PdfPages('set_1_average_daily.pdf')
+    for date in dates:
+        fig = make_daily_average_figure(date)
+        pdf_file.savefig(fig)
+        # plt.show()
+    pdf_file.close()
