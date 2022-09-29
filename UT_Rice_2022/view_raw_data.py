@@ -80,5 +80,5 @@ if __name__ == "__main__":
     for _date in dates:
         _fig = make_daily_average_figure(_date, sensor=SENSOR)
         pdf_file.savefig(_fig)
-        plt.show()
+        # plt.show()
     pdf_file.close()
