@@ -15,10 +15,10 @@ SET = "first"
 SENSOR = "AS7265x"
 TYPE = "reflectance"
 
-# fm.fontManager.addfont('THSarabunNew.ttf')
-# plt.rcParams['font.family'] = 'TH Sarabun New'
-# plt.rcParams['xtick.labelsize'] = 20.0
-# plt.rcParams['ytick.labelsize'] = 20.0
+fm.fontManager.addfont('THSarabunNew.ttf')
+plt.rcParams['font.family'] = 'TH Sarabun New'
+plt.rcParams['xtick.labelsize'] = 20.0
+plt.rcParams['ytick.labelsize'] = 20.0
 AXIS_LABEL_FONTSIZE = 20
 TITLE_LABEL_FONTSIZE = 30
 

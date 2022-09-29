@@ -21,10 +21,10 @@ ALPHA = 0.9
 COLORS = ["navy", "turquoise", "darkorange", "magenta"]
 
 
-def make_daily_average_figure(date):
+def make_daily_average_figure(date, sensor="AS7265x"):
     fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(9, 5),
                              constrained_layout=True)
-    data, wavelengths = get_data.get_data(date)
+    data, wavelengths = get_data.get_data(date, sensor=sensor)
     print(data.shape)
 
     x_columns = []
@@ -61,14 +61,15 @@ def make_daily_average_figure(date):
 
 
 if __name__ == "__main__":
-    dataset = 1
-    if dataset == 1:
+    DATASET = 1
+    SENSOR = "AS7265x"
+    if DATASET == 1:
         dates = ["08-06", "08-08", "08-10", "08-12",
                  "08-14", "08-16", "08-18", "08-20",
                  "08-22", "08-24", "08-26", "08-28",
                  "08-30", "09-01", "09-05", "09-07",
                  "09-09", "09-11"]
-    elif dataset == 2:
+    elif DATASET == 2:
         dates = ["08-27", "08-29", "08-31",
                  "09-02", "09-04", "09-06", "09-08",
                  "09-10", "09-12", "09-14", "09-16"
@@ -77,7 +78,7 @@ if __name__ == "__main__":
         dates = None
     pdf_file = PdfPages('set_1_average_daily.pdf')
     for _date in dates:
-        _fig = make_daily_average_figure(_date)
+        _fig = make_daily_average_figure(_date, sensor=SENSOR)
         pdf_file.savefig(_fig)
-        # plt.show()
+        plt.show()
     pdf_file.close()

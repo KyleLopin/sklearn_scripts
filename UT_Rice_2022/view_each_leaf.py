@@ -15,11 +15,11 @@ import matplotlib.font_manager as fm
 # local files
 import get_data
 
-# fm.fontManager.addfont('THSarabunNew.ttf')
-# plt.rcParams['font.family'] = 'TH Sarabun New'
-# plt.rcParams['xtick.labelsize'] = 20.0
-# plt.rcParams['ytick.labelsize'] = 20.0
-COLORS = ["navy", "turquoise", "darkorange", "magenta"]
+fm.fontManager.addfont('THSarabunNew.ttf')
+plt.rcParams['font.family'] = 'TH Sarabun New'
+plt.rcParams['xtick.labelsize'] = 20.0
+plt.rcParams['ytick.labelsize'] = 20.0
+COLORS = {'nan': 'black', }
 ALPHA = 0.9
 SET = "first"
 SENSOR = "AS7265x"
@@ -41,11 +41,17 @@ def make_leaf_figure(leaf_number):
 
     axes.set_ylabel("Reflectance", fontsize=15)
     axes.set_xlabel("Wavelengths (nm)", fontsize=15)
+    axes.set_title(f"Leaf number: {leaf_number}\n"
+                   f"variety: {data['variety'].unique()[0]}"
+                   f"condition: {data['type exp'].unique()[0]}", fontsize=18)
     for day in FULL_DATASET["day"].unique():
         print(day)
         daily_data = data.loc[data["day"] == day]
         print(daily_data)
-        axes.set_title(f"Leaf number: {leaf_number}", fontsize=18)
+        print('====')
+        print(daily_data['variety'])
+        print(daily_data['variety'].unique())
+
         mean = daily_data[x_columns].mean()
         axes.plot(wavelengths, mean.T, label=day)
         axes.legend()
@@ -54,5 +60,5 @@ def make_leaf_figure(leaf_number):
 
 
 if __name__ == "__main__":
-    _fig = make_leaf_figure(2)
+    _fig = make_leaf_figure(20)
     plt.show()

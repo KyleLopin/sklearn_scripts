@@ -19,9 +19,12 @@ plt.rcParams['xtick.labelsize'] = 20.0
 plt.rcParams['ytick.labelsize'] = 20.0
 AXIS_LABEL_FONTSIZE = 20
 TITLE_LABEL_FONTSIZE = 30
+SENSOR = "AS7265x"
+TYPE = 'reflectance'
+SET = "first"
 
 data = pd.read_excel("first_set_raw.xlsx")
-data = pd.read_excel("first_set_reflectance.xlsx")
+data = pd.read_excel(f"{SET}_set_{SENSOR}_{TYPE}.xlsx")
 # data = data[data['type exp'] != "control"]
 print(data)
 x_columns = []
@@ -30,6 +33,7 @@ for column in data.columns:
         x_columns.append(column)
 x_data = data[x_columns]
 regr = PLSRegression(n_components=6)
+# regr = SVR()
 # regr = SVR(kernel="poly", degree=2)
 # pls.fit(data[x_columns], data["day"])
 # y_predict = pls.predict(data[x_columns])

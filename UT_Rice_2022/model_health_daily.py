@@ -29,7 +29,7 @@ print(dead_leaf_data)
 VARIETIES = ['กข43', 'กข79', 'กข85', 'ปทุมธานี 1']
 print(VARIETIES)
 
-ham
+
 x_columns = []
 for column in dead_leaf_data.columns:
     if 'nm' in column:
@@ -42,6 +42,7 @@ regr = SVR()
 # add each day to the model data
 days = all_data["day"].unique()
 print(days)
+# days = [12, 14, 16, 18, 20, 22, 24, 26,]
 all_data["modeled_health"] = None
 for day in days:
     new_data = all_data.loc[all_data["day"] == day]
@@ -52,18 +53,18 @@ for day in days:
     # print(new_ctrl_data)
     daily_df = pd.concat([dead_leaf_data, new_ctrl_data], ignore_index=True)
 
-
-
     daily_df = daily_df.loc[daily_df["variety"] != "กระดาษขาว"]
     print(daily_df["health"])
     regr.fit(daily_df[x_columns], daily_df["health"])
     y_predict = regr.predict(daily_df[x_columns])
     plt.scatter(daily_df["health"], y_predict)
+    print(daily_df['day'])
     print(regr.score(daily_df[x_columns], daily_df["health"]))
 
     health_predict = regr.predict(new_data[x_columns])
     all_data.loc[all_data["day"] == day, "modeled_health"] = health_predict
-    # plt.show()
+
+    plt.show()
 all_data.to_excel(f"daily_modeled_health_{SET}_{SENSOR}_{TYPE}.xlsx")
 
 y = all_data["modeled_health"]
