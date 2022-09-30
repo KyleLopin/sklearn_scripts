@@ -81,7 +81,7 @@ if __name__ == "__main__":
     # reflectance = get_data("08-06")
     # print(reflectance)
     SENSOR = "AS7265x"
-    TYPE = 'reflectance'
+    TYPE = 'raw'
     SET = "first"
 
     if SET == "first":

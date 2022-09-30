@@ -9,71 +9,79 @@ __author__ = "Kyle Vitautus Lopin"
 
 # installed libraries
 from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import numpy as np
 import pandas as pd
-# local files
-import get_data
 
-fm.fontManager.addfont('THSarabunNew.ttf')
-plt.rcParams['font.family'] = 'TH Sarabun New'
-plt.rcParams['xtick.labelsize'] = 20.0
-plt.rcParams['ytick.labelsize'] = 20.0
+try:
+    fm.fontManager.addfont('THSarabunNew.ttf')
+    plt.rcParams['font.family'] = 'TH Sarabun New'
+    plt.rcParams['xtick.labelsize'] = 20.0
+    plt.rcParams['ytick.labelsize'] = 20.0
+except:
+    pass  # ttf file into installed
 COLORS = plt.cm.cool(np.linspace(0, 1, 18))
 ALPHA = 0.9
+DATASET = "1"
 SET = "first"
 SENSOR = "AS7265x"
-TYPE = "reflectance"
-
-FULL_DATASET = pd.read_excel(f"{SET}_set_{SENSOR}_{TYPE}.xlsx")
-print(FULL_DATASET)
-
-x_columns = []
-wavelengths = []
-for column in FULL_DATASET.columns:
-    if 'nm' in column:
-        x_columns.append(column)
-        wavelengths.append(column.split()[0])
-x_columns = x_columns[1:]
-wavelengths = wavelengths[1:]
+TYPE = "raw"
 
 
-def make_dead_spectrum(axis):
-    DEAD_DF = pd.read_excel(f"ctrl_and_dead_{SET}_{SENSOR}_{TYPE}.xlsx")
-    DEAD_DF = DEAD_DF.loc[DEAD_DF["type exp"] == 'dead'].copy()
-    mean = DEAD_DF[x_columns].mean()
-    std = DEAD_DF[x_columns].std()
-    axis.plot(wavelengths, mean.T, color='black', label="dead leaf")
-    axis.fill_between(wavelengths,
+def get_x_columns_and_wavelengths(df: pd.DataFrame):
+    x_columns = []
+    wavelengths = []
+    for column in df.columns:
+        if 'nm' in column:
+            x_columns.append(column)
+            wavelengths.append(column.split()[0])
+    x_columns = x_columns[1:]
+    wavelengths = wavelengths[1:]
+    return x_columns, wavelengths
+
+
+def make_dead_spectrum(axis, _x_columns, _wavelengths):
+    if TYPE == "reflectance":
+        dead_df = pd.read_excel(f"ctrl_and_dead_{SET}_{SENSOR}_{TYPE}.xlsx")
+        dead_df = dead_df.loc[dead_df["type exp"] == 'dead'].copy()
+    elif TYPE == 'raw':
+        dead_df = pd.read_excel(f"dead_leaves_raw.xlsx")
+    else:
+        raise AttributeError(f"TYPE needs to be 'raw' or 'reflectance' not: {TYPE}")
+    mean = dead_df[_x_columns].mean()
+    std = dead_df[_x_columns].std()
+    axis.plot(_wavelengths, mean.T, color='black', label="dead leaf")
+    axis.fill_between(_wavelengths,
                       (mean - std).T,
                       (mean + std).T, color="black",
                       alpha=0.1)
 
 
-def make_leaf_figure(leaf_number):
+def make_leaf_figure(leaf_number, _dataset):
+
     fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(9, 5),
                              constrained_layout=True)
-    data = FULL_DATASET.loc[FULL_DATASET["Leaf number"] == leaf_number]
+    data = _dataset.loc[_dataset["Leaf number"] == leaf_number]
+    x_columns, wavelengths = get_x_columns_and_wavelengths(data)
     axes.set_ylabel("Reflectance", fontsize=15)
     axes.set_xlabel("Wavelengths (nm)", fontsize=15)
     axes.set_title(f"Leaf number: {leaf_number}\n"
                    f"variety: {data['variety'].unique()[0]}"
                    f"condition: {data['type exp'].unique()[0]}", fontsize=18)
-    for day in FULL_DATASET["day"].unique():
+    for day in _dataset["day"].unique():
         daily_data = data.loc[data["day"] == day]
-        mean = daily_data[x_columns].mean()
         try:
             color_index = int(day/2)
             color = COLORS[color_index]
-            # axes.plot(wavelengths, mean.T, label=day,
-            #           color=color)
-            axes.plot(wavelengths, daily_data[x_columns].T, label=day,
+            mean = daily_data[x_columns].mean()
+            axes.plot(wavelengths, mean.T, label=day,
                       color=color)
+            # axes.plot(wavelengths, daily_data[x_columns].T, label=day,
+            #           color=color)
         except:
             pass  # the dead leaves
-    make_dead_spectrum(axes)
+    make_dead_spectrum(axes, x_columns, wavelengths)
     handles, labels = plt.gca().get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
     axes.legend(by_label.values(), by_label.keys())
@@ -81,14 +89,12 @@ def make_leaf_figure(leaf_number):
 
 
 if __name__ == "__main__":
-    leaves = FULL_DATASET['Leaf number'].unique()
-    DATASET = "1"
-
-    print(leaves)
-    pdf_file = PdfPages(f'{SET}_set_{SENSOR}_every_leaf_every_read.pdf')
+    full_dataset = pd.read_excel(f"{SET}_set_{SENSOR}_{TYPE}.xlsx")
+    pdf_file = PdfPages(f'{SET}_set_{SENSOR}_every_leaf_{TYPE}.pdf')
+    leaves = full_dataset['Leaf number'].unique()
     for leaf in leaves:
         print(leaf)
-        _fig = make_leaf_figure(leaf)
+        _fig = make_leaf_figure(leaf, full_dataset)
         pdf_file.savefig(_fig)
         plt.close(_fig)
     pdf_file.close()
