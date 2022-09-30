@@ -7,6 +7,7 @@ Plot the average of each set of variety / experiment type for each day
 __author__ = "Kyle Vitautus Lopin"
 
 # installed libraries
+import matplotlib as mpl
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
