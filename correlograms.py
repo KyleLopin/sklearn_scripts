@@ -21,18 +21,20 @@ chloro_types = ['Chlorophyll a (µg/mg)', 'Chlorophyll b (µg/mg)',
 # y_name = chloro_types[2]
 y_name = 'Avg Total Chlorophyll (µg/cm2)'
 x_data, y, data = get_data.get_data("mango", "as7262", int_time=[150],
-                                   position=[1, 2, 3], led_current=["25 mA"], return_type="XYZ")
+                                    position=[1, 2, 3], led_current=["25 mA"],
+                                    return_type="XYZ")
 print(x_data)
 print(y)
 y = y[y_name]
-n_comps = 3
+n_comps = 5
 kernel = 'rbf'
 pca = PCA(n_components=n_comps)
-# pca = KernelPCA(n_components=n_comps, kernel=kernel)
-pca = PLSRegression(n_components=3)
-Xpca = pca.fit_transform(x_data)
+pca = KernelPCA(n_components=n_comps, kernel=kernel)
+# pca = PLSRegression(n_components=3)
+Xpca = pca.fit_transform(x_data, y)
 
 columns_ = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5']
+print(Xpca)
 df = pd.DataFrame(Xpca, columns=columns_[:n_comps])
 print(y.shape)
 print(y)
