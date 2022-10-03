@@ -22,10 +22,10 @@ ALPHA = 0.9
 COLORS = ["navy", "turquoise", "darkorange", "magenta"]
 
 
-def make_daily_average_figure(date, sensor="AS7265x"):
+def make_daily_average_figure(date, sensor="AS7265x", dataset=1):
     fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(9, 5),
                              constrained_layout=True)
-    data, wavelengths = get_data.get_data(date, sensor=sensor)
+    data, wavelengths = get_data.get_data(date, sensor=sensor, _set=dataset)
     print(data.shape)
 
     x_columns = []
@@ -38,6 +38,8 @@ def make_daily_average_figure(date, sensor="AS7265x"):
     for column in data.columns:
         if 'nm' in column:
             x_columns.append(column)
+    x_columns = x_columns[1:]
+    wavelengths = wavelengths[1:]
     # x_data = data[x_columns]
     # x_data_std = data_std[x_columns]
     axes.set_title(f"Raw Data: {date}", fontsize=18)
@@ -62,7 +64,7 @@ def make_daily_average_figure(date, sensor="AS7265x"):
 
 
 if __name__ == "__main__":
-    DATASET = 1
+    DATASET = 2
     SENSOR = "AS7265x"
     if DATASET == 1:
         dates = ["08-06", "08-08", "08-10", "08-12",
@@ -73,13 +75,13 @@ if __name__ == "__main__":
     elif DATASET == 2:
         dates = ["08-27", "08-29", "08-31",
                  "09-02", "09-04", "09-06", "09-08",
-                 "09-10", "09-12", "09-14", "09-16"
+                 "09-10", "09-12", "09-14", "09-16",
                                             "09-18"]
     else:
         dates = None
     pdf_file = PdfPages(f'set_{DATASET}_{SENSOR}_average_daily.pdf')
     for _date in dates:
-        _fig = make_daily_average_figure(_date, sensor=SENSOR)
+        _fig = make_daily_average_figure(_date, sensor=SENSOR, dataset=DATASET)
         pdf_file.savefig(_fig)
         # plt.show()
     pdf_file.close()

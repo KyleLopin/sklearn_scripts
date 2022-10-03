@@ -8,21 +8,25 @@ drought stress
 
 __author__ = "Kyle Vitatus Lopin"
 
+# standard libraries
+from datetime import datetime
+import os
+
 # installed libraries
 import pandas as pd
 pd.set_option('display.max_columns', None)
 
 
 def get_data(date, sensor="AS7265x", data_type='reflectance',
-             file_end="UT_rice"):
+             file_end="UT_rice", diff=False, _set=1):
     if sensor not in ["AS7265x", "AS7262"]:
         raise ValueError("sensor has to be 'AS7265x', or 'AS7262'")
     x_columns = []
     wavelengths = []
     try:
-        filename = f"2022-{date}_{sensor}_{file_end}.xlsx"
-        print(f"Getting file: {filename}")
-        data = pd.read_excel(filename)
+        _filename = os.path.join(f"Set_{_set}", f"2022-{date}_{sensor}_{file_end}.xlsx")
+        print(f"Getting file: {_filename}")
+        data = pd.read_excel(_filename)
         data = data.dropna(axis='index', how='all')
         data = data.fillna(method="ffill")
         for column in data.columns:
@@ -34,6 +38,11 @@ def get_data(date, sensor="AS7265x", data_type='reflectance',
                          f"you sent {date}")
     data.rename(columns={"การทดลอง": "type exp", "พันธุ์ข้าว": "variety", "หมายเลขกระถาง": "pot number"}, inplace=True)
     print(data.columns)
+    print(data)
+    if diff:
+        data[x_columns] = data[x_columns].diff(axis=1)
+        print(data)
+
     if data_type == "raw":
         return data, wavelengths
     elif data_type == 'reflectance':
@@ -47,33 +56,31 @@ def get_data(date, sensor="AS7265x", data_type='reflectance',
         raise ValueError("data_type has to be 'reflectance' or 'raw'")
 
 
-def get_all_data(return_type='raw', set=1, sensor="AS7625x"):
-    if set == 1:
+def get_all_data(return_type='raw', _set=1, sensor="AS7625x", diff=False):
+    if _set == 1:
         dates = ["08-06", "08-08", "08-10", "08-12",
                  "08-14", "08-16", "08-18", "08-20",
                  "08-22", "08-24", "08-26", "08-28",
                  "08-30", "09-01", "09-05", "09-07",
                  "09-09", "09-11"]
-        dates = ["08-06", "08-08", "08-10", "08-12",
-                 "08-14", "08-16", "08-18", "08-20",
-                 "08-22", "08-24", "08-26", "09-01",
-                 "09-07", "09-11"]
-    elif set == 2:
+        # dates = ["08-06", "08-08", "08-10", "08-12",
+        #          "08-14", "08-16", "08-18", "08-20",
+        #          "08-22", "08-24", "08-26", "09-01",
+        #          "09-07", "09-11"]
+    elif _set == 2:
         dates = ["08-27", "08-29", "08-31",
                  "09-02", "09-04", "09-06", "09-08",
-                 "09-10", "09-12", "09-14", "09-16"
+                 "09-10", "09-12", "09-14", "09-16",
                  "09-18"]
     final_df = pd.DataFrame()
+    data_format = "%m-%d"
+    first_day = datetime.strptime(dates[0], data_format)
     for i, date in enumerate(dates):
-        new_df, _ = get_data(date, data_type=return_type, sensor=sensor)
-        # print(new_df)
-        # print(new_df["gain"])
-        day_map = {64.0: 2*i}
-        new_df['day'] = new_df["gain"].map(day_map)
-        print(new_df)
+        new_df, _ = get_data(date, data_type=return_type,
+                             sensor=sensor, diff=diff, _set=_set)
+        days_from_start = (datetime.strptime(date, data_format) - first_day)
+        new_df['day'] = days_from_start
         final_df = pd.concat([final_df, new_df])
-    print("====")
-    print(final_df)
     return final_df
 
 
@@ -82,15 +89,20 @@ if __name__ == "__main__":
     # print(reflectance)
     SENSOR = "AS7265x"
     TYPE = 'raw'
-    SET = "first"
+    SET = "second"
+    DIFF = False
 
     if SET == "first":
         _set = 1
     elif SET == "second":
         _set = 2
 
-    df = get_all_data(return_type=TYPE, set=_set, sensor=SENSOR)
-    df.to_excel(f"{SET}_set_{SENSOR}_{TYPE}.xlsx")
+    filename = f"{SET}_set_{SENSOR}_{TYPE}"
+    if DIFF:
+        filename += "_diff"
+    df = get_all_data(return_type=TYPE, _set=_set,
+                      sensor=SENSOR, diff=DIFF)
+    df.to_excel(filename+".xlsx")
 
     # df.to_excel("second_set_raw.xlsx", encoding="utf-16")
     # df1 = pd.DataFrame({'a': [10], 'b': [20], 'c': [30]})
