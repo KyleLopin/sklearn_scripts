@@ -15,6 +15,7 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 
+
 DIMENSIONS = 2
 CUMULATIVE = False
 ADD_DEAD_LEAVES = True

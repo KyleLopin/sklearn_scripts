@@ -18,9 +18,9 @@ import processing
 
 fm.fontManager.addfont('THSarabunNew.ttf')
 plt.rcParams['font.family'] = 'TH Sarabun New'
-plt.rcParams['xtick.labelsize'] = 20.0
-plt.rcParams['ytick.labelsize'] = 20.0
-plt.rcParams['axes.labelsize'] = 20.0
+plt.rcParams['xtick.labelsize'] = 15.0
+plt.rcParams['ytick.labelsize'] = 15.0
+plt.rcParams['axes.labelsize'] = 18.0
 TITLE_FONTSIZE = 20
 LEGEND_FONTSIZE = 14
 

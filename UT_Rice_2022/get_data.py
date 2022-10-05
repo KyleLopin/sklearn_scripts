@@ -37,6 +37,7 @@ def get_data(date, sensor="AS7265x", data_type='reflectance',
         raise ValueError(f"dates has to be a string of format (MM-DD) and the data file in the current directory\n"
                          f"you sent {date}")
     data.rename(columns={"การทดลอง": "type exp", "พันธุ์ข้าว": "variety", "หมายเลขกระถาง": "pot number"}, inplace=True)
+    data.rename(columns={"พันธุ์": "variety"}, inplace=True)
     print(data.columns)
     print(data)
     if diff:
@@ -47,6 +48,7 @@ def get_data(date, sensor="AS7265x", data_type='reflectance',
         return data, wavelengths
     elif data_type == 'reflectance':
         # get average of the white reference
+        print(data.columns)
         reference = data[data["variety"] == "กระดาษขาว"]
         reference = reference.groupby("variety").mean(numeric_only=True)
         for column in x_columns:
