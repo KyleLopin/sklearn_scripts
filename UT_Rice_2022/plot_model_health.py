@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 
-SET = "first"
+SET = "second"
 SENSOR = "AS7262"
 TYPE = "reflectance"
 
@@ -33,11 +33,12 @@ MARKERS = {'control': "o", 'งดน้ำ': "x"}
 
 # df = pd.read_excel(f"modeled_health_{SET}_{SENSOR}_reflectance.xlsx")
 df = pd.read_excel(f"daily_modeled_health_{SET}_{SENSOR}_{TYPE}.xlsx")
-df = df.loc[df['day'] != 30].copy()
-df_summary = df.groupby(["type exp", "variety", "day"],
+df = df.loc[df['day'] != 4].copy()
+df_summary = df.groupby(["type exp", "variety", "day", "pot number"],
                         as_index=False).mean(numeric_only=True)
 df_std = df.groupby(["type exp", "variety", "day", "pot number"]
                     ).std(numeric_only=True)
+
 fitted_curves = {}
 
 
@@ -57,11 +58,12 @@ for i, condition in enumerate(CONDITIONS):
                     color=COLORS[variety], label=variety,
                     ls=LINESTYLES[condition])
         # make fitted line
-        p0 = [min(df_cond["modeled_health"])-1, 10, 1, 1]
+        p0 = [min(df_cond["modeled_health"])-1, 8, 1, 1]
         popt, pcov = curve_fit(sigmoid, df_cond["day"],
                                df_cond["modeled_health"], p0,
                                method='dogbox', maxfev=50000)
         print(popt)
+        print(np.sqrt(np.diag(pcov)))
         fit = sigmoid(df_cond["day"], *popt)
         plt.plot(df_cond['day'], fit)
     plt.figure(i)

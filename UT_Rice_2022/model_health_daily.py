@@ -10,7 +10,10 @@ __author__ = "Kyle Vitatus Lopin"
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.cross_decomposition import PLSRegression
+from sklearn.decomposition import PCA
+from sklearn.pipeline import make_pipeline
 from sklearn.svm import SVR
+
 pd.set_option('display.max_columns', 500)
 # fm.fontManager.addfont('THSarabunNew.ttf')
 # plt.rcParams['font.family'] = 'TH Sarabun New'
@@ -18,8 +21,8 @@ pd.set_option('display.max_columns', 500)
 # plt.rcParams['ytick.labelsize'] = 20.0
 AXIS_LABEL_FONTSIZE = 20
 TITLE_LABEL_FONTSIZE = 30
-SET = "first"
-SENSOR = "AS7262"
+SET = "second"
+SENSOR = "AS7265x"
 TYPE = "reflectance"
 
 # dead_leaf_data = pd.read_excel(f"ctrl_and_dead_{SET}_{SENSOR}_{TYPE}.xlsx")
@@ -39,13 +42,15 @@ for column in dead_leaf_data.columns:
 
 x_data = dead_leaf_data[x_columns]
 regr = PLSRegression(n_components=3)
-regr = SVR()
+# regr = SVR()
+# regr = make_pipeline(PCA(n_components=2), SVR())
 
 # add each day to the model data
 days = all_data["day"].unique()
 print(days)
 # days = [12, 14, 16, 18, 20, 22, 24, 26,]
 all_data["modeled_health"] = None
+scores = []
 for day in days:
     new_data = all_data.loc[all_data["day"] == day]
     new_ctrl_data = new_data.loc[new_data["type exp"] == "control"].copy()
@@ -61,11 +66,11 @@ for day in days:
     plt.scatter(daily_df["health"], y_predict)
     print(daily_df['day'])
     print(regr.score(daily_df[x_columns], daily_df["health"]))
-
+    scores.append(regr.score(daily_df[x_columns], daily_df["health"]))
     health_predict = regr.predict(new_data[x_columns])
     all_data.loc[all_data["day"] == day, "modeled_health"] = health_predict
 
-    plt.show()
+    # plt.show()
 all_data.to_excel(f"daily_modeled_health_{SET}_{SENSOR}_{TYPE}.xlsx")
 
 y = all_data["modeled_health"]
@@ -74,11 +79,17 @@ y = all_data["modeled_health"]
 # y_predict = regr.predict(x_data)
 # print(f"score: {regr.score(x_data, y)}")
 # plt.scatter(y, y_predict)
-plt.show()
+
 
 x_data = all_data[x_columns]
 modeled_health = regr.predict(x_data)
 print(modeled_health)
 all_data["modeled_health"] = modeled_health
 print(all_data)
-# all_data.to_excel(f"modeled_health_{SET}_{SENSOR}_{TYPE}.xlsx")
+all_data.to_excel(f"modeled_health_{SET}_{SENSOR}_{TYPE}.xlsx")
+plt.figure(2)
+plt.scatter(days, scores)
+plt.title(f"Model daily health model fit scores\n{SET} set {SENSOR}")
+plt.xlabel("days")
+plt.ylabel("R² scores")
+plt.show()

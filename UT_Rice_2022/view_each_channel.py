@@ -26,15 +26,15 @@ LEGEND_FONTSIZE = 14
 
 COLORS = ["navy", "turquoise", "darkorange", "magenta"]
 ALPHA = 0.8
-DATASET = 1
+DATASET = 2
 if DATASET == 1:
     SET = "first"
 elif DATASET == 2:
     SET = "second"
-SENSOR = "AS7262"
+SENSOR = "AS7265x"
 TYPE = "reflectance"
-DIFF = True
-PROCESSING = None
+DIFF = False
+PROCESSING = "SNV"
 AVERAGE = []
 
 
@@ -68,9 +68,9 @@ def make_trend_line(_axis, _x, _y, label_start="",
     _coeffs = np.polyfit(_x[_index], _y[_index], 1)
     _fit = np.poly1d(_coeffs)
     if _coeffs[1] >= 0:
-        label_start += f" y={_coeffs[0]:.3f}x+{_coeffs[1]:.3f}"
+        label_start += f" y={_coeffs[0]:.5f}x+{_coeffs[1]:.5f}"
     else:
-        label_start += f" y={_coeffs[0]:.3f}x{_coeffs[1]:.3f}"
+        label_start += f" y={_coeffs[0]:.5f}x{_coeffs[1]:.5f}"
     _axis.plot(_x, _fit(_x), color=color,
                label=label_start, ls=ls)
 
@@ -133,7 +133,10 @@ def make_channel_figure(channel, _full_dataset: pd.DataFrame,
                                       color=color, alpha=0.05)
     plt.legend(fontsize=LEGEND_FONTSIZE)
     plt.xlabel("Days")
-    plt.ylabel(f"{TYPE}")
+    if PROCESSING:
+        plt.ylabel(f"{TYPE} after {PROCESSING}")
+    else:
+        plt.ylabel(f"{TYPE}")
     return fig
 
 

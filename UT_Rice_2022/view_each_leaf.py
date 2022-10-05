@@ -36,7 +36,7 @@ SET = "second"
 SENSOR = "AS7262"
 TYPE = "reflectance"
 DIFF = False
-PROCESSING = None
+PROCESSING = "550 nm"
 
 
 def get_x_columns_and_wavelengths(df: pd.DataFrame):
@@ -61,6 +61,11 @@ def make_dead_spectrum(axis, _x_columns, _wavelengths):
     # else:
     #     raise AttributeError(f"TYPE needs to be 'raw' or 'reflectance' not: {TYPE}")
     dead_df = pd.read_excel(f"dead_leaves_{SENSOR}_{TYPE}.xlsx")
+    if PROCESSING == "SNV":
+        dead_df[x_columns] = processing.snv(dead_df[x_columns])
+    elif PROCESSING == "MSC":
+        dead_df[x_columns] = processing.msc(dead_df[x_columns])
+
     if DIFF:
         dead_df[_x_columns] = dead_df[_x_columns].diff()
     mean = dead_df[_x_columns].mean()
@@ -115,6 +120,8 @@ if __name__ == "__main__":
         full_dataset[x_columns] = processing.snv(full_dataset[x_columns])
     elif PROCESSING == "MSC":
         full_dataset[x_columns] = processing.msc(full_dataset[x_columns])
+    elif PROCESSING in x_columns:  # this should be a string of the
+        full_dataset[x_columns] = processing.norm_to_column(full_dataset[x_columns], PROCESSING)
 
     for leaf in leaves:
         print(leaf)

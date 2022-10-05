@@ -69,3 +69,8 @@ def msc(input_data, reference=None):
                             index=_index), pd.DataFrame(ref)
 
     return data_msc, ref
+
+
+def norm_to_column(input_data, column):
+    print(input_data[column])
+
