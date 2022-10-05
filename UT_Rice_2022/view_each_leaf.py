@@ -33,10 +33,10 @@ COLORS = plt.cm.cool(np.linspace(0, 1, 18))
 ALPHA = 0.9
 DATASET = "2"
 SET = "second"
-SENSOR = "AS7265x"
+SENSOR = "AS7262"
 TYPE = "reflectance"
 DIFF = False
-PROCESSING = "SNV"
+PROCESSING = None
 
 
 def get_x_columns_and_wavelengths(df: pd.DataFrame):
@@ -52,13 +52,15 @@ def get_x_columns_and_wavelengths(df: pd.DataFrame):
 
 
 def make_dead_spectrum(axis, _x_columns, _wavelengths):
-    if TYPE == "reflectance":
-        dead_df = pd.read_excel(f"ctrl_and_dead_first_{SENSOR}_{TYPE}.xlsx")
-        dead_df = dead_df.loc[dead_df["type exp"] == 'dead'].copy()
-    elif TYPE == 'raw':
-        dead_df = pd.read_excel(f"dead_leaves_raw.xlsx")
-    else:
-        raise AttributeError(f"TYPE needs to be 'raw' or 'reflectance' not: {TYPE}")
+    # if TYPE == "reflectance":
+    #     # dead_df = pd.read_excel(f"ctrl_and_dead_first_{SENSOR}_{TYPE}.xlsx")
+    #     # dead_df = dead_df.loc[dead_df["type exp"] == 'dead'].copy()
+    #
+    # elif TYPE == 'raw':
+    #     dead_df = pd.read_excel(f"dead_leaves_raw.xlsx")
+    # else:
+    #     raise AttributeError(f"TYPE needs to be 'raw' or 'reflectance' not: {TYPE}")
+    dead_df = pd.read_excel(f"dead_leaves_{SENSOR}_{TYPE}.xlsx")
     if DIFF:
         dead_df[_x_columns] = dead_df[_x_columns].diff()
     mean = dead_df[_x_columns].mean()

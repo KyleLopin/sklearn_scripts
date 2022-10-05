@@ -19,11 +19,13 @@ pd.set_option('display.max_columns', 500)
 AXIS_LABEL_FONTSIZE = 20
 TITLE_LABEL_FONTSIZE = 30
 SET = "first"
-SENSOR = "AS7265x"
+SENSOR = "AS7262"
 TYPE = "reflectance"
 
-dead_leaf_data = pd.read_excel(f"ctrl_and_dead_{SET}_{SENSOR}_{TYPE}.xlsx")
-dead_leaf_data = dead_leaf_data.loc[dead_leaf_data["health"] == 0]
+# dead_leaf_data = pd.read_excel(f"ctrl_and_dead_{SET}_{SENSOR}_{TYPE}.xlsx")
+dead_leaf_data = pd.read_excel(f"dead_leaves_{SENSOR}_{TYPE}.xlsx")
+# dead_leaf_data = dead_leaf_data.loc[dead_leaf_data["health"] == 0]
+dead_leaf_data.loc[:, 'health'] = 0
 all_data = pd.read_excel(f"{SET}_set_{SENSOR}_{TYPE}.xlsx")
 print(dead_leaf_data)
 VARIETIES = ['กข43', 'กข79', 'กข85', 'ปทุมธานี 1']
@@ -36,7 +38,7 @@ for column in dead_leaf_data.columns:
         x_columns.append(column)
 
 x_data = dead_leaf_data[x_columns]
-regr = PLSRegression(n_components=6)
+regr = PLSRegression(n_components=3)
 regr = SVR()
 
 # add each day to the model data
@@ -48,13 +50,12 @@ for day in days:
     new_data = all_data.loc[all_data["day"] == day]
     new_ctrl_data = new_data.loc[new_data["type exp"] == "control"].copy()
     new_ctrl_data.loc[:, "health"] = 1
-    # new_ctrl_data[new_ctrl_data.columns["health"]] = 1  # FutureWarning says to do this, but this causes an error
-    # new_ctrl_data.isetitem("health", 1)  # This is also an error, who knows
     # print(new_ctrl_data)
     daily_df = pd.concat([dead_leaf_data, new_ctrl_data], ignore_index=True)
 
     daily_df = daily_df.loc[daily_df["variety"] != "กระดาษขาว"]
     print(daily_df["health"])
+    print(daily_df)
     regr.fit(daily_df[x_columns], daily_df["health"])
     y_predict = regr.predict(daily_df[x_columns])
     plt.scatter(daily_df["health"], y_predict)
