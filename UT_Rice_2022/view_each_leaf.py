@@ -29,14 +29,17 @@ try:
     plt.rcParams['ytick.labelsize'] = 20.0
 except:
     pass  # ttf file into installed
-COLORS = plt.cm.cool(np.linspace(0, 1, 18))
+COLORS = plt.cm.cool(np.linspace(0, 1, 19))
 ALPHA = 0.9
-DATASET = "2"
-SET = "second"
-SENSOR = "AS7262"
+DATASET = 1
+if DATASET == 1:
+    SET = "first"
+elif DATASET == 2:
+    SET = "second"
+SENSOR = "AS7265x"
 TYPE = "reflectance"
 DIFF = False
-PROCESSING = "550 nm"
+PROCESSING = "565 nm"
 
 
 def get_x_columns_and_wavelengths(df: pd.DataFrame):
@@ -46,8 +49,9 @@ def get_x_columns_and_wavelengths(df: pd.DataFrame):
         if 'nm' in column:
             x_columns.append(column)
             wavelengths.append(column.split()[0])
-    x_columns = x_columns[1:]
-    wavelengths = wavelengths[1:]
+    if SENSOR == "AS7265x":
+        x_columns = x_columns[1:]
+        wavelengths = wavelengths[1:]
     return x_columns, wavelengths
 
 
@@ -65,6 +69,8 @@ def make_dead_spectrum(axis, _x_columns, _wavelengths):
         dead_df[x_columns] = processing.snv(dead_df[x_columns])
     elif PROCESSING == "MSC":
         dead_df[x_columns] = processing.msc(dead_df[x_columns])
+    elif PROCESSING in x_columns:  # this should be a string of the
+        dead_df.loc[:, x_columns] = processing.norm_to_column(dead_df[x_columns], PROCESSING)
 
     if DIFF:
         dead_df[_x_columns] = dead_df[_x_columns].diff()

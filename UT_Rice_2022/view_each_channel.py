@@ -22,7 +22,7 @@ plt.rcParams['xtick.labelsize'] = 15.0
 plt.rcParams['ytick.labelsize'] = 15.0
 plt.rcParams['axes.labelsize'] = 18.0
 TITLE_FONTSIZE = 20
-LEGEND_FONTSIZE = 14
+LEGEND_FONTSIZE = 12
 
 COLORS = ["navy", "turquoise", "darkorange", "magenta"]
 ALPHA = 0.8
@@ -34,8 +34,11 @@ elif DATASET == 2:
 SENSOR = "AS7265x"
 TYPE = "reflectance"
 DIFF = False
-PROCESSING = "SNV"
+PROCESSING = "565 nm"  # can be 'SNV', 'MSC', or a spectrum channel
 AVERAGE = []
+ABSORBANCE = True  # use absorbance or reflectance with False
+# can be 'Kalman', 'Trend', or 'Data' to plot lines between the data points
+FIT_LINE = "Kalman"
 
 
 def get_x_columns_and_wavelengths(df: pd.DataFrame):
@@ -81,14 +84,16 @@ def make_channel_figure(channel, _full_dataset: pd.DataFrame,
                              constrained_layout=True)
     group_by.append('day')  # average each day
     _full_dataset = _full_dataset.loc[_full_dataset['variety'] != "กระดาษขาว"]
-    print(_full_dataset.columns)
-    print(_full_dataset[channel])
-    print(f"full data1 size: {_full_dataset.shape}")
+    # hack, fix this if used again
+    full_data_backup = _full_dataset.copy()  # kalman filter needs all the data
     fig.suptitle(f"{channel} {SENSOR}, dataset: {SET}", fontsize=TITLE_FONTSIZE)
+    if ABSORBANCE:
+        _full_dataset[channel] = -np.log10(_full_dataset[channel])
+
     if group_by:
         dataset_std = _full_dataset.groupby(group_by, as_index=False
                                             ).std(numeric_only=True)
-        print(dataset_std)
+        # print(dataset_std)
         _full_dataset = _full_dataset.groupby(group_by, as_index=False
                                               ).mean(numeric_only=True)
     for color, variety in zip(COLORS, _full_dataset['variety'].unique()):
@@ -100,41 +105,46 @@ def make_channel_figure(channel, _full_dataset: pd.DataFrame,
             axes.scatter(ctrl['day'], diff,
                          color=color, alpha=ALPHA)
             # make trend line
-            make_trend_line(axes, ctrl['day'],
-                            diff, label_start=f"{variety}",
-                            color=color)
-            # index = np.isfinite(diff)
-            # diff = diff[index]
-            # z = np.polyfit(ctrl['day'][index], diff, 1)
-            # p = np.poly1d(z)
-            # if z[1] >= 0:
-            #     _label = f"{variety} y={z[0]:.3f}x+{z[1]:.3f}"
-            # else:
-            #     _label = f"{variety} y={z[0]:.3f}x{z[1]:.3f}"
-            # axes.plot(ctrl['day'], p(ctrl['day']),
-            #           color=color, label=_label)
+            if FIT_LINE == "Trend":
+                make_trend_line(axes, ctrl['day'],
+                                diff, label_start=f"{variety}",
+                                color=color)
         else:
             for marker, ls, exp_type in zip(['o', 'x'], ['solid', 'dashed'],
                                             ['control', 'งดน้ำ']):
                 data_slice = _full_dataset.loc[(_full_dataset["type exp"] == exp_type) &
                                                (_full_dataset["variety"] == variety)]
-                axes.scatter(data_slice['day'], data_slice[channel],
-                             marker=marker, color=color, alpha=ALPHA)
-                make_trend_line(axes, data_slice['day'], data_slice[channel],
-                                label_start=f"{variety}, {exp_type}",
-                                color=color, ls=ls)
+                y = data_slice[channel]
+                axes.scatter(data_slice['day'], y,
+                             marker=marker, color=color, alpha=ALPHA,
+                             label=f"{variety}, {exp_type}")
+                if FIT_LINE == "Trend":
+                    make_trend_line(axes, data_slice['day'], y,
+                                    label_start=f"{variety}, {exp_type}",
+                                    color=color, ls=ls)
+                elif FIT_LINE == "Data":
+                    axes.plot(data_slice['day'], y, ls=ls,
+                              color=color, alpha=ALPHA)
+                elif FIT_LINE == "Kalman":
+                    full_slice = full_data_backup.loc[(full_data_backup["type exp"] == exp_type) &
+                                                      (full_data_backup["variety"] == variety)]
+                    kalman_fit = processing.fit_kalman_filter(full_slice, 'day', channel)
+                    axes.plot(data_slice['day'], kalman_fit, ls=ls,
+                              color=color, alpha=ALPHA)
                 if group_by:
                     mean = data_slice[channel]
                     std = dataset_std.loc[(_full_dataset["type exp"] == exp_type) &
                                                (_full_dataset["variety"] == variety)][channel]
-                    axes.fill_between(data_slice['day'],
-                                      (mean - std).T,
-                                      (mean + std).T,
-                                      color=color, alpha=0.05)
+                    # axes.fill_between(data_slice['day'],
+                    #                   (mean - std).T,
+                    #                   (mean + std).T,
+                    #                   color=color, alpha=0.05)
     plt.legend(fontsize=LEGEND_FONTSIZE)
     plt.xlabel("Days")
     if PROCESSING:
         plt.ylabel(f"{TYPE} after {PROCESSING}")
+    elif PROCESSING:
+        plt.ylabel(f"Absorbance")
     else:
         plt.ylabel(f"{TYPE}")
     return fig
@@ -145,9 +155,12 @@ if __name__ == "__main__":
     _filename = f'{SET}_set_{SENSOR}_every_channel_{TYPE}_{PROCESSING}'
     if AVERAGE:
         _filename = f'{SET}_set_{SENSOR}_every_channel_{TYPE}_{PROCESSING}'
+    if ABSORBANCE:
+        _filename = f'{SET}_set_{SENSOR}_every_channel_absorbance_{PROCESSING}'
 
     if DIFF:
         _filename += "_diff"
+    _filename += f"_{FIT_LINE}"
     pdf_file = PdfPages(_filename+".pdf")
     leaves = full_dataset['Leaf number'].unique()
     x_columns, wavelengths = get_x_columns_and_wavelengths(full_dataset)
@@ -157,9 +170,14 @@ if __name__ == "__main__":
             full_dataset[x_columns] = processing.snv(full_dataset[x_columns])
         elif PROCESSING == "MSC":
             full_dataset[x_columns] = processing.msc(full_dataset[x_columns])
+        elif PROCESSING in x_columns:  # this should be a string of the
+            full_dataset[x_columns] = processing.norm_to_column(full_dataset[x_columns], PROCESSING)
+
         print(channel)
         _fig = make_channel_figure(channel, full_dataset,
                                    group_by=['variety', "type exp"],
                                    calc_var_diff=DIFF)
+        plt.show()
+        ham
         pdf_file.savefig(_fig)
     pdf_file.close()
