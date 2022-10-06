@@ -89,9 +89,9 @@ def get_all_data(return_type='raw', _set=1, sensor="AS7625x", diff=False):
 if __name__ == "__main__":
     # reflectance = get_data("08-06")
     # print(reflectance)
-    SENSOR = "AS7265x"
-    TYPE = 'reflectance'
-    SET = "first"
+    SENSOR = "AS7262"
+    TYPE = 'raw'
+    SET = "second"
     DIFF = False
 
     if SET == "first":
@@ -99,15 +99,15 @@ if __name__ == "__main__":
     elif SET == "second":
         _set = 2
 
-    # filename = f"{SET}_set_{SENSOR}_{TYPE}"
-    # if DIFF:
-    #     filename += "_diff"
-    # # filename += "_select"
-    # df = get_all_data(return_type=TYPE, _set=_set,
-    #                   sensor=SENSOR, diff=DIFF)
-    # df.to_excel(filename+".xlsx")
+    filename = f"{SET}_set_{SENSOR}_{TYPE}"
+    if DIFF:
+        filename += "_diff"
+    # filename += "_select"
+    df = get_all_data(return_type=TYPE, _set=_set,
+                      sensor=SENSOR, diff=DIFF)
+    df.to_excel(filename+".xlsx")
 
-    df, _ = get_data("09-25", file_end="dead", data_type=TYPE,
-                     sensor=SENSOR)
-    print(df)
-    df.to_excel(f"dead_leaves_{SENSOR}_{TYPE}.xlsx")
+    # df, _ = get_data("09-25", file_end="dead", data_type=TYPE,
+    #                  sensor=SENSOR)
+    # print(df)
+    # df.to_excel(f"dead_leaves_{SENSOR}_{TYPE}.xlsx")

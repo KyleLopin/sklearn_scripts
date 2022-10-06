@@ -87,7 +87,7 @@ class KalmanFilter:
 
     def estimate_state(self, start_state, _measurement):
         """ After measuring position, estimate current state """
-        print('==', start_state, _measurement)
+        # print('==', start_state, _measurement)
         est_position = start_state[0] + self.alpha*(_measurement-start_state[0])
         est_velocity = start_state[1] + self.beta*(_measurement-start_state[0])/self.time_delta
         return [est_position, est_velocity]
@@ -101,21 +101,24 @@ class KalmanFilter:
 
 
 def fit_kalman_filter(data: pd.DataFrame, time_column: str,
-                  channel: str, alpha: float = 0.1,
-                  beta: float = 0.2):
-    group_std = data.groupby(time_column, as_index=False
-                             ).std(numeric_only=True)
-    print('fit kalman')
-    start = min(data[time_column])
-    initial_value = data.loc[data[time_column] == start].mean(numeric_only=True)
+                      channel: str, alpha: float = 0.6,
+                      beta: float = 0.5):
+    print(data)
+    print(len(data))
+    start = data.iloc[0]
+    print("start: ", start)
+    initial_value = data.iloc[0]
     initial_change = 0
-    state = [initial_value[channel], initial_change]
+    state = [initial_value, initial_change]
     kalman_filter = KalmanFilter(alpha=alpha, beta=beta)
     states = []
-    for time in data[time_column].unique():
-        print('===', time, state)
-        data_slice = data.loc[data[time_column] == time].mean(numeric_only=True)
-        est_state = kalman_filter.estimate_state(state, data_slice[channel])
+    vel = []
+    for time in range(len(data)):
+        print('==', state)
+        # data_slice = data.loc[data[time_column] == time].mean(numeric_only=True)
+        est_state = kalman_filter.estimate_state(state, data.iloc[time])
         state = kalman_filter.calc_next_state(est_state)
         states.append(state[0])
-    return states
+        print(states)
+        vel.append(state[1])
+    return states, vel

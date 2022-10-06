@@ -12,12 +12,12 @@ import joblib
 import pandas as pd
 
 TYPE = "raw"
-SET = "first"
-SENSOR = "AS7265X"
-MODEL = "random_forest"
+SET = "second"
+SENSOR = "AS7262"
+MODEL = "pls"
 
 data = pd.read_excel(f"{SET}_set_{SENSOR}_{TYPE}.xlsx")
-model = joblib.load(f'rice_{MODEL}_full_chloro.joblib')
+model = joblib.load(f'rice_{SENSOR}_{MODEL}.joblib')
 x_columns = []
 wavelengths = []
 for column in data.columns:

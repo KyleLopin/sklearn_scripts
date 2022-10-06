@@ -50,14 +50,16 @@ if fruit in hplc_fruits:
 # x_data, y_data = get_data.get_data("rice", "as7265x", int_time=[150], led="b'White UV IR'",
 #                                    position=[1, 2, 3], led_current=["12.5 mA"],
 #                                    average=False)
-
-df = pd.read_excel("rice_leave_data_w_UT_data.xlsx")
-x_columns = []
-for column in df.columns:
-    if 'nm' in column:
-        x_columns.append(column)
-x_data = df[x_columns]
-y_data = df["Avg Total Chlorophyll (µg/cm2)"]
+x_data, y_data = get_data.get_data("rice", "as7262", int_time=[150], led="White LED",
+                                   position=[1, 2, 3], led_current=["12.5 mA"],
+                                   average=False)
+# df = pd.read_excel("rice_leave_data_w_UT_data.xlsx")
+# x_columns = []
+# for column in df.columns:
+#     if 'nm' in column:
+#         x_columns.append(column)
+# x_data = df[x_columns]
+# y_data = df["Avg Total Chlorophyll (µg/cm2)"]
 print(y_data)
 
 # x_data, y_data = get_data.get_data(fruit, "as7262", int_time=[100, 150], average=False,
@@ -75,7 +77,7 @@ print('==', x_data.shape)
 # print(y_data.to_string())
 print('======')
 
-# y_data = y_data[y_name]
+y_data = y_data[y_name]
 # plt.scatter(np.arange(len(y_data)), y_data)
 # plt.show()
 print(x_data.shape, y_data.shape)
@@ -89,7 +91,6 @@ print(x_data.shape, y_data.shape)
 # x_data = pd.DataFrame(x_scaled_np, index=x_data.index)
 # x_scaled_np = PolynomialFeatures(degree=2).fit_transform(x_data)
 # x_scaled_np = StandardScaler().fit_transform(x_scaled_np)
-#
 # x_data = pd.DataFrame(x_scaled_np, index=x_data.index)
 
 
@@ -111,10 +112,10 @@ def inverse(x):
 
 # cv = GroupKFold(n_splits=5)
 cv = ShuffleSplit(n_splits=100)
-# pls = PLSRegression(n_components=8)
+pls = PLSRegression(n_components=3)
 # x_data = -np.log(1/x_data)
 # pls = AdaBoostRegressor()
-# pls = RandomForestRegressor(n_estimators=50, max_depth=4)
+# pls = RandomForestRegressor(n_estimators=50, max_depth=2)
 # pls = SVR(kernel='linear', degree=1)
 # pls = SVR()
 # pls = LassoCV(cv=cv)
@@ -187,7 +188,7 @@ r2_train = r2_score(y_train_mean, y_train_predict)
 mae_train = mean_absolute_error(y_train_mean, y_train_predict)
 # mae_train = 1
 LEFT_ALIGN = 0.07
-# joblib.dump(pls, 'rice_random_forest_full_chloro.joblib')
+joblib.dump(pls, 'rice_as7262_pls.joblib')
 if hasattr(pls, "coef_"):
     print(pls.coef_)
 print(dir(pls))

@@ -31,15 +31,15 @@ except:
     pass  # ttf file into installed
 COLORS = plt.cm.cool(np.linspace(0, 1, 19))
 ALPHA = 0.9
-DATASET = 1
+DATASET = 2
 if DATASET == 1:
     SET = "first"
 elif DATASET == 2:
     SET = "second"
-SENSOR = "AS7265x"
+SENSOR = "AS7262"
 TYPE = "reflectance"
 DIFF = False
-PROCESSING = "565 nm"
+PROCESSING = None
 
 
 def get_x_columns_and_wavelengths(df: pd.DataFrame):

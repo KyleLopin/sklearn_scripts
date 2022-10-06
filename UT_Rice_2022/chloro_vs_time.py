@@ -21,9 +21,9 @@ plt.rcParams['xtick.labelsize'] = 20.0
 plt.rcParams['ytick.labelsize'] = 20.0
 
 TYPE = "raw"
-SET = "first"
-SENSOR = "AS7265X"
-MODEL = "random_forest"
+SET = "second"
+SENSOR = "AS7262"
+MODEL = "pls"
 
 data = pd.read_excel(f"chloro_{SENSOR}_{SET}_set_{TYPE}_{MODEL}.xlsx")
 

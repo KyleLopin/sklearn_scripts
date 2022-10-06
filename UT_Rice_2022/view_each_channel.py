@@ -85,11 +85,11 @@ def make_channel_figure(channel, _full_dataset: pd.DataFrame,
     group_by.append('day')  # average each day
     _full_dataset = _full_dataset.loc[_full_dataset['variety'] != "กระดาษขาว"]
     # hack, fix this if used again
-    full_data_backup = _full_dataset.copy()  # kalman filter needs all the data
+
     fig.suptitle(f"{channel} {SENSOR}, dataset: {SET}", fontsize=TITLE_FONTSIZE)
     if ABSORBANCE:
         _full_dataset[channel] = -np.log10(_full_dataset[channel])
-
+    full_data_backup = _full_dataset.copy()  # kalman filter needs all the data
     if group_by:
         dataset_std = _full_dataset.groupby(group_by, as_index=False
                                             ).std(numeric_only=True)
@@ -126,6 +126,7 @@ def make_channel_figure(channel, _full_dataset: pd.DataFrame,
                     axes.plot(data_slice['day'], y, ls=ls,
                               color=color, alpha=ALPHA)
                 elif FIT_LINE == "Kalman":
+                    print('[[', variety, exp_type)
                     full_slice = full_data_backup.loc[(full_data_backup["type exp"] == exp_type) &
                                                       (full_data_backup["variety"] == variety)]
                     kalman_fit = processing.fit_kalman_filter(full_slice, 'day', channel)
