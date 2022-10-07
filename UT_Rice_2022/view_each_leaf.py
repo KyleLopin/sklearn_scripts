@@ -101,7 +101,7 @@ def make_leaf_figure(leaf_number, _dataset, average=False):
         if average:
             mean = daily_data[x_columns].mean()
             axes.plot(wavelengths, mean.T, label=day,
-                      color=color, ls=line_cycler.next())
+                      color=color, ls=next(line_cycler))
         else:
             axes.plot(wavelengths, daily_data[x_columns].T, label=day,
                       color=color, ls=next(line_cycler))
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     _filename = f'{SET}_set_{SENSOR}_every_read_{TYPE}_{PROCESSING}.pdf'
     average = True
     if average:
-        _filename = f'{SET}_set_{SENSOR}_every_leaf_{TYPE}_{PROCESSING}.pdf'
+        _filename = f'{SET}_set_{SENSOR}_every_leaf_{TYPE}_{PROCESSING}_avg.pdf'
 
     pdf_file = PdfPages(_filename)
     leaves = full_dataset['Leaf number'].unique()
@@ -131,7 +131,7 @@ if __name__ == "__main__":
 
     for leaf in leaves:
         print(leaf)
-        _fig = make_leaf_figure(leaf, full_dataset)
+        _fig = make_leaf_figure(leaf, full_dataset, average=average)
         pdf_file.savefig(_fig)
         plt.close(_fig)
     pdf_file.close()

@@ -102,7 +102,7 @@ class KalmanFilter:
 
 def fit_kalman_filter(data: pd.DataFrame, time_column: str,
                       channel: str, alpha: float = 0.6,
-                      beta: float = 0.5):
+                      beta: float = 0.8):
     print(data)
     print(len(data))
     start = data.iloc[0]

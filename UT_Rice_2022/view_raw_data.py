@@ -38,8 +38,9 @@ def make_daily_average_figure(date, sensor="AS7265x", dataset=1):
     for column in data.columns:
         if 'nm' in column:
             x_columns.append(column)
-    x_columns = x_columns[1:]
-    wavelengths = wavelengths[1:]
+    if sensor == "AS7265x":
+        x_columns = x_columns[1:]
+        wavelengths = wavelengths[1:]
     # x_data = data[x_columns]
     # x_data_std = data_std[x_columns]
     axes.set_title(f"Raw Data: {date}", fontsize=18)
@@ -65,7 +66,7 @@ def make_daily_average_figure(date, sensor="AS7265x", dataset=1):
 
 if __name__ == "__main__":
     DATASET = 2
-    SENSOR = "AS7265x"
+    SENSOR = "AS7262"
     if DATASET == 1:
         dates = ["08-06", "08-08", "08-10", "08-12",
                  "08-14", "08-16", "08-18", "08-20",
@@ -80,8 +81,9 @@ if __name__ == "__main__":
     else:
         dates = None
     pdf_file = PdfPages(f'set_{DATASET}_{SENSOR}_average_daily.pdf')
+    dates = ["08-27"]
     for _date in dates:
         _fig = make_daily_average_figure(_date, sensor=SENSOR, dataset=DATASET)
         pdf_file.savefig(_fig)
-        # plt.show()
+        plt.show()
     pdf_file.close()

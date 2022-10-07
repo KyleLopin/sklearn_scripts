@@ -25,6 +25,7 @@ AXIS_LABEL_FONTSIZE = 20
 TITLE_LABEL_FONTSIZE = 30
 
 VARIETIES = ['กข43', 'กข79', 'กข85', 'ปทุมธานี 1']
+# VARIETIES = ['กข43', 'ปทุมธานี 1']
 COLORS = {'กข43': "navy", 'กข79': "turquoise",
           'กข85': "darkorange" , 'ปทุมธานี 1': "magenta"}
 CONDITIONS = ['control', 'งดน้ำ']
@@ -33,8 +34,8 @@ MARKERS = {'control': "o", 'งดน้ำ': "x"}
 
 # df = pd.read_excel(f"modeled_health_{SET}_{SENSOR}_reflectance.xlsx")
 df = pd.read_excel(f"daily_modeled_health_{SET}_{SENSOR}_{TYPE}.xlsx")
-df = df.loc[df['day'] != 4].copy()
-df_summary = df.groupby(["type exp", "variety", "day", "pot number"],
+df = df.loc[df['day'] != 6].copy()
+df_summary = df.groupby(["type exp", "variety", "day", "Leaf number"],
                         as_index=False).mean(numeric_only=True)
 df_std = df.groupby(["type exp", "variety", "day", "pot number"]
                     ).std(numeric_only=True)
@@ -65,7 +66,7 @@ for i, condition in enumerate(CONDITIONS):
         print(popt)
         print(np.sqrt(np.diag(pcov)))
         fit = sigmoid(df_cond["day"], *popt)
-        plt.plot(df_cond['day'], fit)
+        plt.plot(df_cond['day'], fit, color=COLORS[variety])
     plt.figure(i)
     plt.xlabel("Days", fontsize=AXIS_LABEL_FONTSIZE)
     plt.ylabel("Modeled health", fontsize=AXIS_LABEL_FONTSIZE)

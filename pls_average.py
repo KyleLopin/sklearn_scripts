@@ -32,7 +32,9 @@ plt.style.use('seaborn')
 print("start")
 hplc_fruits = ["mangos", "tomato"]
 fruit = "mango"
-y_name = 'Avg Total Chlorophyll (µg/cm2)'
+# 'Avg Total Chlorophyll (µg/cm2)', 'Avg Chlorophyll a (µg/cm2)',
+# 'Avg Chlorophyll b (µg/cm2)'
+y_name = 'Avg Chlorophyll b (µg/cm2)'
 index_name = "Leaf number"
 AVERAGE = False
 if fruit in hplc_fruits:
@@ -188,7 +190,7 @@ r2_train = r2_score(y_train_mean, y_train_predict)
 mae_train = mean_absolute_error(y_train_mean, y_train_predict)
 # mae_train = 1
 LEFT_ALIGN = 0.07
-joblib.dump(pls, 'rice_as7262_pls.joblib')
+joblib.dump(pls, 'rice_as7262_b_pls.joblib')
 if hasattr(pls, "coef_"):
     print(pls.coef_)
 print(dir(pls))

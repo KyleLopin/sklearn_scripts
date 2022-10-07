@@ -14,18 +14,20 @@ import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.signal import savgol_filter
-
+plt.rcParams.keys()
 fm.fontManager.addfont('THSarabunNew.ttf')
 plt.rcParams['font.family'] = 'TH Sarabun New'
 plt.rcParams['xtick.labelsize'] = 20.0
 plt.rcParams['ytick.labelsize'] = 20.0
+plt.rcParams['axes.titlesize'] = 20.0
+plt.rcParams['figure.titlesize'] = 20.0
 
 TYPE = "raw"
-SET = "second"
+SET = "first"
 SENSOR = "AS7262"
 MODEL = "pls"
 
-data = pd.read_excel(f"chloro_{SENSOR}_{SET}_set_{TYPE}_{MODEL}.xlsx")
+data = pd.read_excel(f"chloro_a_{SENSOR}_{SET}_set_{TYPE}_{MODEL}.xlsx")
 
 x_columns = []
 wavelengths = []
@@ -87,5 +89,6 @@ for color, name in zip(colors, varieties):
     i += 1
 
     plt.legend()
+fig.suptitle(f"{SENSOR} for {SET} set modelled chlorophyll a")
 plt.show()
 

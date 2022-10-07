@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # print(reflectance)
     SENSOR = "AS7262"
     TYPE = 'raw'
-    SET = "second"
+    SET = "first"
     DIFF = False
 
     if SET == "first":

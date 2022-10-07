@@ -31,14 +31,14 @@ if DATASET == 1:
     SET = "first"
 elif DATASET == 2:
     SET = "second"
-SENSOR = "AS7265x"
+SENSOR = "AS7262"
 TYPE = "reflectance"
 DIFF = False
-PROCESSING = "565 nm"  # can be 'SNV', 'MSC', or a spectrum channel
+PROCESSING = None  # can be 'SNV', 'MSC', or a spectrum channel
 AVERAGE = []
 ABSORBANCE = True  # use absorbance or reflectance with False
 # can be 'Kalman', 'Trend', or 'Data' to plot lines between the data points
-FIT_LINE = "Kalman"
+FIT_LINE = "Data"
 
 
 def get_x_columns_and_wavelengths(df: pd.DataFrame):
@@ -65,6 +65,12 @@ def diff_between_varieties(_df: pd.DataFrame, channel: str) -> pd.DataFrame:
         plt.plot(_df["day"], diff)
 
 
+def remove_lows(df:pd.DataFrame, threshold, columns_to_check):
+    for column in columns_to_check:
+        df = df[df[column] > threshold]
+    return df
+
+
 def make_trend_line(_axis, _x, _y, label_start="",
                     color="black", ls='solid'):
     _index = np.isfinite(_x) & np.isfinite(_y)
@@ -85,10 +91,11 @@ def make_channel_figure(channel, _full_dataset: pd.DataFrame,
     group_by.append('day')  # average each day
     _full_dataset = _full_dataset.loc[_full_dataset['variety'] != "กระดาษขาว"]
     # hack, fix this if used again
-
+    _full_dataset = remove_lows(_full_dataset, 0.02, x_columns)
     fig.suptitle(f"{channel} {SENSOR}, dataset: {SET}", fontsize=TITLE_FONTSIZE)
     if ABSORBANCE:
         _full_dataset[channel] = -np.log10(_full_dataset[channel])
+    print(_full_dataset)
     full_data_backup = _full_dataset.copy()  # kalman filter needs all the data
     if group_by:
         dataset_std = _full_dataset.groupby(group_by, as_index=False
@@ -129,25 +136,27 @@ def make_channel_figure(channel, _full_dataset: pd.DataFrame,
                     print('[[', variety, exp_type)
                     full_slice = full_data_backup.loc[(full_data_backup["type exp"] == exp_type) &
                                                       (full_data_backup["variety"] == variety)]
-                    kalman_fit = processing.fit_kalman_filter(full_slice, 'day', channel)
+                    kalman_fit, kalman_vel = processing.fit_kalman_filter(data_slice[channel], 'day', channel)
                     axes.plot(data_slice['day'], kalman_fit, ls=ls,
                               color=color, alpha=ALPHA)
                 if group_by:
                     mean = data_slice[channel]
                     std = dataset_std.loc[(_full_dataset["type exp"] == exp_type) &
-                                               (_full_dataset["variety"] == variety)][channel]
+                                          (_full_dataset["variety"] == variety)][channel]
                     # axes.fill_between(data_slice['day'],
                     #                   (mean - std).T,
                     #                   (mean + std).T,
                     #                   color=color, alpha=0.05)
     plt.legend(fontsize=LEGEND_FONTSIZE)
     plt.xlabel("Days")
-    if PROCESSING:
-        plt.ylabel(f"{TYPE} after {PROCESSING}")
-    elif PROCESSING:
-        plt.ylabel(f"Absorbance")
+    if ABSORBANCE:
+        ylabel = f"Absorbance"
     else:
-        plt.ylabel(f"{TYPE}")
+        ylabel = f"{TYPE}"
+    if PROCESSING:
+        ylabel += f" after {PROCESSING}"
+
+    plt.ylabel(ylabel)
     return fig
 
 
@@ -179,6 +188,5 @@ if __name__ == "__main__":
                                    group_by=['variety', "type exp"],
                                    calc_var_diff=DIFF)
         plt.show()
-        ham
         pdf_file.savefig(_fig)
     pdf_file.close()

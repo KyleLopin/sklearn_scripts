@@ -12,12 +12,12 @@ import joblib
 import pandas as pd
 
 TYPE = "raw"
-SET = "second"
+SET = "first"
 SENSOR = "AS7262"
 MODEL = "pls"
 
 data = pd.read_excel(f"{SET}_set_{SENSOR}_{TYPE}.xlsx")
-model = joblib.load(f'rice_{SENSOR}_{MODEL}.joblib')
+model = joblib.load(f'rice_{SENSOR}_a_{MODEL}.joblib')
 x_columns = []
 wavelengths = []
 for column in data.columns:
@@ -29,4 +29,4 @@ chloro_predict = model.predict(x_data)
 # chloro_predict = x_data.iloc[:, 5] - x_data.iloc[:, 7]
 # print(chloro_predict)
 data["chloro"] = chloro_predict
-data.to_excel(f"chloro_{SENSOR}_{SET}_set_{TYPE}_{MODEL}.xlsx")
+data.to_excel(f"chloro_a_{SENSOR}_{SET}_set_{TYPE}_{MODEL}.xlsx")
