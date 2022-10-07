@@ -100,13 +100,8 @@ class KalmanFilter:
         return [new_position, new_velocity]
 
 
-def fit_kalman_filter(data: pd.DataFrame, time_column: str,
-                      channel: str, alpha: float = 0.6,
+def fit_kalman_filter(data: pd.DataFrame, alpha: float = 0.6,
                       beta: float = 0.8):
-    print(data)
-    print(len(data))
-    start = data.iloc[0]
-    print("start: ", start)
     initial_value = data.iloc[0]
     initial_change = 0
     state = [initial_value, initial_change]
@@ -114,11 +109,9 @@ def fit_kalman_filter(data: pd.DataFrame, time_column: str,
     states = []
     vel = []
     for time in range(len(data)):
-        print('==', state)
         # data_slice = data.loc[data[time_column] == time].mean(numeric_only=True)
         est_state = kalman_filter.estimate_state(state, data.iloc[time])
         state = kalman_filter.calc_next_state(est_state)
         states.append(state[0])
-        print(states)
         vel.append(state[1])
     return states, vel
