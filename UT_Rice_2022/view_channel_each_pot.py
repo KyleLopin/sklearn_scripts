@@ -146,18 +146,11 @@ def norm_to_variety(_full_dataset: pd.DataFrame, channel: str):
     data_slice = data_slice.loc[data_slice['variety'] != 'กระดาษขาว']
     data_slice = data_slice.loc[data_slice['pot number'] != 1]
     data_slice = data_slice.loc[data_slice['pot number'] != np.NaN]
-    # data_slice.set_index(["variety", "pot number", "day"], inplace=True)
-    print(data_slice)
-    print('iiiiii')
+
     mean_df = data_slice.groupby(["variety", "day", "pot number"],
                                  as_index=False).mean(numeric_only=True)
-    print(mean_df)
     mean_df.set_index(["variety", "pot number", "day"], inplace=True)
-    print(mean_df)
     norm_mean = mean_df.loc[NORM]
-    # norm_mean.set_index("day", inplace=True)
-    norm_mean = norm_mean
-    # normed_df = norm_mean.copy()
     print('=======')
     print(norm_mean)
     for pot_num in data_slice["pot number"].unique():
@@ -166,49 +159,39 @@ def norm_to_variety(_full_dataset: pd.DataFrame, channel: str):
             pot_var_slice = pot_slice.loc[pot_slice["variety"] == variety]
             # does not need variety because there is only 1 now
             pot_var_slice.set_index(["pot number", "day"], inplace=True)
-            print(f"pot var slice: {pot_var_slice}")
+            # print(f"pot var slice: {pot_var_slice}")
             # norm mean is indexed with pot number and day
             # this has to be subtraced from the pot_var_slice
-            # print(f"indexes: {pot_var_slice.index}")
-            # print('=====')
-            # print(f"{norm_mean.index}")
             pot_var_slice -= norm_mean.loc[pot_num]
-            # print('pppp')
-            # print(pot_var_slice.index)
-            # print('tttt')
-            # print(pot_var_slice.index.values)
             days = []
             for _pot_num, _day in pot_var_slice.index.values:
                 days.append(_day)
-            # x, y = add_mean(pot_var_slice, norm_mean)
+            # print(f"pot var slice: {pot_var_slice}")
             axes.scatter(days, pot_var_slice[CHANNEL],
                          color=COLORS[variety], alpha=ALPHA,
                          label=f"{variety}")
-            # print(f"mean_df: {mean_df}")
-            # print(f"index: {mean_df.index}")
-            # print(f"pot num: {pot_num}")
-            # # pot_var_mean = mean_df.loc[(mean_df["pot number"] == pot_num) &
-            # #                            (mean_df["variety"] == NORM)][CHANNEL]
-            # pot_var_mean = mean_df.loc[NORM, pot_num, :][CHANNEL]
-            # print(f"pot var mean: {pot_var_mean}")
-            # print(f"mead df: {mean_df}")
-            # print("slice")
-            # print(mean_df.index)
-            # print(mean_df.loc[variety, pot_num, :])
-            # # mean_df = mean_df[(mean_df["pot number"] == pot_num) &
-            # #                   (mean_df["variety"] == variety)][CHANNEL] - pot_var_mean
-            # mean_df.loc[variety, pot_num, :] -= pot_var_mean
-            # print(mean_df)
     if FIT_LINE == "Data":
         for variety in data_slice['variety'].unique():
             var_slice = data_slice.loc[data_slice["variety"] == variety]
             # x, y = add_mean(var_slice, norm_mean)
             print('oooooo')
             print(mean_df)
+            print('=====')
+            print(mean_df.loc[variety, :, :])
+            print('mix')
+            print(mean_df.loc[NORM, :, :])
+            # mean_df.loc[variety, :, :] -= mean_df.loc[NORM, :, :].values
+            mean_df.loc[variety, :, :].sub(mean_df.loc[NORM, :, :])
+            print('kkkk')
+            print(mean_df)
             # x = x.unique()
             # y = y.groupby(['day']).mean()
-            # axes.plot(x, y, color=COLORS[variety],
-            #           alpha=ALPHA)
+            days = []
+            for _, _, _day in mean_df.index.values:
+                days.append(_day)
+            print(f"days: {days}")
+            axes.plot(days, mean_df.loc[variety, :, :], color=COLORS[variety],
+                      alpha=ALPHA)
     plt.legend
     plt.show()
 
