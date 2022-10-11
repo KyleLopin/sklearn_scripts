@@ -36,7 +36,7 @@ elif DATASET == 2:
 SENSOR = "AS7262"
 TYPE = "reflectance"
 PROCESSING = None  # can be 'SNV', 'MSC', or a spectrum channel
-ABSORBANCE = False  # use absorbance or reflectance with False
+ABSORBANCE = True  # use absorbance or reflectance with False
 FIT_LINE = "Data"
 NORM = "กข43"
 CHANNEL = "450 nm"
@@ -142,6 +142,8 @@ def norm_to_variety(_full_dataset: pd.DataFrame, channel: str):
                              constrained_layout=True)
     print(_full_dataset)
     _full_dataset = remove_lows(_full_dataset, 0.02, x_columns)
+    if ABSORBANCE:
+        _full_dataset[channel] = -np.log10(_full_dataset[channel])
     data_slice = _full_dataset[['day', "pot number", 'variety', 'type exp', channel]]
     data_slice = data_slice.loc[data_slice['variety'] != 'กระดาษขาว']
     data_slice = data_slice.loc[data_slice['pot number'] != 1]
@@ -168,31 +170,41 @@ def norm_to_variety(_full_dataset: pd.DataFrame, channel: str):
                 days.append(_day)
             # print(f"pot var slice: {pot_var_slice}")
             axes.scatter(days, pot_var_slice[CHANNEL],
-                         color=COLORS[variety], alpha=ALPHA,
-                         label=f"{variety}")
+                         color=COLORS[variety], alpha=ALPHA)
     if FIT_LINE == "Data":
         for variety in data_slice['variety'].unique():
-            var_slice = data_slice.loc[data_slice["variety"] == variety]
-            # x, y = add_mean(var_slice, norm_mean)
             print('oooooo')
             print(mean_df)
             print('=====')
             print(mean_df.loc[variety, :, :])
+
+            norm_mean_df = mean_df.loc[variety, :, :].groupby(level=1).mean()
+            print(norm_mean_df)
             print('mix')
-            print(mean_df.loc[NORM, :, :])
+            print(norm_mean.loc[:, :])
             # mean_df.loc[variety, :, :] -= mean_df.loc[NORM, :, :].values
-            mean_df.loc[variety, :, :].sub(mean_df.loc[NORM, :, :])
+            # var_norm = mean_df.loc[variety, :, :].sub(norm_mean.loc[:, :])
+            var_norm = norm_mean_df - norm_mean
             print('kkkk')
-            print(mean_df)
+            print(var_norm)
+            print('mmmm')
+            mean_var_norm = var_norm.groupby(level=1).mean()
+            print(mean_var_norm)
             # x = x.unique()
             # y = y.groupby(['day']).mean()
             days = []
-            for _, _, _day in mean_df.index.values:
+            for _, _day in var_norm.index.values:
                 days.append(_day)
             print(f"days: {days}")
-            axes.plot(days, mean_df.loc[variety, :, :], color=COLORS[variety],
-                      alpha=ALPHA)
-    plt.legend
+            print(var_norm.index.values)
+            # axes.plot(days, var_norm, color=COLORS[variety],
+            #           alpha=ALPHA)
+            axes.plot(mean_var_norm.index, mean_var_norm, color=COLORS[variety],
+                      alpha=ALPHA, label=f'{variety}')
+    plt.legend(fontsize=16)
+    plt.xlabel("Days")
+    plt.ylabel("Changes in absorbance coefficents")
+    plt.title(f"Changes in absorbance normalized to {NORM} at {CHANNEL}", fontsize=20)
     plt.show()
 
 
